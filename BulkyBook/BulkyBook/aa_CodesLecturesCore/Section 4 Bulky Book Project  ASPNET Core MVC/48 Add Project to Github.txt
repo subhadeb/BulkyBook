@@ -1,0 +1,99 @@
+In the Portal, Created new Repository BulkyBook
+
+Made it Public.
+
+Add .gitingore and selected temaplate as VisualStudio.
+
+So the URL https://github.com/subhadeb/BulkyBook is available.
+
+
+Now opened VS 2019.
+
+Selected Clone a repository from the starting page.
+
+In the Browse a repository clicked GitHub.
+
+Popup came with all the projects.
+
+I selected: 
+subhadeb\BulkyBook
+
+In the local path the below is selected.
+
+C:\Users\subdeb\Source\Repos\subhadeb\BulkyBook
+
+Clicked Clone.
+
+Was able to see BulkyBook in the solution explorer with gitignore. To that added a new project.
+
+Now Forget the Above and we would Freshly Create a New Project(We would only mapy the above directory to our project). Restart VS.
+
+--Previous Part- Create Project Start
+Now we will create the BulkyBook Project.
+
+In VS Start Page Selecte Create a New Project, then selected ASP.NET Core Web Application, Next.
+
+[Now The Linking to the Github folder folder]
+Project Name: BulkyBook
+Location(The Github folder): C:\Users\subdeb\Source\Repos\subhadeb\BulkyBook
+Solution Name: BulkyBook
+
+Now click Create Button.
+
+Now in the Create a new ASP.NET Core Web Application Popup
+We would be using .NET Core(Not .Net Framework)
+
+We would be using ASP.NET Core 3.1
+
+In the Right Under Authentication, Clicked Change, We would Select the Radio Button Individual User Account. It would automatically write the Code related to Authorization and would automatically Create Identity Tables for US. Pressed Ok.
+
+Now the Type of Application would be Web Application(Model-View-Controller).
+
+We will go with MVC because this our main focus in the Course(we would have created Empty Project or API as well).
+
+Razor Projects are better for building Small Projects. For Large Projects, MVC is prefferred because of the Separation of Concern. 
+
+Now Click Create Button. After the Project is Created we can see the Solution Explorer, Now we have Areas and Controllers Folder Automatically Created.
+
+--Previous Part- Create Project End
+
+In Program.cs Main method Commented like
+//This is the Initial code at 10:45PM
+
+Now Built the Solution.
+
+In Team Explorer, In the changes all the files were visible.
+
+Checked in and pushed the code.
+-------------------------------------------------------------------
+Now in another Machine.
+
+Opened VS 2019.
+
+Selected Clone a Repository.
+
+From The Bottom Browse a repository.
+
+Selected GitHub
+
+Selected the project subhadeb\BulkyBook
+
+Kept the Local Path as
+C:\Users\Sukla\Source\Repos\subhadeb\BulkyBook
+
+Clicked Clone. After clone the solution was loaded and was able to edit the files.
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
