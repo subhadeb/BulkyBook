@@ -1,0 +1,45 @@
+Now opened Startup.cs
+
+In the Previos part we saw main configures the startup class. The runtime will call methods ConfigureServices and Configure().
+
+
+Here we are Injecting Iconfiguration object to the Starup class with Dependency Injection. 
+
+ConfigureServices is called by runtime, it is used to Add Services to the Container. The purpose of ConfigureServices is to configure dependency injection 
+
+Earlier Dependency Injection was optional but With Dot net core, it is an integral part itself. This methods add services to the application to make them available. We get the service collection object that is injected into the method as parameter.
+
+Now we can use this to build on the services that would be available to this applicaiton. Examples of the services would be Entity Framework core, identity service, MVC and many more.
+
+By default we have AddRazorePages() available in the configureServices().  This is because while creating the project we selected Razor Pages.
+
+The other method is the configure method. This method is used to configure the HTTP Request pipeline. The pipeline specifies how the application should respond to HTTP Request.
+
+Pipeline is composed of Individual Parts called middleware. 
+
+Now opened PPT to explain it.
+
+We have a browser and we have a pipeline where there will be request and response.
+
+We have many middlewares in the pipeline. Some of the Middlewares can be Auth, MVC and Static Files.
+
+We should notice we should add authentication middleware before we add mvc and the MVC. The order is very important. This is because we do not want to load MVC and the find out if the user is authenticated or not.
+
+We also have to configure a middleware for static files in our project like HTML files, images and css or JS files.
+
+
+When data travels through the pipeline it gets manipulated by indivdual middlewares and so does the response and the release.
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

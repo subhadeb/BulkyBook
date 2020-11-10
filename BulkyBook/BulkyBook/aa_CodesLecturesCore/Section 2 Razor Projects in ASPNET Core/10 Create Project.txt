@@ -1,0 +1,40 @@
+Opened a fresh Instance of VS 2019.
+
+
+From there he selected Create a New Project.
+
+And then Selected ASP.NET Core Web Application.
+
+If we dont find we can search the template(ASP.NET Core Web Application) as well in the top.
+
+He selected the ProjectName as BookListRazor
+
+He changed the Location of the project.
+
+
+
+Then selected Create button and now there were more options.
+
+Now in the top he selected .Net Core and version as ASP.NET Core 3.1
+
+Now Selected the Option as Web Application not the one with M-V-C as we would see the CRUD Operations. In the right we have Atuthentication. We will not select any Authentication because on selecting Authentication some of the things will already be configured for us and we want to start from scratch.
+
+Before Clicking Create make sure at the bottom right the Source is .Net Core 3.1.0
+
+Now we will create the project. 
+
+The Project was created sucessfully with the files Program.cs, Startup.cs and wwwroot folder.
+
+We will see the files and folders from next video.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

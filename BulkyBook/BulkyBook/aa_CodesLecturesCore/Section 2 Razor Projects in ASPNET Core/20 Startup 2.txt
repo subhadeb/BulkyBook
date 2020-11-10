@@ -1,0 +1,69 @@
+Opened PPT.
+
+When a request is made from Browser the Request first arrives at the web server like IIS. IIS will then invoke the .net runtime which would load the CLR and then look for an entry point in the applicaiton..
+
+It will find that in the main method of the Program class and execute it wich stats the internal web server in the applicaiton.
+
+We will have Kestrel in our application. The main method and the startup class would configure the applicaiton and the request would be rotated from IIS to Kestral and then it would be pushed to the applicaiton.
+
+After that it will be processed by other middlewares and the generated response will be routed back to the castrol which will go back to the IIS. That will finally produce the response on the browser. This is more efficient than the old system.web approach. 
+
+Earlier there was a heavy reliance on system.web which was tied to IIS, but with pipeline approach we only plug in the middleware that we need. 
+
+Everything we need is in a separte assembly exposed in a NuGet. Now asp core can be run on web servers and their operating systems as there is not much reliance on IIS.
+
+One thing to keep in mind is there are two web servers one is external like IIS or Apache or Linux and that is also an internal Web server hosted by our application. Request from the external web server are passed to the internal web server and other way around.
+
+
+We can choose different web servers but the most common is Kestrel since it has first class support in asp.net core. Kestral is a lightweight web server which can only execute a request because of which you need external web server to configure other options like security, hashing and so on.
+
+This was a brief overview on how middleware and pipeline comes to the picture. 
+
+Now back to Code, If we see the configure method in Startup.cs, 
+
+
+There are multiple middlewares:
+
+ if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+            });
+
+
+These are plugged in with app and then the middleware name. If the environment is Developement we want the use the developer exception page else the generic error page.
+
+Then we have UseHttpsRedirection and then middleware for static files because of the useStaticFiles middleware we would be able to use css, html and javascript and we will add all these inside wwwroot folder. 
+
+Then we have app.UseRouting and app.UseAuthorization, finally we have used EndPoints. EndPoints are introduced in DNCore 3.0 wehere we can configure multiple routes.
+
+In future we will see how we can configure different end points. But now the main thing to consider is how we are plugging different middlewares.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

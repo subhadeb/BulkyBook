@@ -1,0 +1,95 @@
+Now, we would work on Edit Html
+
+The UI would be similar to Create here the difference is the data will be loaded here.
+
+
+So copy pasted everything except the Model from Create and Paste in Edit that is from br to Section.
+
+Now one change to make in both Create and Edit cshtml is after br and before the container we should have added a header with h2 having text-info class.
+
+For Crete it would have been.
+<h2>Create New Book</h2>
+<br/>
+
+For Edit cshtml it is
+
+<h2>Edit Book</h2>
+<br />
+
+Now in Edit.cshtml
+
+At the bottom for Create button it would be value="Update"
+
+Now if we run and see, we see that the data is loaded to the textboxes on edit.
+
+The asp-route-id that we have passed is also visible in the url of edit.
+
+
+Next we will work on the Post Handler for Edit.
+---------------------------------------------------------------
+@page
+@model BookListRazor.Pages.BookList.EditModel
+@{
+}
+
+
+
+<br />
+<h2>Edit Book</h2>
+<br />
+
+<div class="border container" style="padding:30px">
+    <form method="post">
+        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Name" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Author"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Author" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Author" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.ISBN"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.ISBN" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.ISBN" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3 offset-3">
+                <input type="submit" value="Update" class="btn btn-primary form-control">
+            </div>
+            <div class="col-3">
+                <a asp-page="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial">
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

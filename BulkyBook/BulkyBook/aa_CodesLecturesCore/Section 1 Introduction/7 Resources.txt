@@ -1,0 +1,54 @@
+When we build any project, Important thing is to get all the resources. 
+
+He advertesised his own website
+
+Gone to
+https://www.dotnetmastery.com/
+
+Looked for
+Complete guide to ASP.NET Core MVC (Latest v3.1)
+
+We have the link to live preview for his bulky book portal.
+
+Below is the link to Github code
+https://github.com/bhrugen/BulkyBook
+
+On Click of Course Content 8MB Files were being downloaded. The file was course_9.zip. On extracting that there were Attachments and Slides.
+
+The Attachments were there for individual sections.(Mostly I have downloaded them from Udemy).
+
+
+The images would be there that we will use.
+
+Now navigated to his github page.
+
+We have the commits for all the lectures.
+
+If some of our code will not work say for example Section 19 - Order Details View Part 1. We can click that and would be able to view the codes.
+
+
+We can take out that code and compare with our code may be use a comparer and quickly solve the error. 
+
+
+So all the codes in the lectures will have a commit.
+
+Also in his github page, there are many other projects created by him.
+
+BookListRazor is also there in his profile repositories.
+
+https://github.com/bhrugen/BookListRazor
+
+We will get started by understanding the basics from the next part.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,117 @@
+Now we will design the Create Razor page.
+
+We will start with br tage, then in h2 display Creeate New Book with class text-info. Now he pasted some bootstrap styling that he had already coded somewhere. These are the pasted codes:
+
+<div class="border container" style="padding:30px">
+    <form>
+        <div class="form-group row">
+            <div class="col-3">
+
+            </div>
+            <div class="col-6">
+
+            </div>
+        </div>
+    </form>
+</div>
+
+What he did was added a container div with padding, inside it created a form, in the form we have two divs with col-3 and col-6. Even though total should be 12 we can leave as it.
+
+Now in the form we would be updating the method to post.
+
+<form method="post">
+
+Now we would add label and input in both the divs of 4 and 6.
+
+For the Name, in col3 div we added,
+<label asp-for="Book.Name"></label>
+
+and in col6 div
+<input asp-for="Book.Name" class="form-control"/>
+
+We can see, With the help of these custom helpers Binding is too easy. Now we can copy the div with form group row, two more times for Author and ISBN. Copied this, pasted and updated the properties to Author and ISBN.:
+
+
+
+  <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Name" class="form-control"/>
+            </div>
+        </div>
+
+Now after the last div with form-group row for ISBN, we would have a div with form group row again for the two buttons, submit and Back to List.
+For the first div we have set offset to 3 for leaving 4 cols. and both the divs will be of col3. For the buttons we have added bottstrap styles btn, btn-primary and form-control these are like:
+
+
+ <div class="form-group row">
+            <div class="col-3 offset-3">
+                <input type="submit" value="Create" class="btn btn-primary form-control">
+            </div>
+            <div class="col-3">
+               <a asp-page="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+
+Now on running we see the form, but the Create Button is not yet working. We will add handler next.
+
+
+---------------------------------------------------------------
+---Create.cshtml
+
+
+@page
+@model BookListRazor.Pages.BookList.CreateModel
+@{
+}
+
+
+<br />
+
+<div class="border container" style="padding:30px">
+    <form method="post">
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Name" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Author"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Author" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.ISBN"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.ISBN" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3 offset-3">
+                <input type="submit" value="Create" class="btn btn-primary form-control">
+            </div>
+            <div class="col-3">
+               <a asp-page="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+    </form>
+</div>
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

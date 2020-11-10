@@ -1,0 +1,50 @@
+Here in this part we would need Nuget package.
+
+Ran the existing solution to show why it is needed.
+
+In the default layout we have the home and the privacy page. 
+
+Now Opened Index.cshtml from pages to make some changes.
+
+After changing the text Welcome under h1(In Running mode), saving and running again we see it is not getting changed in the browser
+
+
+
+Earler Autorefresh was there for the views as part of ASP dot net mvc but now, we need to install a separate Nuget package for this.
+
+To install that, open manage nuget package for solution from tools, search/browse and install the below:
+
+Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation
+
+Installed V 3.1.9
+
+Now in The csproj file the below was present.
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.9" />
+  </ItemGroup>
+
+After installation, We need to make a change in Starup.cs class file in the ConfigureServices method. Change the below 
+
+services.AddRazorPages();
+
+to the below to call AddRazorRuntimeCompilation().
+
+services.AddRazorPages().AddRazorRuntimeCompilation();
+
+Now if we run again/F5, we will see the changed text in index.cshtml, and now if we again change/Revert to the original text and refresh we can see the text is updated on running.
+
+So now when we would change something in the razor UI, and on refreshing the browser it would get reflected. This is useful for the Developers like us because we need not restart the application everytime.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,44 @@
+In the Solution Explorer if we expan the Properties we see launchSettings.json.
+
+This file tels visual studio what to do we we run the solution.
+
+
+iisExpress": {
+      "applicationUrl": "http://localhost:65491",
+      "sslPort": 44379
+    }
+
+
+
+We have few profiles here the first one is the iisExpress. Once we start the broser it will take the url. Also we have set the Environment to Development here. 
+
+"ASPNETCORE_ENVIRONMENT": "Development"
+
+
+The value can be Production as well, if it would be Development we will show all the normal css, if it would be production we would keep the minified css.
+
+At the bottom we have another profile called BookListRazor. This is the project name, it will nun the application as a command line Application.
+
+Castrol would be used to open the application. 
+
+If we right click on the project and open the Properties Under Debug we can see all the profiles.
+
+And if we go down we can set the Environment Variables and the URL.
+
+We will not change these as of now.
+
+Also in the Run dropdown(IIS Express) we can see all the profiles. We can selected any one to run the application.
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+

@@ -1,0 +1,46 @@
+Now le't see the website from an End User Perspective.
+
+He opened the same BulkyBook portal from Localhost.
+
+First he registered as a user and logged in.
+
+After login an Email was sent to his Gmail with a nice template(of the body).
+
+There was a link for Confirm Email Now. On click of that redirected to localhost again saying Thank you for confirming your email.
+
+Veryfying the email is mandatory for placing order. For browsing only it was not needed but he wanted to show the functionality.
+
+Now he slected multiple books(with multiple quantity). Then opened shopping cart with the summay for books price and Remove/Add Delete icons. On Adding + Icon the quantity and price is updated. There was a order summary button on click of that Order Summary was opened with the Shipping Details for Address and the Order summary was there in the right.
+
+On click of place order we have stripe payment. Where they need to edit the email and enter the test credit card with stripe. These(list of) credit card numbers are available in their test website.
+
+ 
+
+On hitting enter after entering card details, the order will be submiteed successfuly(this page will come).
+
+They can go Order history and view the Order details, they would not be able to update anything there.
+
+The order history is same for both admin and user, admin can see all orders, but user can see only his orders. 
+
+As soon as we place order we get sms notifications as well in the phonenumber that we enter. 
+
+Once an order is placed logged out and logged in as an admin to process the order. He opened the order and clicked Start processing. The status would be Processing at that point of time. Next Opened the order again and clicked Ship Order. For ship order we need to provide a Tracking Number and the Carrier otherwise will get error.  After populating both, updating and then clicking ship order, the order status would be shippped. 
+
+So this is the flow of the order. the next thing admin can do is Cancel the Order and issue refund for the cancelled order.
+
+We can go to stripe.com to see the transaction details(in their test portal). So this is a full fledged application with a lot of functionalities. We would be building all of these in ASP.Net core MVC. 
+
+We will start from the basics from the next video.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

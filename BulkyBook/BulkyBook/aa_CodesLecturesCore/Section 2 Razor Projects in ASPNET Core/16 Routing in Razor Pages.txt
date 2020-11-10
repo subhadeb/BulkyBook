@@ -1,0 +1,68 @@
+One of the Top priorites of Developers is how to match urls to the resources of the server.
+
+There are some ruls on URLs maps to files in the server. The Rules can be customized as wee.
+
+Opened PPT.
+
+Routing in Razor Pages.
+>>Routing in Asp.net Razor pages maps URLs to Physical file on disk.
+
+>>Razor pages needs a root folder.
+--the root folder is the Pages folder.
+
+>>Index.cshtml is the default document.Meaning If a file name is missing in the url it will be mapped to Index.cshtml.
+
+>> Below are few examples of URL and Maps to
+
+
+URL			Maps To
+www.domain.com		/Pages/Index.cshtml
+www.domain.com/Index 	/Pages/Index.cshtml
+www.domain.com/Accout	/Pages/account.cshtml or /Pages/Account/Index.cshtml
+
+We have seen for the first URL as we have not specified anything it will be mapped to the index page.
+
+In the second example, it will look for the same index page in the pages folder as we have defined Index here.
+
+The third url will have two ways to find, First it will try to find account.cshtml if it finds it will render, if it will find it will check if there is some Account folder. And inside that it will try to find index.cshtml.
+
+Opened the Application.
+
+He said like the root folder is the Pages folder in the Solution Explorer. We can add Areas inside this and Add page. Now let's run the application.
+
+We see the url is localhost and it does not have anything else.
+
+https://localhost:44379/
+
+So it means by default it is loading the Index page. We can confirm this by looking at the cshtml file there we have Welcome written in h1 tag. And If we explicitly define 
+
+https://localhost:44379/Index
+
+we see the same page is loaded.
+
+If we add Privacy or click on Privacy, we see it is opening the webpace for Privacy Policy
+https://localhost:44379/Privacy
+
+We can verify code in Privacy.cshtml in pages.
+
+Now stopped the solution and added a folder subha in pages and inside that moved Privacy.cshtml and run again.
+
+
+We see now on click of Privacy from home, the page is not opened. however we can access privacy with the url(adding the folder name to the url)
+
+https://localhost:44379/subha/Privacy
+
+
+This is how routing works. Now stopped the solution, and moved privacy back to root(Pages) and deleted the folder subha.
+---------------------------------------------------------------
+No Code changes as of now.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

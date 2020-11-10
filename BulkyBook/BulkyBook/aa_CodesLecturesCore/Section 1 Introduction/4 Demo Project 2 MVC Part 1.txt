@@ -1,0 +1,50 @@
+In this part we will walk us through the final project which is the Bulky Book. Here we can order books in Bulk and get discounts. 
+
+We can order as a company or as an individual. As a company has some benefits.
+
+He logged in to the portal as a Admin with admin@gmail.com and the Password is Admin123*
+
+We have the Content Management tab where we can manage Category, Cover Type and Product. 
+
+Category List is having a Category List here we are doing pagination with custom tag helper.
+
+Then we have Cover Type List where we have sorting and searching functionality.
+
+Then we have Create Cover Type, and we have required validation for it.
+
+For delete we are using sweetalert and toaster for notifications.
+
+For products Create, we have big form with image, and in the description we have text editor, where we can format the text. There is a uplaod image section for file handline.
+
+We have Validations with Delete Functionality.
+
+If a company want to upload books they can contact admin.
+
+Admin can create a new company. It can be authorized company or normal. Normal companies work in the same way as individuals place an order.
+
+But if a company is authorized, They have some flexibility with the payment architecture. 
+
+There is a Users Section where there is a table for the users they can lock the users or unlock the account. 
+
+Here we can see What role is assigned to what user and their company(If applicable).
+
+An Admin can Create a new user and they have the functionality of Adding Roles. They can select role and the Company.
+
+We have another section for Managing Order. This is also a summary table.(data table). There is a filter at the top where we can search for In Process/Payment Pending/Completed/Rejected and All.
+
+Payment Pending would be for the companies who have not made payments yet. There is a details view for viewing the order details. Admin can start processing order or they can cancel order.
+
+Next we will see the functionalites as an individual users.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

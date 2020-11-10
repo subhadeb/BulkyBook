@@ -1,0 +1,43 @@
+In this part we will have an overview of Razor Pages.
+
+Opened PPT.
+
+>> Introduced in asp.net core 2.0
+--Since than it have became the default way of coding Dot net core
+
+>> Razor Pages is a new feature of ASP.NET core MVC that makes coding page-focused scenarios easier and more productive.
+
+>> Razor pages is not just for simple scenarios. everything that you can do with MVC, you can do by using Razor pages like Routing, Models, ActionResults, Tag Helpers and so on.
+
+>> Razor Pages have two parts 
+	###Razor Page(UI/View)
+	###Page Model(Contains Handlers).--It is combination of mdels/vms and action methods.
+Now opened VS.
+
+
+In the solution if we Expand Pages we can see the Razor pages. 
+
+
+If we Expand Index.cshtml we can see Index.cshtml.cs
+
+Index.cshtml.cs is not the page behind, it is the page model for our Index.cshtml view. 
+
+In the cshtml we can see the model is 
+@model IndexModel
+
+In the .cs file we can see the class public class IndexModel
+
+
+Right now we have only onGet() method, but we can also post from our view. Currently we have onGet, but in future for Post we would have onPost.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

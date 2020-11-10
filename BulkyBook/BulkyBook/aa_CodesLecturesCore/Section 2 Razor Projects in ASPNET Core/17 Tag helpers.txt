@@ -1,0 +1,65 @@
+In this part we will have a look at tag helpers.
+
+Tag helpers are brandnew to ASP.Net core.
+
+Microsoft looked at the success of Other libraries like React/Angular and decided to provided angular like experience. And They decided to introduct tag helpers.
+
+Opened ppt.
+
+>> Tag helpers are Introduced with ASP.NET core.
+
+>> Tag Helpers enable server-side code to participate in creating and rendering HTML elements in Razor files.
+
+>> Tag Helpers are very focused around the html elements and much more natural to use
+
+--Difference between Tag Helpers in DNCOre and Angular is : Tag helpes in DN Core are all about server side rendering but Tag Helper in angular is for client side rendering. 
+
+
+Back to solution.
+We will look at some of the tag helpers.
+
+Opened Index.cshtml - there is not tag helpers.
+
+Now opened _Layout.cshtml under shared, we see there are many tag helpers.
+
+Two tag helpers inside that are
+ asp-area="" asp-page="/Index"
+
+When we have to redirect to any page we specify asp-page and then define the path. As we wanted to go to Index page so that is why we specified /Index here.
+
+If we scrool down further we can see similar tag helpers for area and page.
+
+Also at the bottom we see the tag helper
+ asp-append-version="true"
+
+We would be using tag helpers for labels and forms in the future. 
+
+
+Opened PPT Again, Now we had two code snippets showing equivalent html helper and tag helper. We can see the tag helper almost looks like html code only and is easier to code and understand.
+
+    @*Html Helper*@
+    @Html.Label("FirstName","FirstName :", new {@class = "form-control" })
+
+    @*Tag Helper*@
+    <label class="form-control" asp-for="FirstName"></label>
+
+Another example
+
+    @*Html Helper*@
+    @Html.LabelFor(m=>m.FirstName, new { @class = "col-md2 control-label"})
+
+    @*Tag Helper*@
+    <label asp-for="FirstName" class="col-md-2 control-label" ></label>
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

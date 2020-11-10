@@ -1,0 +1,158 @@
+Now Lets work on the Validations, 
+
+Name is a required field, so we would like to throw validation for this right now no validations are there.So we can stop the solution and work on tat.
+
+Opened create.cshtml.cs
+
+
+
+We have onGet() currently, for post we would crete a method OnPost(), the handler name should always start with on.
+
+Asp dot net core has given a feture to Bind the Property to a page. So to the Property Book of type Book, we should use [BindProperty]
+
+So onPost will assume that on post we would be getting the elements in the Book object, so we need not declare Book parameter here to OnPost. We have kept the signature of the Method as async Task<IActionResult>.
+
+Now inside it we can check if the ModelState is Valid, and if it's is valid we can add the Book to _db.Book, and then save changes and at last we can redirect to Index page.
+
+
+  public async Task<IActionResult> OnPost()
+        {
+            if (ModelState.IsValid)
+            {
+                await _db.Book.AddAsync(Book);
+                await _db.SaveChangesAsync();
+                return RedirectToPage("Index");
+            }
+            else
+            {
+                return Page();
+            }
+        }
+
+Now on running after we enter values to the fields, It got saved to the db, and if we keep the fields as empty it does not save because the Model state becomes invalid for Name, and debugged that, in Model state we have the elements like below:
+
+
+For Name if we debug we can see,
+[1] = {[Book.Name, SubKey={Name}, Key=Book.Name, ValidationState=Invalid]}
+
+But For Author it's valid to have blank.
+[2] = {[Book.Author, SubKey={Author}, Key=Book.Author, ValidationState=Valid]}
+
+Now, on we would add Validation Summary to the cshtml.
+
+In Create.cshtml,
+In  the top after <form declaration, added,
+
+<div class="text-danger" asp-validation-summary="ModelOnly"></div>
+
+And after the Input element div, can add like the below for all the three elements(Name/Author/ISBN),
+
+<span asp-validation-for="Book.Name" class="text-danger"></span>
+
+Now on running, we see the Proper Validation Message.
+---------------------------------------------------------------
+--Create.cshtml
+
+@page
+@model BookListRazor.Pages.BookList.CreateModel
+@{
+}
+
+
+<br />
+
+<div class="border container" style="padding:30px">
+    <form method="post">
+        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Name" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Author"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Author" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Author" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.ISBN"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.ISBN" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.ISBN" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3 offset-3">
+                <input type="submit" value="Create" class="btn btn-primary form-control">
+            </div>
+            <div class="col-3">
+               <a asp-page="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+--Create.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BookListRazor.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace BookListRazor.Pages.BookList
+{
+    public class CreateModel : PageModel
+    {
+        private readonly ApplicationDbContext _db;
+
+        public CreateModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        [BindProperty]
+        public Book Book { get; set; }
+
+        public void OnGet()
+        {
+            
+        }
+
+        public async Task<IActionResult> OnPost()
+        {
+            if (ModelState.IsValid)
+            {
+                await _db.Book.AddAsync(Book);
+                await _db.SaveChangesAsync();
+                return RedirectToPage("Index");
+            }
+            else
+            {
+                return Page();
+            }
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

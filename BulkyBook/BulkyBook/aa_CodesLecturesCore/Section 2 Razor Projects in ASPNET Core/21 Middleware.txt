@@ -1,0 +1,45 @@
+Now let's understand Middleware and Pipeline in much more detail.
+
+Opened PPT
+
+Hen a HTTP Request comes from the Browser, something must handle the request so it eventually results in http response. Those pieces of code that handle the request and results in a response make up the request pipeline. What the can do is configure this request pipeline by adding middlewares which are software componenents that are assembled into a applicaiton pipeline to handle requests and response. so typically a browser is going to send a request to your server and that request is going to be interpreted by the server and handled by some piece of software. 
+
+
+Now first that request is attached to something called as the context object. As a part of software that manages this context in our case it would be ASP Dot net core middleware. We can essentially think of it as a pipline which is a series of pipes that is going to determine what is going to happen to the context. 
+
+So first the request is passed along the first pipe and the first pipe interprets the context and checks our the request and determies if there is some type of response needed and attach that to the context.
+
+If there is no immediate response that should be handed back to the server then the context is simply passed along to the next pipe in the pipeline this continues again to the next pieche of the middleware what ever it might be and it goies on till the very last pipe.
+
+Now it is also possible that at the end of the pipeline no response has been formed and that will cause a 404 for not found and written back to whoever originated the request. However it is possible that in any one or more of these middlewares there may be a response that needs to be passed back and it could happen in any of the pipes.
+
+So sometimes it could happen that middleware would not pass the context along the.The next piece but rather says Okay I have a response that I need to send back but typically your context will go all the way through the pipeline to the end.
+
+But the last piece of middleware sends a response which gets back through the pipeline to the server and then the server sends back the response to the browser.
+
+This is very simplified version of how request works. 
+
+Again Revision:
+
+when the request comes into the server the server then accesses the dot net core framework and puts the request into a context object. The context gets passed along to the middlewares and if a middleware has a response anywhere along the way then it will attach that response to the context object and then pass that context object back through the pipeline to the server and then the server sends back the response to the browser.
+
+Now keep in mind the order of pipeline is important. It always gets passed from the first to the last.
+
+A good example will be authentication middleware. If the middleware component finds that the request isn't authorized it will not pass it to the next piece of the middleware but it will immediately return an unauthorized response.
+
+It is hence important that authentication Middleware is added before other components that shouldn't be triggered in case of an unauthorized request.
+
+We will be adding more middlewares in our project but we'll do them as we face that requirement for that.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

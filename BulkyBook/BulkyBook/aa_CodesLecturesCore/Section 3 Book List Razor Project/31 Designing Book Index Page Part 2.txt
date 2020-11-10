@@ -1,0 +1,155 @@
+Now again in Index.cshtml
+
+after the two divs,
+
+added a div with col 12, border p3 mt-3, mt-3 means margin top 3. 
+
+    <div class="col-12 border p-3 m-3">
+        <form method="post">
+
+        </form>
+    </div>
+
+Now inside the form we will check if(with a block with @if) we are having any Books available with Count check, if there would be no books we would display No Books available.
+
+
+In the if block that is if count is greater than 0, We would add a table with class table-striped and inside that we will have tr with class table-secondary. And will have a th for header. 
+
+With the help of tag helper we are easily able to show the label.
+<label asp-for="Books.FirstOrDefault().Name"></label>
+
+Otherwise with Html helpers we have to lot of code.
+
+Html helpers are still in use if we want we can use that as well.
+
+Along with the two th blocks for Name and Author we will add a third th this will be empty inside. So as of now the table headers are like:
+
+            @if (Model.Books.Count() > 0)
+            {
+                <table class="table table-striped border">
+                    <tr class="table-secondary">
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Name"></label>
+                        </th>
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Author"></label>
+                        </th>
+                        <th>
+                        </th>
+                    </tr>
+                </table>
+            }
+            else
+            {
+                <p>No Books Available</p>
+            }
+
+
+Now for displaying the Books we would add a foreach loop(with @), we will iterate over Model.Books. For this we will add tr for each record and each element will be inside td.
+
+As of now we dont have any custom tag helper for DisplayFor, we can write any if we want to. With DisplayFor html helper, we would display the elements
+
+It's like:
+                    @foreach (var item in Model.Books)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(x => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(x => item.Author)
+                            </td>
+                        </tr>
+                    }
+
+
+Now In the Db in SQL server we can insert a Record like:
+
+insert into Book values('Good Book','Subha')
+
+select * from Book
+
+On running we see the books got displayed.
+
+Now we would add a td block inside tr in foreach for Delete and Edit Button for that added like:
+
+                            <td>
+                                <button class="btn btn-danger text-white btn-sm">Delete</button>
+                                <a class="btn btn-success text-white btn-sm">Edit</a>
+                            </td>
+
+
+Now last thing we can do is add a link for create new book.
+
+For that to Create New Book we can simply write asp-page="Create"  to the anchor tag, as both of them are in the same directory we need not specify BookList in the url. It's like:
+
+    <div class="col-md-3">
+        <a asp-page="Create" class="btn btn-info form-control text-white">Create New Book</a>
+    </div>
+---------------------------------------------------------------
+--Index.cshtml
+
+
+@page
+@model BookListRazor.Pages.BookList.IndexModel
+@{
+}
+
+<br />
+<div class="container row p-0 m-0">
+    <div class="col-md-9">
+        <h2 class="text-info">Book List</h2>
+    </div>
+    <div class="col-md-3">
+        <a asp-page="Create" class="btn btn-info form-control text-white">Create New Book</a>
+    </div>
+
+    <div class="col-12 border p-3 mt-3">
+        <form method="post">
+            @if (Model.Books.Count() > 0)
+            {
+                <table class="table table-striped border">
+                    <tr class="table-secondary">
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Name"></label>
+                        </th>
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Author"></label>
+                        </th>
+                        <th>
+                        </th>
+                    </tr>
+                    @foreach (var item in Model.Books)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(x => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(x => item.Author)
+                            </td>
+                            <td>
+                                <button class="btn btn-danger text-white btn-sm">Delete</button>
+                                <a class="btn btn-success text-white btn-sm">Edit</a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+            else
+            {
+                <p>No Books Available</p>
+            }
+        </form>
+    </div>
+
+</div>
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

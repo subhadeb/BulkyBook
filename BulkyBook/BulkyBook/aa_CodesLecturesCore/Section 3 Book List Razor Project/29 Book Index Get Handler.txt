@@ -1,0 +1,94 @@
+Now the purpose of this Course is to perform CRUD operations on the Book Object.
+
+For that we need pages to create/edit/delete/and view.
+
+Now in Pages, add a new folder BookList.
+
+In that Add Razor Page, 
+
+Did not select the Option with Entity Framework because it would have created the codes automatically.
+
+Named it Index.cshtml
+
+For him a small popup came with Add Razor Page where there were options to select PageModel/Partial View etc.
+
+While working we should make sure we are working on the correct index page.
+ It should not create confusions.
+
+One thing to note here is whenever we would need the Database, we should use the ApplicationDBContext.
+As we have setup the db context with ConfigureServices, we would use dependency injection to get the dbcontext first created the readonly variable _db for dbContext.
+
+
+
+private readonly ApplicationDbContext _db;
+
+Then created the constructor with ctor and then have _db as the db
+
+ public IndexModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+If we would not have dependency injection then we would have to create objects and then dispose and all these stuffs. 
+
+
+Now we will have Declare and IEnumberable of Books as a property.
+
+public IEnumerable<Book> Books { get; set; }
+
+Now we would use async and await and set Books to a list inside OnGet method like the below and also change the return type from void to async Task.
+
+
+        public async Task OnGet()
+        {
+            Books = await _db.Book.ToListAsync();
+        }
+
+
+async and await are c sharp constructs and it would let us run multiple tasks until it is awaiting. If we would have used mvc then OnGet would have been action methods.
+
+Now in the cshtml we will have the list of books.
+
+In the next part we will see the list of books.
+
+---------------------------------------------------------------
+---index.cshtml.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BookListRazor.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookListRazor.Pages.BookList
+{
+    public class IndexModel : PageModel
+    {
+        private readonly ApplicationDbContext _db;
+
+        public IndexModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public IEnumerable<Book> Books { get; set; }
+        public async Task OnGet()
+        {
+            Books = await _db.Book.ToListAsync();
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

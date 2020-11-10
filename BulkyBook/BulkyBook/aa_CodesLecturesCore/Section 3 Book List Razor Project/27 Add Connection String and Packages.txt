@@ -1,0 +1,63 @@
+Now we would set up Database.
+
+For Database we need some pacakages. Opened Manage Nuget Pacakage for Solution.
+
+In Browse,
+
+First Install Microsoft.EntityFrameworkCore
+
+Installed 3.1.9
+
+Now Install  Microsoft.EntityFrameworkCore.SqlServer
+
+
+Now Installed Migrations
+
+Now Install  Microsoft.EntityFrameworkCore.SqlServer
+
+Now Install  Microsoft.EntityFrameworkCore.Tools, this would be required to run migrations.
+
+
+So we have istalled the three packages for EF Core. In the Nuget Installed tabl now we would have 4 packages in total.
+
+
+Now opened SQL Server. On opening we can see the username is  and we would be ussing this connection. 
+
+For Window 7 Machine it was SUKLA\SQLEXPRESS
+
+Would add some code to Make it work for both the machines.
+
+Now opened appsettings.json
+
+Before the Loggin Element added the element ConnectionStrings. The Server is the one through which we login, The Database BookListRazor should not be there we would create it from visual studio. 
+
+Next we would modify Startup.cs
+
+---------------------------------------------------------------
+appsettings.json
+
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=SUKLA\\SQLEXPRESS;Database=BookListRazor;Trusted_Connection=True;MultipleActiveResultSets=True"
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

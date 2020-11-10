@@ -1,0 +1,183 @@
+Now he was saying that We can have the simlar view for Insert and Update and Combine them to Upsert.
+
+As it is a combination of Insert and Upadte, we should name it Upsert.
+
+In BookList folder inside pages, added a new Razor Page Upser.cshtml
+
+Copied the Entire Html content starting from Edit Book till Scripts section and Pasted in Upsert.cshtml
+
+Similarly Copied Everything(from inside class) form Edit.cshtml.cs and pasted to Upsert.cshtml.cs inside class.
+
+Update the constructor to UpsertModel.
+
+The Upsert.cshtml.cs file will be used for both insert and update.
+
+We would updte the OnGet id parameter, it can be null so made it int? id and also change the return type from Task to Task<IActionResult>.
+
+In the method we would initialize Book to new Book, then if is null it means create so we would be returning Page.
+
+After that, If id would be present we are finding the book with FirstOrDefaultAsync and Populating the book. Again if Book is null we are returning NotFound().
+
+Now we will work on OnPost.
+
+Inside the ModelState IsValid check, 
+
+If Book.Id will be 0, we would Add with _db.Book.Add(Book).
+
+Else, We would update Book with _db.Book.Update(Book), earler we we were following another way of updating- first finding the book details and then updating the fields one by one. Update() should be used if we want to update every property of the book, if we want to update a subset then we can follow the earlier approach.
+
+        public async Task<IActionResult> OnPost()
+        {
+            if (ModelState.IsValid)
+            {
+                if (Book.Id == 0)
+                {
+                    _db.Book.Add(Book);
+                }
+                else
+                {
+                    _db.Book.Update(Book);
+                }
+                await _db.SaveChangesAsync();
+                return RedirectToPage("Index");
+            }
+            else
+            {
+                return RedirectToPage();
+            }
+        }
+
+---------------------------------------------------------------
+--Upsert.cshtml
+
+@page
+@model BookListRazor.Pages.BookList.UpsertModel
+@{
+}
+
+
+
+<br />
+<h2>Edit Book</h2>
+<br />
+
+<div class="border container" style="padding:30px">
+    <form method="post">
+        <input type="hidden" asp-for="Book.Id">
+        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Name" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Author"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Author" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Author" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.ISBN"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.ISBN" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.ISBN" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3 offset-3">
+                <input type="submit" value="Update" class="btn btn-primary form-control">
+            </div>
+            <div class="col-3">
+                <a asp-page="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial">
+}
+
+
+--Upsert.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BookListRazor.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookListRazor.Pages.BookList
+{
+    public class UpsertModel : PageModel
+    {
+        private readonly ApplicationDbContext _db;
+
+        public UpsertModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        [BindProperty]
+        public Book Book { get; set; }
+        public async Task<IActionResult> OnGet(int? id)
+        {
+            Book = new Book();
+            if (id == null)
+            {
+                //Create
+                return Page();
+            }
+            //Update
+            Book = await _db.Book.FirstOrDefaultAsync(x=>x.Id == id);
+            if (Book == null)
+            {
+                return NotFound();
+            }
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPost()
+        {
+            if (ModelState.IsValid)
+            {
+                if (Book.Id == 0)
+                {
+                    _db.Book.Add(Book);
+                }
+                else
+                {
+                    _db.Book.Update(Book);
+                }
+                await _db.SaveChangesAsync();
+                return RedirectToPage("Index");
+            }
+            else
+            {
+                return RedirectToPage();
+            }
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

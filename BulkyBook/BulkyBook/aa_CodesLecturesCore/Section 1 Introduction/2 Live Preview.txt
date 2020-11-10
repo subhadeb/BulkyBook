@@ -1,0 +1,44 @@
+In this part we would show the live website that we will be building.
+
+The website is 
+https://bulkybook.azurewebsites.net/
+
+I too opened it.
+
+In the begining he wanted to show his students what he would be building and hosted azure.
+
+To the right he have an i(Information) icon which would give us the login details for multiple roles.
+
+Adding a new book is disabled in the portal because this can misused. 
+
+
+
+
+We would be able to process and place the order.
+
+We can see how a page looks like and can start coding. 
+
+Clicked on login from top right.
+
+He had already linked to facebook so he used that to login.
+
+Once we login the details view would be different.
+
+We have multiple features and roles in this project.
+
+In the next part he will show what the application will actually do. He will show the details of the roles and how we will process.
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

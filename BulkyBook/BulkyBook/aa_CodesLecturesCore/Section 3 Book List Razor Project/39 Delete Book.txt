@@ -1,0 +1,150 @@
+Now we will work on the Delete.
+
+Opened Index.cshtml
+
+For Delete We would show a popup alert and on Confirmation we will delete it from the Index page only. We would use javascript confirm for onclick of Delete Button.
+
+Here we would use a new kind of hander tag, this is asp-page-handler and named it Delete, we would pass asp-route-id as item.Id 
+
+So, it's updated to
+<button asp-page-handler="Delete" asp-route-id="@item.Id"  onclick="return Confirm('Are You Sure you want to Delete')" class="btn btn-danger text-white btn-sm">Delete</button>
+
+Now we need to implement Delete handler in the Index page.
+
+Opened Index.cshtml.cs
+
+Created a new async method returning Task<IActionResult>, it would have parameter int id,  As it is a Post Handler and for Delete(We speicified it before), so named it OnPostDelete.
+
+Next we would find the book with FindAsync, and then woud use Remove and then SaveChangesAsync. IF the book will be null then we will return NotFound(). 
+
+
+At the end We would Redirect to Index.
+
+        public async Task<IActionResult> OnPostDelete(int id)
+        {
+            var book = await _db.Book.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+            _db.Book.Remove(book);
+            await _db.SaveChangesAsync();
+            return RedirectToPage("Index");
+        }
+
+On running, on click of delete we see the item is deleted.
+
+---------------------------------------------------------------
+--Index.csthml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BookListRazor.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookListRazor.Pages.BookList
+{
+    public class IndexModel : PageModel
+    {
+        private readonly ApplicationDbContext _db;
+
+        public IndexModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public IEnumerable<Book> Books { get; set; }
+        public async Task OnGet()
+        {
+            Books = await _db.Book.ToListAsync();
+        }
+
+        public async Task<IActionResult> OnPostDelete(int id)
+        {
+            var book = await _db.Book.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+            _db.Book.Remove(book);
+            await _db.SaveChangesAsync();
+            return RedirectToPage("Index");
+        }
+    }
+}
+
+
+
+---------------------------------------------------------------
+Index.cshtml
+
+@page
+@model BookListRazor.Pages.BookList.IndexModel
+@{
+}
+
+<br />
+<div class="container row p-0 m-0">
+    <div class="col-md-9">
+        <h2 class="text-info">Book List</h2>
+    </div>
+    <div class="col-md-3">
+        <a asp-page="Create" class="btn btn-info form-control text-white">Create New Book</a>
+    </div>
+
+    <div class="col-12 border p-3 mt-3">
+        <form method="post">
+            @if (Model.Books.Count() > 0)
+            {
+                <table class="table table-striped border">
+                    <tr class="table-secondary">
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Name"></label>
+                        </th>
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Author"></label>
+                        </th>
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().ISBN"></label>
+                        </th>
+                        <th>
+                        </th>
+                    </tr>
+                    @foreach (var item in Model.Books)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(x => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(x => item.Author)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(x => item.ISBN)
+                            </td>
+                            <td>
+                                <button asp-page-handler="Delete" asp-route-id="@item.Id"  onclick="return Confirm('Are You Sure you want to Delete')" class="btn btn-danger text-white btn-sm">Delete</button>
+                                <a asp-page="Edit" asp-route-id="@item.Id" class="btn btn-success text-white btn-sm">Edit</a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+            else
+            {
+                <p>No Books Available</p>
+            }
+        </form>
+    </div>
+
+</div>
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

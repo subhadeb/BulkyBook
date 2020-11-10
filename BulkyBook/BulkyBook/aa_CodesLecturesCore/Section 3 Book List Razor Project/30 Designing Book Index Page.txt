@@ -1,0 +1,53 @@
+Now it's time to Add the UI.
+
+We would replace Privacy with BookList so updted the Text to BookList and change the asp-page from "/Privacy" to "/Booklist/Index"
+
+
+Now, Index.cshtml did not had thing to display so added <h1> Index Book </h1>
+
+Now let's run the solution.
+
+Now on click of Booklist Index Book is opened.
+
+Now we will design the webpage. 
+
+Opened Booklist/Index.cshtml
+
+We would remove the h1 tag and start our page with <br/>
+
+We would add a bootstrap container div with row having classes p-0 m-0.
+
+Iside it we will divide among two cols one will occupy col-9 for displaying book list, and col-3 for showing the Button.
+
+In the div with col-md-9, we would display header with h2 and class text-info.
+
+In the div will col-md-3 we will add a Button wtih btn-info class and text-white.
+
+
+---------------------------------------------------------------
+---Index.cshtml
+
+@page
+@model BookListRazor.Pages.BookList.IndexModel
+@{
+}
+
+<br/>
+<div class="container row p-0 m-0">
+    <div class="col-md-9"  >
+        <h2 class="text-info">Book List</h2>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-info form-control text-white">Create New Book</a>
+    </div>
+</div>
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

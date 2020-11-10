@@ -1,0 +1,42 @@
+PPT
+
+Another file that we have in our project is AppSettings.json
+
+>> All of the application's settings are contained in a file named appsettings.json.
+
+>> Any Changes to the appsettings.json file will require restarting the Microsoft IIS Administration service to take effect.
+
+Let's switch back to the application.
+
+
+The appsettings.json file is like:
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}
+
+
+We only Loggin, LogLevel and few other details we would be adding more settings here for connection string. And if we add other details may be some dependency we can add them here. We can also store them remotely on a server but Appsettings is generally a place where you have them when we are initially developing.
+
+In future We would be adding variables here and would be using them in Startup class file when we use Dependency Injection.
+
+So this is all about appsettings.json file.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

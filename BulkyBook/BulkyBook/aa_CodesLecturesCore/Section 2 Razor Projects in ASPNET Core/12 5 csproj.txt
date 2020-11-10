@@ -1,0 +1,60 @@
+Let's have a look at the project configuration file.
+
+
+For opening the Project file we can right click on the Project(not the solution) and then select edit Project file or double click on the project. both will work.
+
+The filename would be the project name with the extension .csproj.
+
+The project file have been there since long but the format is different in asp.net core 3.
+
+We have the targe framewordk netcoreapp3.1 in this project. 
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+
+
+With time we would add more packages into our solution.
+
+For demo he have installed Newtonsoft.json from nuget and we have seen that it got added to the csproj. We will delete the reference as well(later).
+
+It got added as 
+
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+Every time we add a new package a package is added here. 
+
+Uninstalled the nuget. after showing.
+
+Opened SLide.
+
+Where's the Meta Package
+
+Microsoft AspNetCoreApp was the metapackage which contained all features of .Net Core.
+
+>>Prior to .Net Core 3, metapackage was included as a nuget package.
+
+
+>> With .Net Core 3 onwards, meta package is part of .Net core installation itself so you donot have to include that in the project reference anymore.
+
+Some packages like EFCore is now moved out of the metapackage. It has it's own nuget package which we will be using later.
+
+So Metapackage is installed automatically.
+
+So we have seen csproj is used for referencing the packages.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

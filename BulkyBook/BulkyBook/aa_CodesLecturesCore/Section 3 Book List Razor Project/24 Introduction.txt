@@ -1,0 +1,18 @@
+In this Part we would be working on our Booklist Razor Project, we would be performing CRUD Operations on book list.
+
+All the pages and functionalities will be done here for Create, Reaad,Update and Delete.
+
+We will start from the next part.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

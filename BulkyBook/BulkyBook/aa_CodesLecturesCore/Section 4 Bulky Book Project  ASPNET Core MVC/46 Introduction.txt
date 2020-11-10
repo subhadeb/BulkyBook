@@ -1,0 +1,18 @@
+In this section We will be creating our Main Project which is an MVC Project.
+
+We will create the project and see how is it different than Razor and also the difference in Routing between the two.
+
+We will also understand the basic concepts.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

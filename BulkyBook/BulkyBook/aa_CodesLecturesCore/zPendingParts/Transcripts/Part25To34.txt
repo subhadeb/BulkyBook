@@ -1,0 +1,863 @@
+---------------------------------------------------------------
+25 Runtime Razor Package
+---------------------------------------------------------------
+In this video he will be installing our first new get package.
+
+So far that let me run the application and show you why we need that package.So when you hit the run button it will load our Web site and you can see the default layout that we have.
+
+We have a home page and a privacy page.
+
+Let's go to our home Razer page and edit this text so far that we'll switch back to our application and we'll go to solution Explorer.
+
+All of the pages will be inside the pages folder.
+
+We will double click on index start as such e-mail.
+
+And right here while the application is running with an ad my name broke in here.
+
+Save it.
+
+Go back and refresh.
+
+You can see the refresh was successful but the content here did not change.
+
+This was an existing feature before ESB dot net called Three but with three they have decided to add
+
+this auto refresh for the view as a separate package.
+
+So we'll stop the application will go to Tools and you'll get package manager and manage new get packages
+
+for solution inside the browser tab.
+
+We will search for Microsoft ESB net core dot MVC dark Razr dot runtime compilation.
+
+We have to install this package inside our booklet Grazer project with acceptance.
+
+And once the installation is complete we need to make one change inside our startup Darcy s class file
+
+and we have to configure services method in here where we have the DART added razor pages.
+
+We will have dot add XML runtime compilation after you add this line.
+
+If you press F FI or hit the run button here it will load the web site again and the content will be
+
+welcome broken right now.
+
+Let's see that.
+
+Perfect.
+
+Let's switch back.
+
+Let's go back to what.
+
+Index and remove through gain and let's refresh the page.
+
+And this time it should automatically reload and it should display welcome grade.
+
+You can see that in action.
+
+And with this whenever you will change anything inside the razor you y and you come back here while the application is running and refresh.
+
+This should automatically refresh.
+
+This is one of a cool package that is needed for developers because we are many times dealing with the view we make changes.
+
+We come back and we want to see the change rather than restarting the application.
+
+---------------------------------------------------------------
+26 Create Book Model
+---------------------------------------------------------------
+In this video what we will do is we will be adding our first model now models represents any table that you want in your database.
+
+In this project what we want to do is we want to manage a list of books so far that they will add a model or a table card book in order to do that in our project.
+
+Well right click add.
+
+Let's add a new folder to separate things out and we'll call this model inside here.
+
+Work right click add a new class file and we'll call this book.
+
+Then in here we will add a few properties.
+
+First will be the I.D..
+
+So we'll set up this will be an end teacher I.D..
+
+This will be a unique key so we can add a data annotation by typing key and if we do control data here you see using system that component model that data annotation what Key will do is it will automatically add a d as an identity column so that we do not have to pass the value it will create an I.D. value automatically along with I.D..
+
+We also want name of the book. So we do prop screen and name then we want the author.
+
+So we do prop again.
+
+Prop is a snippet for property.
+
+So if your type prop and hit tab twice it will automatically create a property.
+
+We'll call this as author and let's make a string now for name.
+
+I want to display book name so far that we have a display attribute.
+
+And we also have required data annotation.
+
+Let's try the required first. When we do required.
+
+This means that name cannot be known. The display data annotation I will add it as we proceed with the course.
+
+So this looks good for my book.
+
+And these three properties should be sufficient.
+
+Once we have created this book next thing is to add this to database for that we have to add a few packages for entity framework and we have to set up connection string.
+
+Let's do that in the next radio.
+
+
+
+---------------------------------------------------------------
+27 Add Connection String and Packages
+---------------------------------------------------------------
+Now that we have added book model inside our project we need to set up the database in order to setup the database.
+
+We need few packages so we'll go to Tools you get package manager and package manager solution here.
+
+The first package we want is Microsoft that entity framework core will select this.
+
+The woman is 3.0 art.
+
+Oh look scared.
+
+That's and short this.
+
+These are all the entity framework packages that we are needing because we'll be using entity framework to access database.
+
+After this we need dot sequel CERN work so we'll search for that and we'll be using Sequel Server.
+
+So we'll add this package as well.
+
+And the final package that we'll need is entity framework core got tools.
+
+And this is required because we'll be running migrations.
+
+I will explain you in the next week radio what exactly migrations are.
+
+So don't worry.
+
+But these are the three packages that you need.
+
+If you remove and close this your application should have this four packages right out OK.
+
+So with this we have installed all the necessary packages.
+
+Now we need to set up our connections.
+
+Let's go to sequencer were real quick and in here.
+
+When you try to connect you need a server name the server name that you see right here.
+
+Local TB in bracket backwards slash MSA sequel local TB.
+
+This is the default so where a name that's equal said What has.
+
+So right here we'll use this in our connection screen.
+
+So let me just go back and the connection is strong that we'll be adding We'll be inside upsetting star
+
+Jason as I explained before so far connection string.
+
+Right here before logging let me just paste that this is what you need to write it will be connection strings with a plural as at the end and we'll set up a default connection you can give default connection any other name that you want then for the CERN world we have the exact server name that we see inside Sequel Server make sure this is aligned and also try to connect once you connect.
+
+This means that this and where name is valid after that you can use the same server name here then for the database will create a new database called booklet Razr make sure that you do not create that database automatically from Sequel Server we will be doing that using Visual Studio.
+
+So right now you see we do not have published research database here we'll go back.
+
+We have the trusted connection true and we have the multiple active results that's too true.
+
+I will be pasting this exact string with the lecturer as well so that you don't have to waste time to type this manually but make sure the server name is waylaid with what you have.
+
+Once the connection string is an apt setting start Jason.
+
+Next thing we have to do is we have to configure our startup class file and let's do the configuration and run migrations in the next radio.
+---------------------------------------------------------------
+28 Add Book Table to Database
+---------------------------------------------------------------
+Now that we have the connection string inside upsetting star Jason it's time to configure our configure services with entity framework in order to configure that.
+
+We need an application TB context or a D.B. context class so that class we can add insight solution explorer model right click add a new class.
+
+We'll call this class application DB context let's add this.
+
+Now the application DB contact should inherit from DB context class which is a class inside Microsoft entity framework core.
+
+After this we need to implement the constructor and we have to pass the DB context options do the bad and class so for constructor we have a snippet called CDO R and we'll press tab twice.
+
+Right here we have to pass the DB context options and in here we need the application DV context. We'll call this options.
+
+This will have to pass to the base and will pass the options here.
+
+This is an empty constructor but the parameter is needed for dependency injection.
+
+Once we have that then we need to add the book model that we added to our database in order to add any model to the database inside the DB context.
+
+You need an entry. We will do public and this will be DB set off type book and let's call this property book as well.
+
+Once you act this the last thing that you have to do is add the DB context in such start up dots.
+
+Yes so in such start up Tazi yes we have to add the DB contacts to our pipeline.
+
+So with her services that add DB context and right here we have to pass art class name which is application
+
+B context.
+
+We do a controlled dart here and we need to pass the options with connection string so we'll see options.
+
+Don't use Sequel Server we'll have to do a controlled dart here and the use sequencer will be added as a new package.
+
+In here we need to pass the connection string from r upsetting star Jason.
+
+So far that we can use the configuration object that we have.
+
+So we just say configuration dot in here we have to get connection string and we need to pass the name that we used for our connection string which is default connection with confidence and we'll pass this in a string notation like this.
+
+So this was the configuration that we had to do to include entity framework inside the configuration pipeline.
+
+Once you have this all you have to do is unique to push this to database so far that will go to Tools.
+
+You'll get package manager.
+
+This time will be going to package manager console and in here the project name it should be book list razor wire type.
+
+Come on ADD migration and we will add a meaningful name.
+
+What we are doing right now is add book to database our DP World Press enter and what add migration
+
+will do is it will create a script that will be executed across the database the script has been created right here you see what the script is doing is it is automatically creating a table called book and it is adding the columns IDI name and author it is also making sure 1811 Alice files and name not is false author Nullarbor is true because if we go we do not have any required attribute with Auteur since Idea is a key it knows that it is not malleable in the constraint it is also adding primary key for the table and in the annotation it is making sure that I.D. is identity column so this is the perfect script that is needed to create the book table.
+
+Now right now only script has been created with the add migration command how do we actually create the database and create the table for that we have a command called update database once you hit update database it will check if the database accessed if it does not it will create the database and it will also push the migrations once the update database command complete successfully you can go back to your sequel server and to the database let's refresh it right now if you expand this and go on tables you see we have the book table that has been created.
+
+And if you do select up thousand you will see the three columns.
+
+Perfect.
+
+So with this we created our database and we also added the book table with the properties that we wanted.
+
+---------------------------------------------------------------
+29 Book Index Get Handler
+---------------------------------------------------------------
+Now the purpose of this course is to perform crowd operations on this book object.
+
+So far that we need pages to create a new book. Edit a new book Delete the book and also view all of the books that are available.
+
+So we'll go to solution explorer and inside pages we have the index page and few other pages all of the book pages.
+
+Let me add this in a new folder and we'll call this book list in here.
+
+Let me add a new razor page. So what do you have to do is write.
+
+Take ad and we'll add a razor page.
+
+We will go with the empty razor page because going with this will solve our problems but we will not know what was done.
+
+So then go with the empty razor page and let's call this index.
+
+What are all of the options here.
+
+First option is to create a page model class as you saw with the index page here.
+
+We have index page as well as page model.
+
+We need a page more than class because we need to populate all of the books from the database and pass that to the page to displayed.
+
+So that's why we'll need that and then this won't be a partial view or a partial view is something which is a small subsection like maybe group of patterns that you want to reuse in multiple places in your web site.
+
+But this is a company page so that won't be a partial view and we will use our layout page because that is the match to the page and we want to be consistent.
+
+So with this let's at this one drawback that I see with the Razer pages is when we will be adding index pages it might get confusing because you see we have a master index page inside book list. We have another index page so whenever you are working make sure you are working on the correct index page.
+
+At this time we'll be working on Index an index page model inside the book list.
+
+So if you have any other pages open you can close them inside the index page what we want to do is we want to retrieve all of the books from the database so far that we need the application DB context. Whenever you have to deal with the database you will need the application DB context. When you added the application to be context right here in the services. That means that you have added it to the pipeline.
+
+Once you have added it as a pipeline you can use them using dependency injection.
+
+So we need to object of application DB context.
+
+What you will do is use a private read only application DB context and let's call this underscore D.B..
+
+Now we need to initiate our constructor so we'll type CTO R TAC tab.
+
+And right here we will get the application DB context D.B. this application DB context we are getting using dependency injection.
+
+So right here with the underscore TB is equal to TB.
+
+This way you can extract the application TB context that is inside the dependency injection container and injected onto this page.
+
+If you did not have dependency injection what you would have to do is you would have to create a new object and then once you are done with that you'll have to dispose that and all the other things with dependency injection.
+
+You do not have to worry about anything.
+
+Now what we want to do is we want to return a list or an eye enumerable of book so we'll say public eye enumerable of book.
+
+Let's call this books will have to get her and set her. What we will do is we'll assign this books all of the books from the database.
+
+How do we get that.
+
+It's way too simple because we're using entity framework will use a wait here and we'll see underscore D.B. dark books.
+
+You can see it already has the book and we have a method here which is to learn and we'll call the async method. We'll have to do a controlled dart for the async to use entity framework core.
+
+Now when you are using async and way rather than wide you will have to use async task what we are doing here is we are going to keep the peace and quit creating all of the books storing that inside the eye innumerable.
+
+And we are doing that inside the get handler. So when we go inside the view here we will already have the list of books available to display all your did was right here. You extracted that and it is already available inside your view to display. Now one thing to notice is right now I'm using a wait and async what async does. This is a basic C sharp explanation and not related to darknet core.
+
+So I won't be going into much details but async will basically let you run multiple tasks at a time until it is awaited.
+
+Right here's we need to await because we need to assign all the books that we found but the method that we have is also async and task.
+
+So this was all you had to do for the get handler again if it was MVC this would be action methods but with Razer pages inside the page model we have handlers in the next video.
+
+Let's write some code here and see the list of books.
+
+---------------------------------------------------------------
+30 Designing Book Index Page
+---------------------------------------------------------------
+Now that we have added the get handover method for the index page inside booklet it's time to add some you why here.
+
+The first thing we'll do is we'll go to solution explorer and we'll go to our master page which is underscored lay out.
+
+We have home and privacy.
+
+Let me add a book tab in place of privacy. And for that we have to change the ESB page so far that rather than privacy we will have closed forward slash index.
+
+And if you save this that's why not application.
+
+Once you click on this it should load the index page in order to see the difference you have to go here and let me type index book.
+
+Save this and let's click on the book for fact.
+
+You can see the pages loaded. So with this you can see inside underscored layout how you had to manipulate the routing for the ESB page tag helpers if you want to access something inside the book first you have to write the book quest name followed by the page that we have which is the index page then we can keep this application running.
+
+We can go to index and we'll design this so we just remove this.
+
+Let me add ya then let me just remove this index and we start designing this page.
+
+We also do not need the view data.
+
+We can remove that will like to be R and related div give it a class of container.
+
+These are the bootstrap classes row batting zero and margin zero.
+
+Within this first container I'll additive give it a class of column 10 and I'll also add another day.
+
+Give it a class of column two.
+
+If you are not familiar with bootstrap bootstrap divides a row into twelve equal columns.
+
+So that's why I'm dividing one column inside two separate columns first will occupy 10 columns and the next one will beat the press two columns inside here I'll use x to give it a bootstrap class of text in four for a bluish color and we'll display book next in here we will add an anchor tag and we'll give it a class of PETN the T and infill and form control.
+
+These are all bootstrap classes and would say create new book let's save this let's go back and refresh the page what effect this is coming along.
+
+Let me increase the size here so we can do column three and we'll have to make it column 9.
+
+Perfect.
+
+This is good.
+
+We just make it.
+
+Text white here.
+
+So right here we can do text white OK.
+
+This looks good.
+
+Now what we want to do is we want to display a table with all of the books.
+
+Let's continue working on the designing in the next we do.
+
+---------------------------------------------------------------
+31 Designing Book Index Page Part 2
+---------------------------------------------------------------
+Let's continue working on the designing right now we have to create a new book like when we collect nothing happens and that is because we have not used any tag helpers on where it should redirect.
+
+We'll do that in a while after this column nine and column three.
+
+Let me add another dev give it a class of column twelve.
+
+We'll give it a border.
+
+Batting 3 and marching top of 3 0 bootstrap classes and we'll add a form here.
+
+Give it a matter of post within this form.
+
+We want to display this only if books exist inside the table so we can use Razer syntax here.
+
+Like If X condition for that you need at sign and then you can use C sharp syntax like if and we want to check if there are any books that are returned from this get method you can see inside the page model. We have the AI enumerable as book so inside the razor page you can see model with a capital M dot right here you can see books is available.
+
+This is the same books that is being passed from the get handler right here so we can check if model books that count.
+
+If this is greater than zero then we will display a table as we will display a paragraph and say no books are available.
+
+Let's save this.
+
+Let's go back and refresh and we should see no books available now in order to see some books.
+
+Right now we do not have the create book page.
+
+So let's go to database and hack some things with right click on the book and a top hundred that we do 1 one and any of the dummy record will come back here and will refresh.
+
+And that message is gone and that is because it retrieved one book that we just added.
+
+So how do we display that right here. We will have to add a table inside the if condition.
+
+So will that table give it bootstrap classes of table tables try and water within here will add a tr.
+
+Give it a class of table secondary and related t edge for the table heading here.
+
+We will use the label tag helper and the tag helper.
+
+We have its ESB for we will go to our books and in here we want the first default because the label
+
+we want for only one record and we'll see that name.
+
+So this is how you can use tag helper.
+
+You can also use HDMI helper for the same thing.
+
+Let me show you that for the author.
+
+So the syntax for HDMI helper was pretty weird.
+
+So it was HDMI that display named for and in here.
+
+You would have to use the lambda expression M goes to MDR books that first are default dot Potter.
+
+Now you can see how tag helpers have made this extremely simple.
+
+It is the existing label tag.
+
+All you did was add ESB for so that's why tag helpers are preferred or what HDMI helpers but HDMI helpers are still there for some functionalities which you have to write custom tag helpers for and I will show you that in just a while.
+
+Once you have this let me add a t h here and I will comment this code out but I believe there.
+
+For reference I copy this and pasted here for author.
+
+So this was the table header.
+
+We will add an empty t h tag after this.
+
+We want all of that records so far that we need a for each loop.
+
+How do we get for each loop inside the view.
+
+Again the answer is at same.
+
+And then we have the for each which is a C shot syntax.
+
+We'll say variable item in model with a capital M dark box.
+
+So far all of the books that we have with will have item and vividly display a table row here.
+
+So we will add a TR tag and inside the TV we want to display the value.
+
+Now in this case we do not have a tag helper but we have an HDMI helper the HDMI helper is HDMI that display for in here.
+
+We'll have to use LINQ M goes to item dot we want to display the name.
+
+We do not have an equivalent tag helper for display for of course you can write a custom tag helper that can do the exact same thing but that is beyond the scope for this project.
+
+So we can just use the HDMI helper.
+
+We can competence and will paste it again for author.
+
+Let me save this.
+
+Let's go back and refresh and we should see our record.
+
+Perfect.
+
+This was so easy.
+
+Now this is not a line so we can do control a control KDE to align everything that we have last thing that I want is in here I want buttons to edit or delete a book.
+
+So after this T.D. I we had another T.D. and I will give Peyton give it a class give it a class of beauty and beauty and danger and beauty and smile.
+
+These are all bootstrap classes and hyper display delete after the delete button.
+
+We need a link to redirect to the edit page so far that will use the anchor tag and we'll give you the class of beauty and beauty and success and will do P.T. and small here.
+
+This will be added.
+
+Let me save this and refresh and great.
+
+This is good.
+
+We will not worry about designing much things here but this looks good in the league.
+
+I just to text white so that it is aligned with the DVD.
+
+So with this we have almost completed the index page but we will come back here later.
+
+Now the last thing that I want to do on index page for this review is on create book.
+
+I want to add a link so that it redirects me to a create reset page so far that right here inside the create new book.
+
+You will need a tag helper the tag helper.
+
+We have seen before in underscored layout it is ESB page White Page 2 We want to redirect to that will be a create page.
+
+Now you do not have to mention here that the create page will be inside book list because if you are in the same folder you can directly write the page name.
+
+That being said let's add the create page in the next week you.
+---------------------------------------------------------------
+32 Create Book Page Model
+---------------------------------------------------------------
+In this review we will be adding the create razor page.
+
+So let me stop the application will go to solution Explorer Inside the book first right leg had a razor page.
+
+Again it will be the basic one and we'll say create here it won't be a partial view let's add this now with the create page when the page will be loaded do we want to display any data.
+
+No we just want to display text box so user can enter a book name and an author so far that right here
+
+we will again need the application to be context not for the get handler but when we hit the create button we need to save it to our database so we will just do that while we are here.
+
+So we'll see a Private Read only application DP context will do a controlled dart to add model and will have underscore D.B. we need constructor so CTO ah TAB TAB we'll get the application to be context TB an underscore TB is equal to TB now inside the get method we need to display text boxes to write the author's name and the book name what will be the model.
+
+So that will be public book.
+
+Let me call that book will have the catcher and center on get.
+
+We do not have to write that we'll be passing this empty book object it does that automatically.
+
+So inside the CREATE VIEW you will be able to access this book and display labels as well as text boxes before we do that in the next video.
+
+Many times it's a common situation that you start with a model and then you feel. No I need one more property or they are like what's I need to rename this.
+
+So far that's what we will do is right here.
+
+Let's imagine we have to add a new property called ISBN so we're right.
+
+Then your property as b n.
+
+And let's have a character and center once you add a property.
+
+Since you change something in the model here you have to add a new migration.
+
+So we'll call it tools and you'll get package manager package manager console will write add migration and ISBN to book model.
+
+Always try to name your migration as meaningful as possible for fact you can see it is adding in your column and all you do is update database.
+
+So this way inside your table a new column will be added.
+
+If you go back now and if you do select a thousand you can see ISBN has been added which is no.
+
+This looks great.
+
+And now we know how we can make changes to a model that we have already added We'll have to change our index for the same.
+
+I just copy and paste it one more time.
+
+Remove the display for here we'll have the ISBN and we'll do the same for HDMI Hedberg.
+
+Perfect.
+
+So these are all the changes that were needed in the next we deal.
+
+Let's design the create page and see everything in action.
+---------------------------------------------------------------
+33 9 Create Book Page UI
+---------------------------------------------------------------
+In this video they start designing the create razor page where will remove all of this things will either be ya will give it a heading here.
+
+Give it a class of text info and let print display create new book followed by a VR.
+
+Now let me just paste some Bush rap styling that we have.
+
+I like this all I did was I added a div give it a class of border and container and some style with padding.
+
+Then I added a form and in that form I have a div with class of form grow and grow and inside that role
+
+I have divided this into two parts column 2 and column 6.
+
+Let me make it column 4 and column 6.
+
+That should be OK even though the total should add up to 12 you can leave it like this.
+
+Once you have the same designing what we will do is within the form we will add a method of borscht because when we hit the create button we will be posting data back to our page handler within the column for we want to display label. So we do label and ESB 4.
+
+This will be for book done.
+
+We have the name.
+
+After that we have column 6 here.
+
+We want a text box so we'll see input.
+
+We'll use the tag helper ESB for this is for the book.
+
+That name and we'll give it a class of control.
+
+You can see how easy the binding is with the tag helpers.
+
+You do not need to worry about anything in the post book.
+
+That name will have the value that user enters inside this text box so let me just copy this and paste this two more times. We have author and we have ISBN after author and ISBN with it add another div.
+
+Give me that class of form group and row.
+
+Just like we did before and will add a dev.
+
+Give it a class of column 3 offset of 2.
+
+Let me do column 6.
+
+Offset 0 4.
+
+That's what we have and will add a div.
+
+Give it a class of column four.
+
+This should be column 3 and this will be column 3.
+
+This is because the 6 that we have we are dividing that into two columns again.
+
+The first one will be an input and this will be type of sub made for the button and we'll give it aview of create.
+
+Give it some bootstrap classes of Beattie and Beattie and primary and form control the other one is to go back to the index page so we'll use the anchor tag and the tag helper ESB page will take us back to the index page and the classes will be Beattie and Beattie and success and form control will display back to last.
+
+Let me save this and run our project we'll go to our book and this time will help create your book.
+
+Great.
+
+You can see how good the page is coming along.
+
+If you think the size is too big here you can always modify that.
+
+I changed this to three in all the places and that way it will be more closer.
+
+Offset will also be three.
+
+Let's save this and perfect.
+
+Looks much better now if you click on back to the list it works and on create.
+
+We need to work on what will happen when we hit the submit button.
+
+Right now if you do that nothing happens and that is because inside the create page model we do not
+
+have a post handler.
+
+So let's see how we can add a post handler so that whenever they submit anything from the page how do we get the data and save that inside our database.
+
+---------------------------------------------------------------
+34 Create Book and Validations
+---------------------------------------------------------------
+In this video we need to make sure when we feel all of this information and hit the create button it takes us back to the page.
+
+But before that we need some validation. As you know name was a required property.
+
+So if you hit create before pressing the name we want to see the error message right here. We'll do all of that.
+
+Let's stop the application and let's go to the page model right here.
+
+We have the on get handler but when we hit the submit button we will be posting data so far that we need a post handler to retrieve that.
+
+So we'll create public async and task.
+
+This task will be of AI action preserved because we'll be redirecting to a new page and the handler name will always start with on and what is the handler name.
+
+We want a post handler.
+
+So it will be on post when this will be posted.
+
+What will be passed from this waiter page.
+
+We will be passing a book object so far that will retrieve a book object and we'll call this book or B.J..
+
+Now rather than getting a book object like this we already have a book right here. We can use the exact same property rather than writing this ESB darknet code team has given a property binding here where you have to write buying property.
+
+Once you bind the property it is automatically assumed that on the post you will be getting this book right here.
+
+So that way all you have to do is write here. You can check if model state type is valid then proceed further.
+
+Else if it is invalid we want to return back to the page.
+
+I'll explain you what model state is.
+
+But hang with me right now.
+
+If the model state is valid we want to add the book to database adding that is really simple.
+
+We can use the underscore D.B. in here we have the book and we have an add a sink right here.
+
+What is the parameter we want to add the book features to await here.
+
+And this will work after we add the book we need to save changes to the database.
+
+Right now this book has not been added to the database.
+
+It is just added to a queue which will be eventually pushed into the database.
+
+When we type the command underscore D.B. dot save changes asynchronously only when this command is executed
+
+then the data will be pushed to the database.
+
+And once the changes are pushed to the database all that is remaining is returned with a redirect to a page and that page will be the index page.
+
+That's look scared.
+
+Let's run our application and say this in action.
+
+So we'll go to book we try to create a new book and let's hit the create button.
+
+Great.
+
+You can see the book has been created.
+
+Now let's try to create a new book and hit the create button.
+
+You'll see nothing happens if you type name here and hit create it gets created.
+
+But if you're tried without name it won't be created.
+
+And that is because name is a required property.
+
+What is actually happening is if we add a debugger here and if we go back and try to hit the create
+
+button the control goes back here and let me add a few more debunkers hit continue the model state if you hover is invalid.
+
+What is not valid if you go on Model State you will have to go to result view and right here you will see the name is invalid and the reason it is invalid is it is a required property and you are not passing any value but we need some added messages to see that it is actually an error in order to do that.
+
+Let me hit continue and we go back inside the view here.
+
+We need to add a div will additive give it a class of text danger.
+
+This will be a red color and that is a special tag helper ESB validation summary will change this to model only once we have this what we need is we want to display individual error so we'll add span here and we have ESB validation for tag helper here we want the validation for book that name will give it a class of text danger we can copy this will do the same for author and ISBN once you do this.
+
+If you save this go back and refresh the page the control comes back here.
+
+That's said to continue.
+
+Woops I think there are some changes would just stop this.
+
+Remove the debugger now and let's just run the application again this time.
+
+If we go to book and if we try to create a new book hit the create button you can see the error message comes right up.
+
+I need to show one more thing here.
+
+Let me show you that in the next week you.
+
+---------------------------------------------------------------
+35 11 Client Side Validations
+---------------------------------------------------------------
+Now we see that added message but that is one more issue.
+
+If you go back to the application while it's running let's add a debugger here in the modern state and hit the create button again.
+
+You can see that the control is going to the on post handler.
+
+It finds the model state is invalid and it returns back with the error.
+
+We want this to be done on the client side in order to do that.
+
+If we switch back we go to create right here inside solution explorer.
+
+We have the validation scripts partial.
+
+All we have to do is we need their reference so right here we do a section.
+
+This will be scripts.
+
+And right here we will use partial tag helper name.
+
+We will paste the name.
+
+This name will be exactly same as validation scripts partial make sure there is no spelling mistake.
+
+We'll save this.
+
+Let's go back go back to the home page.
+
+Let me do.
+
+Control 5 for hard refresh.
+
+Let's try to create again and let's make it empty.
+
+The create button.
+
+You see the error message pops up.
+
+It doesn't go back and to confirm if we go back we still have our debugger.
+
+So this means the validation here is done on the client side without posting back.
+
+So that way we have both the validation server side as well as client side.
+
+So this was one way I wanted to show you that the validation should be done.
+
+Both client side as well as server side.
+
+Now the create is completed in the next week.
+
+You let's start working on the added functionality.
+
+
+---------------------------------------------------------------
+36 Edit Book Get Handler
+---------------------------------------------------------------
+Now we will be working on the added razor page.
+
+So while this is running if we can go back and be go to our index if we scroll down where we have to
+
+edit in here we need to pass the routing so the ESB page.
+
+This will be the added page which we will create.
+
+Now whenever any user clicks on the added button we want to pass the IED off the field that they are editing.
+
+In this case it will be IED off the book.
+
+So in order to pass that we have another tag helper and that is ESB we have round.
+
+And then we need to define the name that we want we can just call this as I.D. what we want to pass here is the actual I.D. of the book which is inside at item dot I.D..
+
+This way when a user clicks on added it will go to the edit Razer page and it will also pass I.D. as the parameter.
+
+Let me save this.
+
+Let me stop this.
+
+Let's go back inside the pages book list.
+
+Let's add a new razor page called as added perfect in the cat handler.
+
+We will get a parameter of I.D. that we just pass.
+
+It will be an integer based on this integer.
+
+We will retrieve the book.
+
+We can use bind property and we can start first with private application DV context because we'll have to update things we'll do CTO R constructor.
+
+We'll have the application DBA context DP underscore DP is equal to DP great.
+
+Then we need to bind property in here and we'll be working with just one book.
+
+So with the public book let's call this book will have the character and center here.
+
+We need to populate this book object based on the database with the idea that we received.
+
+So a weight way to underscore D.B. dark book Dark find a sink.
+
+And here we just need to pass the idea.
+
+This is another method that we have with our entity framework rather than white.
+ 
+This will be a thing and task because we are using a wait here.
+
+This looks good for our cat method in the next week.
+
+You let us design the edit view and continue working on posting or editing a book.

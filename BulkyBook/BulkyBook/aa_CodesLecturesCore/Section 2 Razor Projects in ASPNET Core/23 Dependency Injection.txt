@@ -1,0 +1,63 @@
+Opened PPT
+
+ASP DotNet core supports Dependency Injection software design pattern which is a technique for achieving Inversion of Control between classes and their dependencies.
+
+Now you might be wondering what is IOC or Inversion of Control container.
+
+IOC container is a framework for implementing automatic dependency injection. It manages object creation and its lifetime and also injects dependencies to their class. 
+
+IOC container creates an object of the specified class and also injects all of the Dependency objects through constructor property or method at runtime and disposes it at appropriate time.
+
+This is done so that we do not have to create and manage the objects manually. Support for dependency injection is built into ASP Dot net core 
+
+In ASP Dot Net core, both frameworks services and application services can be injected into your classes rather than being tightly coupled. 
+
+Dependency Injection is a design pattern in which a class or object has its dependent classes injected rather than creating them directly.
+
+Dependency Injection can help developers decouple the different pieces of their application.
+
+
+New Slide: 
+
+Let's try to see this with an example.
+
+We have Bob here who has been thinking about going on hiking so he makes a list of all the supplies like maps flashlights protein bars etc. and puts them in a backpack.
+
+Now next day when he goes on hiking he takes the backpack with him this bag acts as a container. So during the hike whenever he needs anything he takes it out of the container and uses them.
+
+This is the simple concept that you put items you will need in a container and when you need them it already exists inside a container.
+
+Let's understand this in a way that is more related to coding.
+
+Let's imagine our application have three pages and in each page we will need three functionalities.
+
+We need to log something, we need to send email and we need to save something to our database. So we will need to create objects of these functions. 
+
+In classic days will be creating objects of email database and logger in the first page. Then we will do the same in the second page and so on. 
+
+But this is different with dependency injection.
+
+Let's take a look at that with dependency injection.
+
+Again we have the same three pages and we want the same three functionalities or the classes.
+
+We have a Dependency Injection container.
+
+What people do is we will register all the three classes inside our container. Whenever any page will need anything we will directly extract it from that container rather than creating a new object in individual pages.
+
+It is created and registered in the container, we only have to use this. This way Container deals with creating, registering and disposing of the object rather than creating them in every page.
+
+This is how efficient dependency injection is compared to the classic approach.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

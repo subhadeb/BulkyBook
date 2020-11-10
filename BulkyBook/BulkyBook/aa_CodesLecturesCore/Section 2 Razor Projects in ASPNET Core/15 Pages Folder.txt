@@ -1,0 +1,57 @@
+Now we would be looking at the Pages folder in our razor project.
+
+The main folder in the Razor Project is the Pages folder. There have the shared folder. 
+
+_Layout has _ValidationScriptPartial are the shared files, _ at the beginning means they are partial views.
+
+Partial components means we can reuse in multiple places in the website.
+
+_Layout is the default master page of the applicaiton. If we open it, first we see the <header> for our applicaiton.
+
+We have the main part with RenderBody and at the bottom we have the script references and at the top we have the css references.
+
+Next we have _ValidationScriptsPartail.
+
+Here we have just included the jquery and javascript for validation.
+
+
+In _ViewImports, we see we have tag helpers and we will understand tag helpers in sometime.
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+The above means that we would be using the Mvc.TagHelpers in our applicaition. We can also define our own tag helpers. He can define custome tag helpers if we wish to.
+
+Also If we want to define for only a certain set of pages then we can define tag helpers at an individual level as well.
+
+
+
+He Like to keep that at the global level in this file only(_ViewImports.cshtml).
+
+
+Next is _ViewStart.cshtml, here we define what is the master page of our applicaiton and here we defined _Layout to be our master page. 
+
+The last 3 are the actual razor pages. If we open Index.cshtml, we see the UI and Interface with html and css.
+
+In MVC we used to have controllers but we do not have controllers in Razor pages. If we expand Index.cshtml we  Index.cshtml.cs here the model is IndexModel. This cs file is the code behind for our web page. Thsi approach is completely different than the classic ASP. .cs is the page model and .cshtml is the view or razor page.
+
+
+Next we will see routing.
+
+
+
+
+
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

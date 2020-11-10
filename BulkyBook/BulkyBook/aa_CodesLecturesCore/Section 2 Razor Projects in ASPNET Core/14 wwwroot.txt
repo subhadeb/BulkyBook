@@ -1,0 +1,33 @@
+Now let's talk about wwwroot folder.
+
+This folder is introduced in Asp dot net core and this is created automatically.
+
+Under this we have the folders css, js lib.
+
+Here we would be storing all the static files of our application like css, images,js and also static html. This folder(wwwroot) is the root folder of our website. 
+None of the code files that we will be creating will go inside this folder.
+
+We should not be placing csharp or razor files here.
+
+As we have created the project with visual studio it automatically created css/js for us. If we expand all the folders we see site.css, site.js bootstrap,jquery, jquery-validation.
+
+If we would created an empty project we would have to insert all of these by ourselves. 
+
+
+So, For all our static files like css/js/html we should store them here in wwwroot.
+
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

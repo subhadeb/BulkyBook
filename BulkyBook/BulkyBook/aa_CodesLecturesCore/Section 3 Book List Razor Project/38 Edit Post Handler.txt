@@ -1,0 +1,168 @@
+We will be working on the button.
+
+
+Now in Edit.cshtml.cs we need to write the Post Handler.
+
+So created OnPost async method returning Task<IActionResult>
+
+
+  public async Task<IActionResult> OnPost()
+        {
+            
+        }
+
+Now Added Check for ModelState is Valid.
+
+We will get the Book from the Database with _db.Book.FindAsync and would pass Book.Id
+
+
+Next we would Update each Book Element and at the end call SaveChangesAsync().
+
+public async Task<IActionResult> OnPost()
+        {
+            if (ModelState.IsValid)
+            {
+                var BookFromDb = await _db.Book.FindAsync(Book.Id);
+                BookFromDb.Name = Book.Name;
+                BookFromDb.ISBN = Book.ISBN;
+                BookFromDb.Author = Book.Author;
+
+                await _db.SaveChangesAsync();
+                return RedirectToPage("Index");
+            }
+            else
+            {
+                return RedirectToPage();
+            }
+        }
+
+Now, we would need a small modification in Edit razor view.
+We need to pass the id of the book in a hidden field.
+
+So before validation summary and and after form method post, added,
+<input type="hidden" asp-for="Book.Id">
+
+
+
+Now on running we are able to Edit and Update, next we would work on Delete.
+
+---------------------------------------------------------------
+--Edit.cshtml
+
+@page
+@model BookListRazor.Pages.BookList.EditModel
+@{
+}
+
+
+
+<br />
+<h2>Edit Book</h2>
+<br />
+
+<div class="border container" style="padding:30px">
+    <form method="post">
+        <input type="hidden" asp-for="Book.Id">
+        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Name" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Author"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Author" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Author" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.ISBN"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.ISBN" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.ISBN" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3 offset-3">
+                <input type="submit" value="Update" class="btn btn-primary form-control">
+            </div>
+            <div class="col-3">
+                <a asp-page="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial">
+}
+
+
+---Edit.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BookListRazor.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace BookListRazor.Pages.BookList
+{
+    public class EditModel : PageModel
+    {
+
+        private readonly ApplicationDbContext _db;
+
+        public EditModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        [BindProperty]
+        public Book Book { get; set; }
+        public async Task OnGet(int id)
+        {
+            Book = await _db.Book.FindAsync(id);
+        }
+
+        public async Task<IActionResult> OnPost()
+        {
+            if (ModelState.IsValid)
+            {
+                var BookFromDb = await _db.Book.FindAsync(Book.Id);
+                BookFromDb.Name = Book.Name;
+                BookFromDb.ISBN = Book.ISBN;
+                BookFromDb.Author = Book.Author;
+
+                await _db.SaveChangesAsync();
+                return RedirectToPage("Index");
+            }
+            else
+            {
+                return RedirectToPage();
+            }
+        }
+
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

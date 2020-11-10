@@ -1,0 +1,86 @@
+Opened Starup.cs
+
+Now we would Configure with ConfigureServices,
+
+For Configuring that we need DBContext.
+
+So now in the Models folder, created Class ApplicationDbContext
+It would inherit DbContext which is a part of EF Core package.
+
+Now in this class(ApplicationDbContext) we would add a constructor, to add that type ctor and tab tab.
+
+For Dependency Injection to work we need to inherit base and add the parameter DbContextOptions<ApplicationDbContext> options. 
+
+
+public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+
+        }
+
+In order to add any model to the Database, we need to initialize the Model with DbSet in a property like:
+
+public DbSet<Book> Book { get; set; }
+
+
+Now opened Startup.cs
+
+In ConfigureServices, we need to add our DBContext to the pipeline and here we would have the mapping with Connection string as well. Here we are reading from the configuation file and should use the same name specified in appsettings.json
+
+
+services.AddDbContext<ApplicationDbContext>(option => option.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))); 
+
+
+Now we would play wit Package manager console. Open Package Manager Console from Tools.
+
+In that the Default project should be selected as BookListRazor.
+
+Currently we dont have any Migrations folder, it would be created after add-migration
+Now run the command
+
+PM> add-migration AddBookToDB
+
+In Migrations folder we see the file 20201106043444_AddBookToDB.cs is created.
+
+If we open that Table Book is created like:
+migrationBuilder.CreateTable(
+                name: "Book",
+                columns: table => new
+
+
+The Columns nullablitiy is also set. As we have set Name as not null, it maded nullable false.
+
+  columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: false),
+                    Author = table.Column<string>(nullable: true)
+                },
+Id is also the identity column.
+
+
+Now only ths script have been created, the database is not yet created(Confirm it from sql server).
+
+If we run the command
+
+> update-database
+
+After the command is executed we can see in sql server(Do refresh) the Database is created -BookListRazor  with the table Book.
+
+--Returns no Rows, it has 3 Columns
+select * from Book
+
+
+So now our database and the table is created through EF Core.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

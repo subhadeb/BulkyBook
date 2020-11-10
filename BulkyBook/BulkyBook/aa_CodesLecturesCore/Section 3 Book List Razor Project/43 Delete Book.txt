@@ -1,0 +1,116 @@
+Now from BookList.js we would add a function for delete and call our API.
+
+So to the Datatable Delete button anchor tag added,
+
+onClick=Delete('/api/Book?id='+${data})>
+
+At the end of the js file we would add Delete funciton, it would have sweetalert(swal) it takes an object of the elements title, text, icon and dangermode. We have the then promise that have the argument true or false. If true we would call API for delete.
+
+If the delete was successful from the API, we would use toastr to display notification messages. it has the functions toastr.success and toastr error.
+
+
+function Delete(url) {
+    swal({
+        title: 'Are you Sure',
+        text: 'Once Deleted you will not be able to recover',
+        icon: 'warning',
+        buttons:true,
+        dangerMode: true
+    }).then((willDelete) => {
+        if (willDelete) {
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message);
+                        dataTable.ajax.reload();
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                }
+            })
+        }
+    })
+}
+
+Now, on running we see Delete is working with the sweetalert and toastr notification
+---------------------------------------------------------------
+--bookList.js
+var dataTable;
+
+$(document).ready(function () {
+    loadDataTable();
+})
+
+function loadDataTable() {
+    dataTable = $('#DT_load').DataTable({
+        "ajax": {
+            'url': '/api/book',
+            'type': 'GET',
+            'datatype': 'json'
+        },
+        'columns': [
+            { 'data': 'name', 'width': '20%' },
+            { 'data': 'author', 'width': '20%' },
+            { 'data': 'name', 'width': '20%' },
+            {
+                'data': 'id',
+                'render': function (data) {
+                    return `<div class = 'text-center'>
+            <a href="/BookList/Edit?id=${data}"  class='btn btn-success text-wite' style='cursor:pointer;width:70px;'>
+                Edit
+            </a>
+            &nbsp;
+            <a  class='btn btn-danger text-wite' style='cursor:pointer;width:70px;'
+            onClick=Delete('/api/Book?id='+${data})>
+                Delete
+            </a>
+                </div>
+`
+                }, 'width': '40%'
+            }
+        ],
+        'language': {
+            'emptyTable': 'no data found'
+        },
+        'width': '100%'
+    });
+}
+
+function Delete(url) {
+    swal({
+        title: 'Are you Sure',
+        text: 'Once Deleted you will not be able to recover',
+        icon: 'warning',
+        buttons:true,
+        dangerMode: true
+    }).then((willDelete) => {
+        if (willDelete) {
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message);
+                        dataTable.ajax.reload();
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                }
+            })
+        }
+    })
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,27 @@
+In this Part he will give an Introduction on ASP.Net Evolution.
+
+ASP - In 1996 - Microsft Released ASP which means Active Server Pages or Classic asp. It was for building dynmic web pages and server side scripting.
+
+ASP.NET Webform - In 2002 - Microsoft Introducted ASP.Net Webform. Here Webpages are created similar to Webform. There were some downsides with Webforms. Webforms tried to make Stateless thing Stateful. Codebehind was introducted here in Webforms. This was good but This was making testing diff
+icult because In one line we are reading the database and in the next line we are updating the UI. Another issue was Page life cycle. Websites were good to make websites run quickly. 
+
+ASP.NET MVC - In 2009 - In this time MS released the first version of MVC(couple of years later than 2002), here they tried to overcome most of the problems in Webforms. It laid a gread emphasis on separation of concern. It released open source. Lot of developers did not like MVC Framework because it had a lot of flows, when it was created it had the components already created on top of forms. During that time Web as evolving rapidly and Microsoft had to update each and everything. Cloud came to the picture, although Cloud was implemented in some projects it was not there in all.
+
+ASP.Net Core - June 2016 - This was the first version of ASP.Net core. ASP.Net Core is built on the new Dot Net Core framework. Dot Net core is not tied to just windows. ASPNET Core is very active and in 2017.
+
+ASP.NET Core 2.0 - 2017. 2.1 and 2.2 were introducted in 2018. 
+
+ASP.NET Core 3,3.1 - Sep 2019 - This have been realeased recently. It has a long term support and we will be using this in this core.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

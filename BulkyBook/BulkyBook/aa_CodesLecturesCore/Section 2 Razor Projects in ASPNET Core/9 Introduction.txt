@@ -1,0 +1,16 @@
+In this Section we will be creating our first project and it is the Razor Project. Once we create the project we will understand the evolution of ASP.Net core and also understand the basic files that gets created.
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,36 @@
+In this course we will be preparing two projects.
+
+First will be a simple project.
+
+He opended the running solution in localhost.
+
+First will be a simple BookListRazor, where we would display two types of books.
+
+We have two tables here. On is th tr table and another is a datatable which makes API calls.
+
+We have a Create New Book screen where we would insert data.
+
+On create/update both the tables are updated.
+
+If we would delete anything it would display sweetalert.
+
+Out of two tables, the top table(with tr td) is a simple view and the bottom table(Datatabele) is an advanced view.
+Event though this is a simple project for CRUD operation there is a lot of basic funcitonality.
+
+
+Next we will look at the final project which is more advanced.
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

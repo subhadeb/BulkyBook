@@ -1,0 +1,52 @@
+In Classic aspx, we had the logics in global.asax
+
+The steps needed to start the application are now determined by us. The execution starts with the Program.cs class and it contains the main method which is the entry point for the applicaiton. 
+
+At run time when the applicaition is started, it starts with the main method like most dot net application starts with the main method.
+
+
+The Main Method
+
+>> No global.asax anymore
+
+>> Startup is defined by you
+
+>> Main Method.
+
+Now opened Program.cs
+
+Now Main method calls CreateHostBuilder, define in the same class which returns IHostBuilder. And on that method Build().Run() is called and this now becomes asp dot net core application.
+
+We have the code like:
+
+ public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+
+CreateHostBuilder calls CreateDefaultBuilder this configures the webhost using defaults it deals with the configuration on how asp dot net deals with web server.
+
+The webBuilder is also configured to use Startup class file. If we press F12 on statup we see Statup.cs was opened, it is a simple class not derrived from any class. The runtime will by convention call two methods here 
+
+These are 
+
+>> ConfigureServices()
+
+
+>> Configure()
+
+In the next part we will see both the files along with the Starup file
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

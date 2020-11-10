@@ -1,0 +1,53 @@
+In this Part we would be adding our first model. Model represents a table in the db. 
+
+In the solution root folder, added a Folder Model, and under that added a class Book.cs
+
+In that type prop and then tab tab
+and then added the first property as int Id
+
+Added a data annotation([Key]) to it, to import the reference, type ctrl . 
+
+With the Key annotation, the Id will be unique and creted automatically.
+
+Added two other properties with the help of prop tab tab string author and string Name.
+
+To the name added the Required Annotation.
+
+
+Later we would be adding Display Annotation. 
+
+
+Now we have added the Book next task would be add these to the database. Now we would connect to the DB with EF Core
+---------------------------------------------------------------
+-------------Book.cs
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace BookListRazor.Model
+{
+    public class Book
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        public string Author { get; set; }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

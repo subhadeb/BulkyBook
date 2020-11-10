@@ -1,0 +1,77 @@
+Now we see the error message.
+
+The error is coming from Model State, We want the error to be displayed from the Client side and dont want it to come from Backend.
+
+In the Pages Under Shared we have _ValidationScriptsPartial. We need a reference to that. So at the end in Create.cshtml.
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial">
+}
+
+On running and putting debugger in the Create Post handler we dont see the debugger hits there on keeping the field empty.
+
+From the next part, let's start working on the Edit functionality.
+
+---------------------------------------------------------------
+--Create.cshtml
+@page
+@model BookListRazor.Pages.BookList.CreateModel
+@{
+}
+
+
+<br />
+
+<div class="border container" style="padding:30px">
+    <form method="post">
+        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Name" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.Author"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.Author" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.Author" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Book.ISBN"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Book.ISBN" class="form-control" />
+            </div>
+            <span asp-validation-for="Book.ISBN" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-3 offset-3">
+                <input type="submit" value="Create" class="btn btn-primary form-control">
+            </div>
+            <div class="col-3">
+               <a asp-page="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial">
+}
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

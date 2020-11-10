@@ -1,0 +1,178 @@
+Now we would be adding the Create Razor Page.
+
+We will stop the Application. In BookList folder we would add a Razor page.
+
+Named the Razor page Create.cshtml and is created now.
+
+Opened the cs file for this.
+
+We will only display textboxes for the User to Enter both the fields. Now int class again we need to inject our Context class, this is for saving our data to the database. 
+
+So in the file initilized context with:
+private readonly ApplicationDbContext _db;
+
+Now ctor tab tab to create the construtor. And injected db like,
+
+        public CreateModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+Now we will declare the model for the page by adding the property Book like:
+
+public Book Book { get; set; }
+
+Now to the Book Model, lets add ISBN propery.
+
+public string ISBN { get; set; }
+
+So after this to update the Database we need to add a migration. So Opened Nuget Package manager console.
+
+We should always try to name our migration as meaningful as possible. Currently in Migration folder we have two files. So run the below
+
+PM> add-migration AddISBNToBookModel
+
+Now we see three files.
+
+To reflect ISBN in the databse run,
+PM> update-database
+
+Now in DB, we see ISBN Column is added.
+
+So now we need to update the Index html again to incorporate ISBN. So copied the last cell, pasted and renamed to ISBN in both header and data.
+
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().ISBN"></label>
+                        </th>
+
+And also
+
+                            <td>
+                                @Html.DisplayFor(x => item.ISBN)
+                            </td>
+
+---------------------------------------------------------------
+--Create.cshtml.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BookListRazor.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace BookListRazor.Pages.BookList
+{
+    public class CreateModel : PageModel
+    {
+        private readonly ApplicationDbContext _db;
+
+        public CreateModel(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+        public Book Book { get; set; }
+
+        public void OnGet()
+        {
+
+        }
+    }
+}
+
+--Book.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace BookListRazor.Model
+{
+    public class Book
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        public string Author { get; set; }
+
+        public string ISBN { get; set; }
+    }
+}
+
+
+
+--index.cshtml
+@page
+@model BookListRazor.Pages.BookList.IndexModel
+@{
+}
+
+<br />
+<div class="container row p-0 m-0">
+    <div class="col-md-9">
+        <h2 class="text-info">Book List</h2>
+    </div>
+    <div class="col-md-3">
+        <a asp-page="Create" class="btn btn-info form-control text-white">Create New Book</a>
+    </div>
+
+    <div class="col-12 border p-3 mt-3">
+        <form method="post">
+            @if (Model.Books.Count() > 0)
+            {
+                <table class="table table-striped border">
+                    <tr class="table-secondary">
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Name"></label>
+                        </th>
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().Author"></label>
+                        </th>
+                        <th>
+                            <label asp-for="Books.FirstOrDefault().ISBN"></label>
+                        </th>
+                        <th>
+                        </th>
+                    </tr>
+                    @foreach (var item in Model.Books)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(x => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(x => item.Author)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(x => item.ISBN)
+                            </td>
+                            <td>
+                                <button class="btn btn-danger text-white btn-sm">Delete</button>
+                                <a class="btn btn-success text-white btn-sm">Edit</a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+            else
+            {
+                <p>No Books Available</p>
+            }
+        </form>
+    </div>
+
+</div>
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

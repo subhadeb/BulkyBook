@@ -1,0 +1,148 @@
+Now we would be making changes in Index.cshtml.
+
+Inside the container div after the end of <div class="col-12 border p-3 mt-3">,
+
+Copy pasted codes for a table that are already written by him He said it was attached to the video, but I did not find it actuallly. I have copied his codes from Udemy commit
+
+https://github.com/bhrugen/BookListRazor/commit/2ae9c7fc4430da3d00589b55fd4e310fbf253823
+
+<div class="col-12" style="text-align:center">
+        <br />
+        <span class="h3 text-info">OR</span>
+        <br /><br />
+    </div>
+    <div class="col-12 border p-3">
+
+        <table id="DT_load" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th> Author</th>
+                    <th> ISBN</th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+
+This is a table that he have created with tr and th. He said the id he have given is DT_load and this is Important.
+
+We will load the table with Javascrip.
+
+Added a @section at the very end named it Scripts to use bookList.js. Like:
+
+@section Scripts{ 
+<script src="~/js/bookList.js"></script>
+}
+
+Now In wwwroot under js add a new item searched java from the list of pages and selected JavaScript File, named it bookList.js
+
+
+Now we will start writing javscript and jquery codes in the newly created js file.
+
+added a variable dataTable.
+
+var dataTable;
+
+Inside document ready called loadDataTable, that is defind after this.
+
+$(document).ready(function () {
+    loadDataTable();
+})
+
+Now we would define the funciton loadDataTable
+
+Inside that, we have dataTable population logic, first took the Datatable selector( $('#DT_load')) and then use DataTable(, first it would have ajax request and then we would define the columns
+
+We would have three columns, Make sure we name the datatable columns in camel casing(name or nameEmploye).
+
+ "ajax": {
+            'url': '/api/book',
+            'type': 'GET',
+            'datatype': 'json'
+        },
+        'columns': [
+            { 'data': 'name', 'width': '20%' },
+            { 'data': 'author', 'width': '20%' },
+            { 'data': 'name', 'width': '20%' },
+
+After the three columns we would have delete and edit but for that we took the data as id, and used a render function that would return the div for edit and delete.
+
+
+We can write multiline html codes in jquery with tilled sign(`).
+
+we can use a variable inside the strings html with ${data}. 
+
+ {
+                'data': 'id',
+                'render': function (data) {
+                    return `<div class = 'text-center'>
+            <a href="/BookList/Edit?id=${data}"  class='btn btn-success text-wite' style='cursor:pointer;width:70px;'>
+                Edit
+            </a> </div>	`
+
+After writing the html codes for edit, we can copy the code with a &nbsp; in between and past the codes. Change Edit to Delete. removed the href link, changed success to danger. We would add the click handler later for delete later. After render function end we would define the width of this column as 40%
+
+Now after the columns array end we would add a language object for emptyTable and after that we would have width 100%.
+
+        'language': {
+            'emptyTable': 'no data found'
+        },
+        'width': '100%'
+
+
+Now on running the Application. We see the datatable, on edit it is taking to the edit page, and on delete nothing happens.
+
+---------------------------------------------------------------
+--bookList.js
+
+var dataTable;
+
+$(document).ready(function () {
+    loadDataTable();
+})
+
+function loadDataTable() {
+    dataTable = $('#DT_load').DataTable({
+        "ajax": {
+            'url': '/api/book',
+            'type': 'GET',
+            'datatype': 'json'
+        },
+        'columns': [
+            { 'data': 'name', 'width': '20%' },
+            { 'data': 'author', 'width': '20%' },
+            { 'data': 'name', 'width': '20%' },
+            {
+                'data': 'id',
+                'render': function (data) {
+                    return `<div class = 'text-center'>
+            <a href="/BookList/Edit?id=${data}"  class='btn btn-success text-wite' style='cursor:pointer;width:70px;'>
+                Edit
+            </a>
+            &nbsp;
+            <a  class='btn btn-danger text-wite' style='cursor:pointer;width:70px;'>
+                Delete
+            </a>
+                </div>
+`
+                }, 'width': '40%'
+            }
+        ],
+        'language': {
+            'emptyTable': 'no data found'
+        },
+        'width': '100%'
+    });
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,55 @@
+COMPLETE GUIDE TO ASP.NET CORE MVC(v3.1)
+-Bhrugen Patel
+
+Before he move he added some Pre Requisites.
+
+We should be familiar with Coding and Csharp. 3-6Months is sufficient.
+
+We will build a web app with Basic CRUD operations.
+
+Once we understand the fundamentals we will jump to an MVC Project. We will start with basic Dot net core. After that we will go to folder structure and tags.
+
+After Basics we will build our project. This application will be built with Razor pages.
+
+It is good to know the basics.
+
+We will move into a project with MVC with many advanced features. 
+
+
+Course Overview:
+
+1. Interoduction to Razor Pages in .Net core 3.1
+2. MVC Architecture with .Net Core 3.1
+3. Entity Framework Core 3.1
+4. Identity Security with EF Core 3.1
+5. N-Tier Architecture.
+6. Dapper and Stored Procedures in EF Core 3.1
+7. Repository Pattern.- To access the database(we will also call SPs when needed).
+8. Payments using Stripe and BrainTree.
+9. 2 Factor Authentication Emails and SMS Notifications.
+10. Role Management, Session, TempData, Custom Tag Helpers, View Components and Much more.
+11. Deployment to Azure. -- Everything will be deployed to Azure.
+
+He have best practices, Assignments, Debuggin in this course.
+Every section will have some best practices to use and avoid.
+
+All the code will be there in Github.
+
+In the next part we will see what we would be building in this course.
+
+
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

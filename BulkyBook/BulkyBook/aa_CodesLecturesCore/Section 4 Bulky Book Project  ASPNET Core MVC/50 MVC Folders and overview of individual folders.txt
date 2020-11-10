@@ -1,0 +1,86 @@
+Now we will see the Other Folders.
+
+Now Opened HomeController from Controllers folder,
+
+We can see the HomeController is inheriting Controller base class. And every controller should have the Name Controller at the end.
+
+
+In Each controller we will have Action Methods. We can see we have the ActionMethods for Index, Privacy and Error.
+
+IActionResult is an interface and it defines what would be the Result of an Action. It contains all the implementations, It can be a view/string/empty object etc. IActionResult has all the implemetaions that an Action would return.
+
+Whenever we give an URL it hits the ActionMethod in the controller, For example for Index() At the end return View() means it will return the Index view.
+
+We have the Index View in the Path. 
+Views/Home/Index.cshtml
+
+So ActionMethod will have a Corrosponding View in the Views Folder and this is a general flow of MVC Applicaitons. So For Privacy we have the Privacy View.
+
+We can specify a different view if we pas some parameters and we will understand that later. So Every Controller will have ActionMethods.
+
+
+We can have different Action Methods like Get/Post and For API we would have other action methods. If nothing is defined it is a get Action Method. 
+
+
+
+Now in Models Folder, Right now we only Have ErrorViewModel.cs. We will see View Models later
+
+For every entity/table  in the Database, we will have a corrosponding Model. All the Columns in the tables will be the Properties of the Class. We would be adding many models and view models in our course.
+
+
+
+Now we have the Views Folder, Inside it we have the Home folder and it is mapped to the Home Controller. We will all the view of Home Controller here.
+
+We have a Shared folder, The first one is _Layout, it is the Master page of the application. Everything that is common in the application like Header and Footers would be in the _Layout. Here we would also have the CSS and JS references that we would use through out our Applicaiton.
+
+
+Currently in _Layout.css we can see in the head section we have Bootstrap and Css reference.
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+
+At the end we can see all the Javascript references that we want through out our application.
+
+
+We can see we have <header> section that would be used for displaying the top elements of the page(screen page), and footer section will have the bottom elements of the page.
+
+RenderBody() will render the contents of the other views. Like Index/Details etc.
+
+In the header we can see like:
+ <partial name="_LoginPartial" />
+
+Whenver we will use a Partial View, we would use the partial tag. And in _LoginPartial we can see we have the Buttons for Login and Register. So in the Main layout we would have the links to Login and Register. 
+
+
+In _ValidationScriptsPartial, we are adding the links to jquery validation. These are responsible for validating ModelState in the Client Side. We will use these in the future videos.
+
+Next we have Error.cshtml for Errors and this is just a generic view. 
+
+Next we have _ViewImports.cshtml and _ViewStart.cshtml. ViewImports is a file that is used to Import tag helpers. The below codes for area and controller in _Layout.cshtml, these are working because we are using @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers in the ViewImport. If we would have separate Areas for different views, We should use _ViewImports and _ViewStarts and import the tag helpers otherwise tag helpers will not work. If we have a custome tag helper we need to add that in _ViewImports. 
+
+asp-area="" asp-controller="Home" 
+
+Now in _ViewStart.cshtml we have
+
+@{
+    Layout = "_Layout";
+}
+
+
+Here we define what is the Masterpage of the folder and the sub folders. We have defined that as _Layout. we can change that as well.
+
+This a brief overview of the Models,Views and Controllers.
+
+
+---------------------------------------------------------------
+No Code Changes.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

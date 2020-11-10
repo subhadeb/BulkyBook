@@ -1,0 +1,142 @@
+We will have a look at the different files and folders that are created. I have also created Three folders for my Tracking Purposes.
+
+
+Inside Razor Project, we had only a folder called Pages but in MVC we have Areas,Controllers,Models and Views.
+
+Other than the above folder the other three are same as Razor -- wwwrooot, Program.cs and Startup.cs
+
+Here we see in Arease, Identity Folder is there automatically, Inside that we have Pages. So Identity is Using Razor pages. We will deep dive into Identity in this course later. So Areas currently only have the Identities. 
+
+We have the Folders Models,Views and Controllers and this is waht MVC Stands for. 
+
+We se we have a Data Folder and Inside that we can see Migrations folder is automatically created. In the Last project we Used Migrations for Configuring our Database.
+
+We can also see the File ApplicationDbContext is created, this is configured automatically for Managing Identity. The two files that are created in Migrations will create the Identity tables for Users/Roles and Security.
+
+But when we start working we will delete the migrations and start from scratch. 
+
+
+The ApplicationDbContext will be same that we would use to Access the Database.
+
+Currently it is Inheriting IdentityDbContext, like:
+
+public class ApplicationDbContext : IdentityDbContext
+
+This is because we are implementing the individual Identity when we selected the authentication.
+
+Now Opened Startup.cs
+
+In ConfigureServices(), we can see we are configuring ApplicationDbContext, we are also using UseSqlServer. We can also see we have AddDefaultIdentity, Since we have selected Individual User Account while creating the project it have automatically created the same. We can see the below:
+
+services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+
+This means when a user will sign up,
+They need the Email to be confirmed, removed the code for options now. we will be implementing our own later. Now it's like:
+
+services.AddDefaultIdentity<IdentityUser>()
+
+Now all users will be able to login without account confirmation. 
+
+We can also see we have:
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+
+We are using AddRazorPages because the Identity would be using Razor Pages.
+
+Next we can see the Configure method which is used to Configure the Pipeline. 
+
+Here we can see we have routing and UseAuthentication and UseAuthorization. It has added because we have selected the Identity template.
+
+
+In UseEndPoints. We can see some Routing, we will check that in the upcoming videos.
+
+As of Now I have the Three Folders for My Tracking. These are:
+
+>aa_CodesLecturesCore - For all the lectures notes.
+>Constants - Contains a file that would store the Configurable Constants. Currently I have only stored the Machine Name in a constant.
+>DataSubha - I Will store the Data that I would require for Tracking currently it is only having a Script file that would be use for storing the queries as backup
+
+
+---------------------------------------------------------------
+--Startup.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using BulkyBook.Data;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

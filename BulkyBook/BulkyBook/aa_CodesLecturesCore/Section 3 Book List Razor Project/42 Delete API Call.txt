@@ -1,0 +1,108 @@
+Now we will work on the Delete.
+
+On click of Delete we would show a Nice Alert and on confirmation we would make an API call for deleting.
+
+
+Opened BookController.cs
+
+We would add the async method Delete retruning Task<IActionResult> that would have param id and attribute [HttpDelete]
+
+	[HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+        
+        }
+
+THere we would get the bookFromDb with FirstOrDefaultAsync
+
+var bookFromDb = await _db.Book.FirstOrDefaultAsync(u=>u.Id==id)
+
+If the dbFromBook would be null then we would return json with success false and message as Error while Deleting.
+
+After that we would remove from book with _db.Book.Remove(bookFromdb)
+
+After that save changes and at last we would return json with success true.
+
+	[HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var bookFromDb = await _db.Book.FirstOrDefaultAsync(u => u.Id == id);
+            if (bookFromDb == null)
+            {
+                return Json(new { success = false, message = "Error while Deleting" });
+            }
+            _db.Book.Remove(bookFromDb);
+            await _db.SaveChangesAsync();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+To be consitent we would update the GetAll to be a async method returning Task<IActionResult> and inside it we would use await and toListAsync So it is now like:
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return Json(new { data = await _db.Book.ToListAsync() });
+        }
+
+In the next part we would add JS function to delete and call this API.
+---------------------------------------------------------------
+--BookController.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BookListRazor.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookListRazor.Controllers
+{
+    [Route("api/Book")]
+    [ApiController]
+    public class BookController : Controller
+    {
+
+        private readonly ApplicationDbContext _db;
+        public BookController(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return Json(new { data = await _db.Book.ToListAsync() });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var bookFromDb = await _db.Book.FirstOrDefaultAsync(u => u.Id == id);
+            if (bookFromDb == null)
+            {
+                return Json(new { success = false, message = "Error while Deleting" });
+            }
+            _db.Book.Remove(bookFromDb);
+            await _db.SaveChangesAsync();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
