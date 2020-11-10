@@ -1,0 +1,52 @@
+Now Let's Understand Areas.
+
+Opened PPT.
+
+Areas
+
+>> Identity
+
+>> Customer
+-->>Controllers
+-->>View
+
+>> Admin
+--->>Controllers
+--->>Views
+
+In ASP.Net core we have something Called Areas, that would divide our Application into important Components. Here he have shown three areas.
+
+Identity Area is associated with dealing with login/authorization/authentication etc.
+
+Customer Area we will be dealing with Customer Facing UI.
+
+Admin- We will be dealing with Content Management, We would adding updating products, Add Admin Functionalities will be there in the area.
+
+Identity is a rzor class library and this is why we can mix Razor Class Library with MVC Applicaiton. So it will not have controllers and View. 
+
+Later on in the Areas we will add the Two Areas Admin and Customer. ANd everything will be separated. And they will have their own controllers/views etc.
+
+Now in Routing The Area name will be added for example.
+
+For 
+LocalPath: 
+https://localhost:44347/identtiy/Acount/Register
+
+The Area is: Identiy
+Controller is: Account
+Action is Register
+ID is null.
+
+The same would be applicable for Admin and Customer.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

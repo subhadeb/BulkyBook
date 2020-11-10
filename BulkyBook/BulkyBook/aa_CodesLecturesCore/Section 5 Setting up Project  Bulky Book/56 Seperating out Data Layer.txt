@@ -1,0 +1,60 @@
+Now we would be moving few files from the Main Project to the Class Libraries.
+
+First Copy(Drag and Drop) Data folder from the Main project to DataAccess. After it is copied Delete(Right Click->Delete) the Data folder from the Main Project.
+
+For Models Currntly we have the folder with ErrorViewModel, for now we will leave as it is, in the future we will be adding all the models to the Models Project.
+
+Currently in DataAccess Project -> Data -> Migrations we have two files created and on opening we see a bunch of errors. He have shown how to remove the errors by Ctrl + . and then adding the references, but as we would be creating our own migrations, deleted the two files from Migrations folder. We will Re add them when we need it.
+
+Now opened ApplicaitonDBContext, it is throwing few errors, first to fix the below error
+
+In the below line error
+
+public class ApplicationDbContext : IdentityDbContext
+
+Press ctrl + .
+Selected Install Package Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
+Then select Find and Install the latest version(Option 2)
+
+
+Now the error is gone changed the namespace:
+namespace BulkyBook.Data
+
+To
+
+namespace BulkyBook.DataAccess.Data
+
+Now deleted all the Three Class1.cs files from all the three projects.
+
+
+---------------------------------------------------------------
+--ApplicationDBContext.cs In the project DataAccess
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace BulkyBook.DataAccess.Data
+{
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

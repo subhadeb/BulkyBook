@@ -1,0 +1,35 @@
+Currently in the Solution we have only one Project that is the BulkyBook we can add other projects, like for Database access we can have a Data Access Layer. We can separate Models and View Models of our project.
+
+We want another project for the Utilitis/Common Functionalities/Common Methods and Constants.
+
+Right Click solution, Add New Project, search for class library, Select the .Net Core version of Class Library, Click Next Button.
+
+Named it
+BulkyBook.DataAccess
+
+Location Remained the same(Did not change it)
+C:\Users\subdeb\Source\Repos\subhadeb\BulkyBook\BulkyBook
+
+Clicked Create.
+
+The New Project is Added to the Solution.
+
+Now add another Project(Class Library .Net Core). It's available in Recent project templates. CLicked Next, Named the project as BulkyBook.Models. This will store the Models of our project.
+
+Finally add another project(same as other two). Name it BulkyBook.Utility
+
+So now we have added three projects in the Main BuilkyBook solution. In the next part we will separate more.
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

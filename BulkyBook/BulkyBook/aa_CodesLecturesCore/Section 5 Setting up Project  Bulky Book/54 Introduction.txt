@@ -1,4 +1,6 @@
+In this Module we would be setting up our project.
 
+Before we go into the Details of MVC, he want to set up the Project. We would introduce third party tools and start our project from the next part
 
 ---------------------------------------------------------------
 

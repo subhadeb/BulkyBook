@@ -1,0 +1,62 @@
+Now Moved ErrorViewModel to BulkyBook.Models Project.(Dragged and dropped and deleted from the Main Project). Deleted the Models Folder.
+
+Now in BulkyBook.Models, Created a new Folder named ViewModels and Moved ErrorViewModel.cs inside that.
+
+Updated the namespace to
+
+namespace BulkyBook.Models.ViewModels
+
+Now On Building we can see 6 Reference Errors.
+
+Deleted all the unwanted References(Codes).
+Example the First one was to remove the below from Startup.cs
+using BulkyBook.Data;
+
+[He did not do it]
+The last error was for some version mismatch for Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore,
+
+To fix that Opened Manage Nuget Packages, and then for the DataAccess project changed the version from 5.x to 3.1
+
+After the errors are gone run the project and make sure it is working.
+
+Also there was error in the file
+Error.cshtml.g.cs
+
+Fixed it by Changing the Reference to BulkyBook.Models.ViewModels.ErrorViewModel.
+
+Now on running we see the Home and Privacy Working as earlier.
+
+Now in the Utility project addd a Class file for Static Details named it SD.cs
+
+After creation change the classname to 
+public static class SD
+
+Once again Build the project.
+
+As The main project would be using all the three created prjects we need to add references to the three. 
+
+Right click main project, 
+
+Add Project Reference
+
+Checked all the three projects.
+
+Our Models would be using Data and Utility.
+
+Now Right Click on DataAccess Project and Check the Projects Models and Utility.
+
+Make sure we do not add any circular references.
+
+We will continue filtering the project in the next part.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

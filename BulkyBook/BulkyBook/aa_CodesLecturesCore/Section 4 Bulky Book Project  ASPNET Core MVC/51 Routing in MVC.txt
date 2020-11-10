@@ -1,0 +1,116 @@
+Now we will understand, How Routing works in an MVC Application.
+
+Opened Startup.cs
+
+We can see we have app.UseRouting and app.UseEndPoints.
+
+End point roting have been introduced in ASP.NET Core 3.
+
+In Routing, we have more than one End Points in our Application. We have MapRazorPages(), Controllers with Routes as well. If we want we can add SignarR to the project and it would add one more route here.
+
+In
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+
+MVCRouting is the first section. Here we have MapControllerRoute
+
+Now opened PPT.
+
+MVC Routing.
+
+Before we understand this in more details let's understand what routing is 
+
+Routing basically defines that based on the URL that we type what page should be fetched and displayed. 
+
+Routing in MVC is different than what we used to have for classic Dotnet in order to understand this.
+
+Let's see the big picture here.
+
+In the diagram here we see a basic flow for routing. 
+
+ASP Dotnet routing is a pattern matching which enables you to match the incoming request to a particular MVC Action defined in a controller. 
+
+When ASP Dotnet routing engine receives the request at runtime it finds a match against that requested URL, against the URL pattern defined in the route table.
+
+If any matches found then it forwards that request to the Controller otherwise it will return a 404 not found. 
+
+When we create a new ASP Dotnet core MVC application. Routes are already added to the project that will be an overview of how the route engine and the URL pattern works.
+
+Let's take a look at few examples so we can understand this further here we have two examples.
+
+
+New Slide:
+
+The URL Pattern is considered only after domain name part in the URL.
+
+>> Localhost:1234/{controller}/{action}/{id}
+
+>>>> Localhost:1234/Book/Index/2
+
+If the Area is used with MVC
+
+>> Localhost:1234/{area}/{controller}/{action}/{id}
+
+>>>> Localhost:1234/Admin/Book/Index/2
+
+
+
+By Default the first one after the localhost is controller name(Book) followed by action and an Id. Id can be optional field in the example you see below is an example with areas 
+
+When you use areas in the project it adds one more layer to the routing. We will see areas in sometime.
+
+Opened the Application Again and Ran the solution.
+
+Added a Debugger in Index and Privacy Action Methods in HomeController.
+
+On click of Privacy the control hits the Breakpoint for Privacy ActionMethod. The View for the ActionMethod is rendered from Views/Home/Privacy.cshtml
+
+
+On click of Home, The Index ActionMethod is hit and we dont see anything in the url, it's like:
+The URL for index is like:
+https://localhost:44339/
+
+THis is because in Startup.cs, We can see the default route is the Home controller with the Index action. So if nothing is specified in the URL it will go to home controller and Index method.
+
+If we explicitly hit the URL like
+
+https://localhost:44339/Home/Index
+
+It is again hitting the same Index Breakpoint. 
+
+Later when we would add Areas it would add one more layer in top of Controller. We will see areas later.
+
+Now again Opened PPT, with a table having URL, Controller, Action and Id. It tells what would be the controller/action for an URL
+
+
+URL					Controller	Action	Id
+http://localhost/home			Home		Index	Null
+http:/localhost/home/Index/123		Home		Index	123
+http://localhost/home/about		Home		About	Null
+http://localhost/home/contact		Home		Contact	Null
+http://localhost/book			Book		Index	Null
+http://localhost/book/edit/123		Book		Edit	123
+
+For the fist URL, The index is not specified so It would be Index and Id is null. 
+
+This is all about Routing.
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,47 @@
+We would be adding a lot of Nuget.
+
+In order to be able to Update the UI while running the Solution we need to add a Nuget package and add update Statup.cs Before Dot net core 3, this was a pre build feature, now we need ot install it from Nuget.
+
+If we open the csproj(Double click the project in solution explorer), we dont see RuntimeCompilation now,
+
+Open Manage Nuget Packages for Solution. Browse for RuntimeCompilation Selected it changed version to 3.1.10 and clicked install.
+
+The below is added to the csproj
+<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.10" />
+
+Now opened Startup.cs
+
+In the method: ConfigureServices changed the below
+
+services.AddControllersWithViews();
+
+to add RazorRuntimeCompilation like:
+services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
+Now after running, open Index.cshtml and changed the welcome header text to
+
+<h1 class="display-4">Welcome to Project</h1>
+
+
+---------------------------------------------------------------
+--Index.cshtml
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Project</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
