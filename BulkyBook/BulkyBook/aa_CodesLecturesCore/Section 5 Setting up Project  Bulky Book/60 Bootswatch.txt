@@ -1,0 +1,31 @@
+He want to change the Default theme that ASP Dot Net core has given us.
+
+Opened the portal
+https://bootswatch.com/
+
+Searched Yeti, we would download this free template.
+
+Downolaed bootstrap.css and replaced the contents with the one inside wwwroot/lib/dist/css/bootstrap.css
+
+Now after replacing, In this Video attachment he added a few classes in site.css and we would replace the contents of the site.css generated automatically with his site.css. It is the path
+wwwroot/css/site.css
+
+In the file we can see like .facebook-btn {, google etc, these are added by hime.
+
+
+In _Layout.cshtml under views/shared we need to chane bootstrap link from bootstrap.min.css to bootstrap.css in order to use the updated bootstrap file.
+
+Checked in the code Changes till this part.
+
+---------------------------------------------------------------
+For Code Changes(Mainly in wwwroot files) See github - After Part 60 Bootswatch
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

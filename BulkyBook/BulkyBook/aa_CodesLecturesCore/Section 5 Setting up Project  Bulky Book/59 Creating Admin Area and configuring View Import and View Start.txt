@@ -1,0 +1,50 @@
+On Running we did not see the Layout or Master Page, The reason is we have moved views in the areas but our masterpage is defined in _ViewStart.cshtml.
+
+So copied the two files from Views of Main Project to the Views of Customer Area.
+
+_ViewImports.cshtml
+_ViewStart.cshtml
+
+Now opened _ViewStart.cshtml under Areas, and changed the Layout to
+Layout = "~/Views/Shared/_Layout.cshtml";
+
+So we are keeping the _Layout at a global level and not moving it inside areas.
+
+Also we will not move the Shared partial views from the main project to the areas. We will keep them global.
+
+Now on running. The Layout is again Visible.
+
+Now Lets add the Admin area(similar to the way we created Customer Area).
+
+Now again we are able to see the folders- Controllers,Data,Models and Views under Admin.
+
+Now again deleted the folders Data and Models.
+
+Now copied the below to from the Views of Customer Area to Views of Admin Area
+
+_ViewImports.cshtml
+_ViewStart.cshtml
+
+Now Deleted the Controllers Folder of the Root Project.
+
+Now our Main project is Sorted and Things are more readable.
+
+Deleted ScafoldingReadMe.txt from the main project.
+
+---------------------------------------------------------------
+_ViewStart.cshtml under the views of both the Areas.
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

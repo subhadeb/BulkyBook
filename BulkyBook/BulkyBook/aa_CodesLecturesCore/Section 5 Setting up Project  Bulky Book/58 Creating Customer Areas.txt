@@ -1,0 +1,136 @@
+Although we have separated the Projected by creating two more but our controllers/Views will become too cumbersome if we would add too many of them.
+
+Our Application has two main broad parts
+Customer: Customer Facing Website
+Admin: Manage the Content that The Website displays.
+
+It would be nice if we would mantain Areas for these two.
+
+Currently in the Areas folder we have One Folder Identity, It got created because We Selected Individual Users Account while creating the Application.
+
+Now Controllers Folder is having the HomeController and Views have Home folder for HomeController Action Methods.
+
+Now in the Areas folder, Add New Area Name it Customer, Add
+
+After it is Added we can see ScaffoldingReadMe.txt is opened. It is asking to change the routes.
+
+We can also see the Customer Area is created with the folders Controllers, Data,Models, Views.
+
+From ScaffoldingReadMe.txt copied 
+template : "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+
+Opened Startup.cs in app.UseEndPoints we can see the pattern is like:
+pattern: "{controller=Home}/{action=Index}/{id?}");
+
+With areas the above should change to incorporate area like:
+
+pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+
+
+Now we will move the HomeController to the Customer to make it work.
+
+First Remove the Data and Models Folder in the Customer as we have separate projects for these.
+
+Now Removed HomeController form Controllers folder to Customer>Controllers under Areas.
+
+Now Opened HomeController and we need to specify the Area Attribute so to the HomeController class, added the attribute 
+[Area("Customer")]
+
+Also to Note, whenever we will add a new controller to this Controllers folder under an Area, we need to add the Attribute for Area.
+
+Now Drag the Home Folder From Views of the Main Project to the Views folder under Areas(Customer).
+
+Now Opened HomeController, we will change the Namespace to the updated path now it would be.
+
+namespace BulkyBook.Areas.Customer.Controllers
+
+Now on running he got the errors which I already got in the last part. He Resolved them by Adding References/ Updating the New Path in the errors.
+
+pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+
+Now After running, There no webpage Local host error was coming after multiple hit and tries(Restart/New Controller Created and Deleted in Areas), I was able to resolve the error. There was no specific fix for this.
+
+---------------------------------------------------------------
+--Startup.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BulkyBook.DataAccess.Data;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
