@@ -1,4 +1,37 @@
-﻿<!DOCTYPE html>
+In our Project, Admin would be managing the contents. 
+
+Navigated to Bootstrap Navbar from the portal.
+
+https://getbootstrap.com/docs/4.0/components/navbar/
+
+From there we will copy the Dropdown code. Below are the codes:
+ <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Dropdown
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Action</a>
+          <a class="dropdown-item" href="#">Another action</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+      </li>
+
+Now opened _Layout.cshtml
+
+After <li> tag end for Privacy, pasted the copied code.
+
+
+Now if we run that, After Privacy we see a Dropdown with few Dropdown items.
+
+Now, In the li tag, changed the text Dropdown to Content Management.
+
+Now first we would like to manage the product, categories and Covered Types. We will start with category in the next part.
+
+---------------------------------------------------------------
+--Layout.cshtml Backup.
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -66,3 +99,14 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

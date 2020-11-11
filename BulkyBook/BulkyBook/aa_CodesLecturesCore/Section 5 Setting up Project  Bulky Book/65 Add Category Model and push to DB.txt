@@ -1,0 +1,88 @@
+In This part we want to Add the Category. First we would work on the Table. For Category we will only have the Primary Key and the Category.
+
+First we would need to Create a model and only after the creation of Model, we need to create a table for the Model.
+
+Now In BulkyBook.Models project added a class file named Category.
+
+Made the class public.
+
+One point to remember is Everything(for the table) like Primary Key, Range, Required we will add the attribute in the Model We will not do anything in sql server.
+
+Add the property Id with prop tab tab of type int. Similarly added the property Name of type string.
+
+Id should be a primary key. By Default if we dont specify any explicit key, the Column Id will be considered as an Identity Column by Entity Framework. If we name it as CategoryId it will not create primary key. 
+
+To make the column primary key we need to add the annotation [Key] and add reference for Annotation.
+
+[Key]
+public int Id { get; set; }
+
+For Name, Added the Attribute Display, and Set the Name as Category Name. Along with this we add the Required Attribute and MaxLength of 50 attribute.
+
+So our Category Model is done as of now.
+
+Let's add it to the database.
+
+Open PM Console, Set the Default Project as BulkyBook.DataAcess, add a new migration named AddCategoryToDb like:
+
+PM> add-migration AddCategoryToDb
+
+The name should be meaningful. Now we see a file is created in the Migrations Folder. But the file has two empty methods because we have not yet added Category to our DbContext. 
+
+So opened ApplicationDbcontext under Data Folder of BulkyBook.DataAccess Project.
+
+Now in the class, after the constructor, added a property with prop tab tab. This is of type DBSet for Category model and named the propery as Categories.
+
+public DbSet<Category> Categories { get; set; }
+
+Now, as we have not yet pushed the changes to database(with update-database) we can delete the Migration. And run the same command again.
+
+So deleted the Migration 20201111165353_AddCategoryToDb.cs and again run 
+
+PM> add-migration AddCategoryToDb
+
+Now on the created file we see the columns and table with Id being the Identity column.
+
+Opened sql server, and check currently there is not table with name Category.
+--will give error
+select * from Categories
+
+Now run update-database in pm console
+
+--will NOT give error
+select * from Categories
+---------------------------------------------------------------
+Pushed the Codes to Github
+
+
+--Category.cs
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+   public class Category
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Display(Name="Category Name")]
+        [Required]
+        [MaxLength(50)]
+        public string Name { get; set; }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

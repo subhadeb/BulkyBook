@@ -1,0 +1,170 @@
+Now we need to Set Up the Database.
+
+Currently If we go to appsettings.json.
+
+If we check DefaultConnection, It is connected to (localdb)\\mssqllocaldb. 
+
+As we would be using the Code First Approach, We will not write the Database code first, Everything will be Updated in the Database, on the fly.
+
+We have set the Database as BulkyBook, 
+
+Set the server as SUKLA\\SQLEXPRESS(Confirm by connecting to SQL Server locally).
+Also I have set up another connection named it Win10DefaultConnection and here set the server as Database Server of Windows10. 
+
+Overall the connectionStrings are like:
+
+"ConnectionStrings": {
+    "DefaultConnection": "Server=SUKLA\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "Win10DefaultConnection": "Server=USMUMSUBDEB3\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+
+
+[He did not do it]
+To setup the Database server based on the Machine, In Startup.cs, in Convigure Services, I have updated the codes for AddDbContext to the below(Based on the Machinename kept in constants.
+
+            if (Environment.MachineName == Constants.Win10MachineName)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("Win10DefaultConnection")));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+Currently in the SQL Database we dont have any BulkyBook database.
+
+Now Open PM Console from Tools.
+
+Now in BulkyBook.DataAccess Project, delete the Migrations Folder under Data.
+
+Run the below add migration command. We should name the migratations as Readable as possible, this the default Identity that we deleted. Make sure we set the Default Project to BuilkyBook.DataAccess
+
+PM> add-migration AddDefaultIdentityMigration
+
+Now we can see the Migration folder is created and a file with some data at the start with extension .cs is opened. Here we can see the name is AspNetRoles, we have columns like Id, Name etc. We have fee other tables and all these are related to Asp.net Identity. These are not yet pushed to the Database.
+
+Now run the below in PM Console. Before that we Need to make sure we have below Installed from nuget
+Microsoft.EntityFrameworkCore.SqlServer(I have set the browser as 3.1.9)
+
+PM> update-database
+
+Now we can see the Database is created and are able to see 8 tables with the query:
+select * from sys.tables
+
+We will be dealing with the tables in our later videos.
+---------------------------------------------------------------
+--appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=SUKLA\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "Win10DefaultConnection": "Server=USMUMSUBDEB3\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}
+
+
+--Startup.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BulkyBook.DataAccess.Data;
+using BookListRazor.Constants;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            if (Environment.MachineName == Constants.Win10MachineName)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("Win10DefaultConnection")));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+          
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
