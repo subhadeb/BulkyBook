@@ -20,6 +20,7 @@ Checked in the code Changes till this part.
 ---------------------------------------------------------------
 For Code Changes(Mainly in wwwroot files) See github - After Part 60 Bootswatch
 
+https://github.com/subhadeb/BulkyBook/commit/845b5bb1b34dc5ba9b64f615b22efafd89ed43dd
 ---------------------------------------------------------------
 
 

@@ -1,0 +1,53 @@
+Now in this part let's Install all the third party tools that we would be using in our Project.
+
+The First one is jQuery UI for Datepicker. (See Demo in the Portal)
+https://jqueryui.com/datepicker/
+
+Next is Datatables. We would be displaying all our data in a datatable. 
+https://datatables.net/
+
+
+For Alerts we Would be using sweetalert.
+https://sweetalert.js.org/guides/
+
+We would be using Font Awesome for Icons. We would be working with the Free Icons. He said for the link, we should provide our email and they would send a link to our mail which we can use.
+
+
+
+We would be Using Toastr for Notifications.
+
+
+So we would be using the Five Tools in our project. 
+
+He provided the links in the attachments for css and js. below are all of these.
+
+CSS:
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+
+JS:
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://kit.fontawesome.com/e19c476714.js"></script>
+
+
+
+Copied the CSS Links to the head section(after site.css). Pasted the the js links at the end after fotter section(after site.js)
+
+We need to get link from fontawesome if the below does not work:
+<script src="https://kit.fontawesome.com/e19c476714.js"></script>
+---------------------------------------------------------------
+Pushed the Changes to Github.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
