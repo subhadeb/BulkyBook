@@ -1,0 +1,118 @@
+Opened PPT:
+
+Slide:
+
+The Unit of Work class Coordinates the work of multiple repositories by creating a single database context class shared by all of them.
+
+Contoller    --->>> Unit of Work(Having Mupliple Repository and One DBContext)   ---->>> Entity Framework and Database.
+
+Explanation:
+The unit of work class coordinates the work of multiple repositories by creating a single database context class that is shared by all of them.
+
+A unit of Ford maintains a list of objects affected by a business transaction and coordinates the writing out of the changes.
+
+The controller interacts with the unit of work which has all the repositories and it will ultimately interact with database using entity framework.
+
+Now what benefit you see with unit of work is that there is a common DB Context for all repository without unit of work that will be separate DB context object for each repository.
+
+This is a common argument that the repository and unit for work pattern are already implemented in entity framework and there is no need to recreate them as this would lead to unnecessary complexity.
+
+Let's take a look at that.
+---------------------------------------------------------------
+---------------------------------------------------------------
+New Slide---
+
+>>>DbSet:
+Add(obj)
+Remove(obj)
+Find(id)
+FirstOrDefault(expression)
+Where(expression)
+--The Above are Repository
+
+
+>>>DBContext:
+DbSet
+DbSet
+Dbset
+SaveChanges();
+--The Above is Unit of Work
+
+Explanation
+
+As you can see here DBSet has a collection like interface so it has methods like Add,Remove,Find,Where and as you can see it does not have methods like Update and Save. 
+
+Then DBContext acts as a unit of work.It keeps tracks of changes and ultimately saves them to the database by using SaveChanges method and it makes sense because as we discussed Save() method should not be in the repository.
+
+Also in a business transaction we may work with more than one repository. For example we will have Category repository, Order header repository, order details repository and so on.
+
+Hence it is better to have save() method inside the unit of work so it can coordinate persistent changes across multiple repositories in a single transaction.
+
+
+Looking at the big picture, We can agree that framework DbSet and DbContext looks like repositories and units of work but in reality there is a problem in this implementation.
+
+Let's see that by comparing this with repository pattern and the advantages it brings over the DBSet approach and in order to understand that. Let's go back to our example.
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+New Slide---- The Same Codes For Traditional And Repository Pattern that we have already seen earlier.
+
+>> Traditional Approach
+var CategorySelectList = _db.Category.Select(i=> new SelectListItem() { Text = i.Name, Value = i.I.ToString})
+
+>> Repository Pattern
+var CategorySelectList = _repository.GetCategoryListForDropdown();
+
+
+Explanation: Here the repository pattern minimizes the duplicate QUERY LOGIC.
+
+And as you can see in this example that we discussed before the problem with DbSet and Linq extension methods implemented on them is that they're written IQueryable and this means if you want to check dropdown for category as we can see here you will end up repeating the same code in different places in your application.
+
+This is just a small query but what happens when the query is more complex and detailed you will have to repeat the whole query in multiple places and a change in one place will have to be updated in all the other places in future. 
+
+So the implementation of DBSet does not really help with minimizing duplicate query logic.
+
+So in this case ideally we want a repository that has a method like GetCategoryListForDropdown() and all the logic should be wrapped within that method.
+---------------------------------------------------------------
+---------------------------------------------------------------
+New Slide---
+
+>>With DbSet/DbContext
+
+--Application  ----------------------->> Entity Framework
+
+>>With Repository Pattern
+
+--Application ---GetCategoryListForDropdown()..-->>Repository(Entity Framework)
+
+Explanation:
+Now the second benefit for repository pattern is that it decouples Our application from persistent framework when you are using DbContext and DbSet typically in your application your application is tightly coupled to entity framework.
+
+If you want to upgrade to a different ORM(May be it means Object Relational Model) you need to modify your application code directly.
+
+However if all of this is behind the repository and your application code relies on the repository to return that right data it doesn't matter what is inside the repository.
+
+Your application code will not be affected in future when you decide to change the ORM and that is because repository does its job of retrieving and saving data. It doesn't matter what is inside a repository and how it's done.
+
+Because of these differences even though DbSet and DbContext seems like implementation of repository and unit of work but they do not bring all the advantages as repository pattern now you must always remember that not all project would require such sophisticated architecture.
+
+Many times if you need a basic application or maybe an application where requirements are changing very frequently, I would not recommend this pattern because using patterns would always increase the time to implement your project.
+
+[Now he would tell his story(Make be Fake as well :) )]
+I have one example in which the application I was building was a basic CRUD operation website for about 50 tables which were Reference tables for an SSIS package and the business was constantly changing that requirement and project was on a strict timeline.
+
+I was able to complete the project just in time with the changing requirement only because I did not use repository pattern, If I had decided to go with repository pattern then I can bet that I would not have finished it on the timeline because it would have increased drastically with the changing requirement.
+
+So you should always analyze before you decide on using any of the patterns.
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

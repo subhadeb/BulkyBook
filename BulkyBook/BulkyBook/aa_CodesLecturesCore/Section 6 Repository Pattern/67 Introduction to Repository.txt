@@ -1,0 +1,67 @@
+Opened PPT For Repository Pattern.
+
+Repository Pattern
+>> It provides an Abstraction of Data.
+
+>> Benefits of Reposityry Pattern 
+	--Minimize duplicate logic.
+
+Explanation: 
+The repository pattern has gained quite a bit of popularity since it was first introduced as a part of Domain Driven design in 2004.
+
+Essentially it provides an abstraction of data so that your application can work in a simple abstraction that has an interface approximating that of a collection.
+
+Adding removing updating and selecting items from this collection is done through a series of straightforward methods without the need to deal with database concerns that Connections/Commands/Cursors or Readers.
+
+Using this pattern can help achieve loose coupling and keep the domain objects persistence ignorant. 
+
+Although the pattern is very popular, it is also frequently misunderstood and misused. One of the major benefits of repository pattern is to minimize duplication of logic.
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+New Slide(with code sniped showing differnce of the below two):
+
+>> Traditional Approach
+var CategorySelectList = _db.Category.Select(i=> new SelectListItem() { Text = i.Name, Value = i.I.ToString})
+
+>> Repository Pattern
+var CategorySelectList = _repository.GetCategoryListForDropdown();
+
+Explanation: 
+Let's understand that with the help of an example let's say you have a requirement in the website to display list of categories in a dropdown in multiple places in your website.
+
+You will end up writing something like on the top in five places read from the _db.Category, you will do a select and you will generate a list in all the five places 
+
+Rather than this, It would be better if you just had a function that would read preview the same result every five times. 
+
+Because of this there will be much less duplicate code and the actual logic would reside in only one location so that in future if you have to change it you will have to update only in one location rather than in the 5 location in the traditional approach.
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+
+New Slide.
+Another Benefit Of Repository Pattern:
+
+It decouples your Application from the persistence frameworks
+
+Explanation:
+Then another benefit of repository pattern is that it decouples your application from persistent frameworks. In our case it will be entity framework.
+
+So in the future if you decide to switch to a different persistence framework you can do so with minimal impact on the rest of your application.
+
+Persistent frameworks are constantly changing and evolving. And if you want to have the freedom to explore a different persistence framework with minimal impact on your application that's when you should use the repository pattern.
+
+This was just a basic overview of repository pattern in the next video, Let's take a look at how actually they were implemented theoretically.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

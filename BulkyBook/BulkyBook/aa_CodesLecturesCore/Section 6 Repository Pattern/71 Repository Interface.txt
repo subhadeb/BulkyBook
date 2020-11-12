@@ -1,0 +1,104 @@
+Back to the Code.
+
+Now we have Category and ApplicationDBContext where we have Category. It's time to Add Repository.
+
+Repository is a generic way of accessing common functionalities like getting a record, get all records, getFirstOrDefault etc.
+
+We will be implementing the generic repository inside the Data Access. 
+
+Added a new Folder Repository in the DataAccess Project, inside it added a new folder named it IRepository. 
+
+IRepository will have the Interfaces, And Repository will have the class Implementations for those. 
+
+In IRepository folder added an interface, named it IRepository.cs
+
+After creation made the interface public. As the Interface would be genic, we would add <T> to it with where T: class so, it's like:
+
+    public interface IRepository<T> where T: class
+    {
+
+    }
+
+Now we will declare all the Generic methods for CRUP operations. First will be Get(int id) returning T.
+
+T Get(int id);
+With the above for Category we can get the Category by passing the id from the database.
+
+Next we want the list of categories. It will retrun IEnumberable of T. As we might pass conditions to this so we will add parameter of type Expression(available in System.Linq) . Expression will have two parameters in <>, First will be a Func. Func in turn will have two params first would be T and the second one is bool we will call it filter and set it to null. Next we can have OrderBy so passed another Func(as second parameter of Expression). The Func will have <IQueryable>, IOrderedQueryable<T> named it as orderBy and set it to null, 
+
+We will also have a parameter named includeProperties and set it to null. This is useful when we have foreign key references and we want to have the object reference of that foreign key. He will explain when we will use that. So the method is like:
+
+        IEnumerable<T> GetAll(
+            Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            string includeProperties = null
+            );
+
+
+Now we would want FirstOrDefault. Copy paste the method, Renamed it to GetFirstOrDefault. It would retrun only T. Here we dont need the order by because it will only retrieve one record. So the method is:
+
+        T GetFirstOrDefault(
+          Expression<Func<T, bool>> filter = null,
+          string includeProperties = null
+          );
+
+Now we have the method Add, It will have the parameter T we name it Entity. Similary we will have the method Remove pasing the Id, And aslo Remove passing the Entity.
+
+        void Add(T entity);
+
+        void Remove(int id);
+        void Remove(T entity);
+
+We will also have RemoveRange(IEnumerable<T> entity). Here we will remove a complete range of entities. If we want to remove three Elements together we can use remove range.
+
+	void RemoveRange(IEnumerable<T> entity);
+
+In the next part lets complete the class that Implements the Repository.
+
+---------------------------------------------------------------
+--IRepository.cs Under BulkyBook.DataAccess.IRepository
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IRepository<T> where T : class
+    {
+        T Get(int id);
+
+        IEnumerable<T> GetAll(
+            Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            string includeProperties = null
+            );
+
+        T GetFirstOrDefault(
+          Expression<Func<T, bool>> filter = null,
+          string includeProperties = null
+          );
+
+        void Add(T entity);
+
+        void Remove(int id);
+        void Remove(T entity);
+
+        void RemoveRange(IEnumerable<T> entity);
+
+    }
+}
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

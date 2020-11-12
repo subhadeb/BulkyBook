@@ -1,4 +1,6 @@
+Whenever a website grows It can be very easy to have a very messy looking code. In order to organize our Database calls in a perfect way we will be using Repository Pattern. 
 
+He will set up a default repository and will explain the flow of Repository Pattern.
 
 ---------------------------------------------------------------
 

@@ -1,0 +1,239 @@
+We will add the Class that will implement the Interface. So in the Repository Folder, added the class Repository.
+
+Make it Public and implement IRepository, this class is also Generic so the type will be T where T : class. So it's like:
+
+
+public class Repository<T>: IRepository<T> where T: class
+
+It would give error in IRepository because we have not yet implemented the interface.
+
+Now press control + .,show potential fixes and then selected Implement Interface.
+
+All the method will be created like:
+
+        public void Add(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+We will modify/use the Database for all these methods, so we need the DbContext object here. We can directly access our ApplicationDbContext here. So added the below two.
+
+        private readonly ApplicationDbContext _db;
+        internal DbSet<T> dbSet;
+
+Now with the help of Constructor and Dependency Injection, we will initialize _db.
+
+Added the constructor with ctor tab tab. It will have the parameter ApplicationDbContext db and we will set _db as db and aso this.dbset will be _db.Set<T>. It's like:
+
+        public Repository(ApplicationDbContext db)
+        {
+            _db = db;
+            this.dbSet = _db.Set<T>();
+        }
+
+Now we will modify the Add Method. In Add method, we do db.Set.Add(entity). Also point to remember here is In ApplicationDbContext, we have the DbSet like public DbSet<Category> Categories { get; set; }.
+
+So we are updating that DbSet. so Add method is like:
+
+        public void Add(T entity)
+        {
+            dbSet.Add(entity);
+        }
+
+Now in Get Method, we will only return dbset.Find(id)
+
+        public T Get(int id)
+        {
+            return dbSet.Find(id);
+        }
+
+Now GetAll will have a bit more implementation. Because here we have filters and OrderedQueryable things.
+
+Inside the method, 
+
+First declared a variable query of type IQueryable<T> and this is the dbSet.
+
+IQueryable<T> query = dbSet;
+
+Now if filter will not be null, the query will be query.Where(filter)
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+Now we will do something called Eager Loading. Eager Loading means if we have Product with a Foreign key CategoryId inside it. And CategoryId willl be in Category table. This way we will link product to category. With this way we can show the category name. And we will do in a single load. All of the names we will have a comma separated string stored in the parameter includeProperties.
+
+If the includeProperties will not be null, then we will iterate over includeProperties by splittin it based on command and also use StringSplitOptions.RemoveEmptyEntries. Inside foreach we will include that includeProp element.
+
+It's like:
+           if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(includeProp);
+                }
+            }
+
+
+
+So the above will include all the properties that we pass as a string separated by commas.
+
+Now we will work on orderBy. If it would not be null We can simply return orderBy(query).toList()
+
+            if (orderBy != null)
+            {
+                return orderBy(query).ToList();
+            }
+
+At the end we will return query.ToList(). Hence we are returning IEnumberable after working with the query. 
+
+Now, its time for GetFirstOrDefault, It will be be similar to the above GetAll, it will not return a list and it will not have orderBy.
+
+So copied everything from GetAll and pasted here. After pasting removed orderBy logics and return query.FirstOrDefault().
+
+        public T GetFirstOrDefault(Expression<Func<T, bool>> filter = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(includeProp);
+                }
+            }
+            return query.FirstOrDefault();
+        }
+
+
+Now It's time for Remove. For Remove, we need to find the entity of type T. And we can find it with dbSet.Find(id), and then Remove the entity.
+
+        public void Remove(int id)
+        {
+            T entity = dbSet.Find(id);
+            Remove(entity);
+        }
+
+For Remove with param T entity, we can remove with dbSet.Remove(entity)
+
+        public void Remove(T entity)
+        {
+            dbSet.Remove(entity);
+        }
+
+For RemoveRange, we can use dbSet.RemoveRange(entity)
+
+        public void RemoveRange(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
+        }
+
+So now we have implemented all the IRepository Methods.
+---------------------------------------------------------------
+
+Will push the codes to Github after this this part.
+
+--Repository.cs under BulkyBook.DataAccess Project under Repository Folder.
+
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class Repository<T> : IRepository<T> where T : class
+    {
+        private readonly ApplicationDbContext _db;
+        internal DbSet<T> dbSet;
+
+        public Repository(ApplicationDbContext db)
+        {
+            _db = db;
+            this.dbSet = _db.Set<T>();
+        }
+
+        public void Add(T entity)
+        {
+            dbSet.Add(entity);
+        }
+
+        public T Get(int id)
+        {
+            return dbSet.Find(id);
+        }
+
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(includeProp);
+                }
+            }
+            if (orderBy != null)
+            {
+                return orderBy(query).ToList();
+            }
+
+            return query.ToList();
+        }
+
+        public T GetFirstOrDefault(Expression<Func<T, bool>> filter = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(includeProp);
+                }
+            }
+            return query.FirstOrDefault();
+        }
+
+        public void Remove(int id)
+        {
+            T entity = dbSet.Find(id);
+            Remove(entity);
+        }
+
+        public void Remove(T entity)
+        {
+            dbSet.Remove(entity);
+        }
+
+        public void RemoveRange(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
+        }
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

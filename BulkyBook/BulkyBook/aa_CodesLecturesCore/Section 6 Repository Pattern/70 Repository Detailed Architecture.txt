@@ -1,0 +1,71 @@
+Opened PPT:
+
+For the Slide Content See The Image:
+Part 70Repo Image-1.jpg
+
+[During Revision open The Image and this Note side by side]
+
+Now it's time to see a practical flow of what happens with repository pattern. First with it implement the interface for repository and then call this IRepository.
+
+This will have generic method definitions for get, getAll,Add,Remove, FirstOrDefault and any other common methods that we want to implement.
+
+The implementation of these methods will lie inside the repository class.
+
+Once we complete the generic methods for repository and its interface we will consume these repositories.
+
+We will implement an interface ICategory repository and then they will define any custom methods that we want like GetCateListForDropdown()
+
+Remember that its implementation will lie inside the CategoryRepository Class.
+
+Now in a typical application there would be only one model. Let's say we'll also have another model for order header and maybe order details and much more 
+
+So they will create their repositories for IOrderHeader for interface and then the class that implements that interface will be the OrderHeaderRepository.
+
+Once we have all the repositories it's time to create the final interface for unit of work and then the class which implements the interface with the same methods and we will create our DbContext inside unit of work as well.
+
+So this was the complete overview of how the repository pattern will work and when we will implement this, You will see the exact same architecture.
+
+Now I know you might be wondering it's too much talk but I want to explain the basics before we jump to the code.
+
+Let me repeat the floor one more time so that you can get the concept once again but in a different design.
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+New Slide
+
+For the Slide Content See The Image:
+Part 70Repo Image-2.jpg
+
+
+First we will implement the interface for the repository and we will call this IRepository.
+
+This will be the generic and we will have common method definitions. The implementation of these methods will lie inside the repository class. Once we complete this generic methods then we will start consuming them.
+
+Next we can have the unit of work and its interface implemented.
+
+They will be empty for now but later once we create other repositories like Category/OrderHeader then we will add that inside UnitOfWork along with the safe methods.
+
+Then we will implement an interface for all the models that we want.
+
+We will start with the ICategoryRepository for example and then we will define any custom methods we want like GetCateListForDropdown().
+
+Its implementation will lie inside the category repository.
+
+Once we have all the repositories it's time to add the ICategoryRepository interface inside our own unit of work and then finally implement the safe method and assign the DBObject to category repository.
+
+I know it's a lot of talking and you will understand all of this from the next Part when we start implementing this.
+
+So now that you have a good understanding of theory let's start with the code from the next Part.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

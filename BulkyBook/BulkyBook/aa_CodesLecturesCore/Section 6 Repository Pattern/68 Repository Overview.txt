@@ -1,0 +1,40 @@
+Opened PPT.
+
+Repository---
+
+Get(Id)
+GetAll(param1, param2),
+GetFirstOrDefault(param1,param2),
+Add(obj),
+Remove(obj)
+
+Explanation:
+Now repository should act like a collection of objects in memory. So we have methods to add or remove an object get an object by Id or get all of the object based on certain parameters.
+
+As you can see we do not have an update method here because many times update logic is not common for all of the objects or entities. Hence we should always implement that separately and not inside our common repository.
+
+One common mistake by many developer is to implement an update method in the repository as well but it should not be included.
+
+Some may argue that it does work if we keep in common repository. But trust me as the project grows in complexity and increases the different update logic, it will definitely not work and you will end up overwriting it in almost all of the places, a repository should also not have the semantics of your database.
+
+It should be like a collection of objects in memory and shouldn't have methods like update or save.
+
+Now if we cannot save or update inside the repository then how are we supposed to do those things.
+
+For that we have something called as UnitOfWork.
+
+Let's take a look at that in the next week Part
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
