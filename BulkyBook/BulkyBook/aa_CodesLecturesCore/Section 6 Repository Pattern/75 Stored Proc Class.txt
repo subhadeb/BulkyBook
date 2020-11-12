@@ -1,0 +1,234 @@
+Now let's implement the SP Class, So In the Repository folder created a class SP_Call
+
+Make it public, and implement ISP_Call
+
+public class SP_Call : ISP_Call
+
+It will give error in ISP_Call, so Ctrl + . and then Implement Interface, all the methods wil be created.
+
+Now, initialize DbContext with dependency injection same as earlier like:
+
+        private readonly ApplicationDbContext _db;
+
+        public SP_Call(ApplicationDbContext db) 
+        {
+            _db = db;
+        }
+
+After _db declaraton we will create a private static string ConnectionString 
+
+private static string ConnectionString = "";
+
+Now inside the Constructor we would invoke db.Database.GetDbConnection().ConnectionString like
+
+ConnectionString = _db.Database.GetDbConnection().ConnectionString;
+
+We would be using this ConnectionString to call stored procedures.
+
+First, in the Dispose metod we will directly call _db.Dispose()
+
+Now in Execute() method, we will initalize SqlConnection in using passing the ConnectionString. 
+
+using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            { 
+            
+            }
+
+Now inside that, we will open sqlCon, then we will call sqlCon.Execute passing the procedurename, param and CommandType. so finally the method is like:
+
+        public void Execute(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                sqlCon.Execute(procedureName, parm, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+Now we will work on  List<T>, first copied all the codes for using SqlConnection
+
+Now replace Execute with Query<T> and retrun this like:
+
+        public IEnumerable<T> List<T>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                return  sqlCon.Query<T>(procedureName, parm, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+Now we will retrieve two lists or two IEnumerable. Now again paste the SqlConnection codes from Execute() method.
+
+Here after opening the connection, we will declare a variable result that will use SqlMapper.QueryMuliple this will have the parameters sqlCon, procedureName, commandType and this would be CommandType.StoredProcedure.
+
+var result = SqlMapper.QueryMultiple(sqlCon, procedureName, parm, commandType: CommandType.StoredProcedure);
+
+Now result will have the tables, we can retrieve item1 with result.Read<T>().ToList() like:
+
+var item1 = result.Read<T1>().ToList();
+
+done the same thing for T2/item2.
+
+Now we will check if both item1 and item2 are not null, then we will return a new Tuple of two IEnumberable like:
+return new Tuple<IEnumerable<T1>, IEnumerable<T2>>(item1, item2);
+
+At the end of the method(and also if item1/item2 will be null)
+
+we will return two empty lists.
+Overall the method is like:
+
+        public Tuple<IEnumerable<T1>, IEnumerable<T2>> List<T1, T2>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                var result = SqlMapper.QueryMultiple(sqlCon, procedureName, parm, commandType: CommandType.StoredProcedure);
+                var item1 = result.Read<T1>().ToList();
+                var item2 = result.Read<T2>().ToList();
+
+                if (item1 != null && item2 != null)
+                {
+                    return new Tuple<IEnumerable<T1>, IEnumerable<T2>>(item1, item2);
+                }
+            }
+            return new Tuple<IEnumerable<T1>, IEnumerable<T2>>(new List<T1>(), new List<T2>());
+        }
+
+Now we have OneRecord and Single Pending.
+
+Of OneRecord we will copy the contents from List(One List) and will modify it.
+
+Now change return to var value = ..
+
+Now we will return with the help of Convert.ChangeType and type casting. SO the method is like:
+
+        public T OneRecord<T>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                var value = sqlCon.Query<T>(procedureName, parm, commandType: CommandType.StoredProcedure);
+                return (T)Convert.ChangeType(value.FirstOrDefault(), typeof(T));
+            }
+        }
+
+Now for Single again, pasted contents from List(One List) and will modify it.
+
+First change sqlCon.Query to sqlCon.ExecuteScalar<T>. 
+Now rep the entire conent starting from sqlCon.ExecuteScalar inside (T)Convert.ChangeType() and the second parameter would be typeof(T). so the method is 
+
+        public T Single<T>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                return (T)Convert.ChangeType(sqlCon.ExecuteScalar<T>(procedureName, parm, commandType: CommandType.StoredProcedure), typeof(T));
+            }
+        }
+
+
+So now we have implemented all the SP calls. So we can handle all the Sp calls with this, for one record/multiple record etc. 
+
+This is a base template, if we would want three tables, then we could add another with Three lists(similar to two list) as per our requirement.
+
+In the project we will use Entity Framework most of the times, one CRUD operation will be done through stored procedure.
+
+---------------------------------------------------------------
+--SP_Call.cs
+
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Dapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class SP_Call : ISP_Call
+    {
+        private readonly ApplicationDbContext _db;
+        private static string ConnectionString = "";
+
+        public SP_Call(ApplicationDbContext db)
+        {
+            _db = db;
+            ConnectionString = _db.Database.GetDbConnection().ConnectionString;
+        }
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+        public void Execute(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                sqlCon.Execute(procedureName, parm, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public IEnumerable<T> List<T>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                return  sqlCon.Query<T>(procedureName, parm, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public Tuple<IEnumerable<T1>, IEnumerable<T2>> List<T1, T2>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                var result = SqlMapper.QueryMultiple(sqlCon, procedureName, parm, commandType: CommandType.StoredProcedure);
+                var item1 = result.Read<T1>().ToList();
+                var item2 = result.Read<T2>().ToList();
+
+                if (item1 != null && item2 != null)
+                {
+                    return new Tuple<IEnumerable<T1>, IEnumerable<T2>>(item1, item2);
+                }
+            }
+            return new Tuple<IEnumerable<T1>, IEnumerable<T2>>(new List<T1>(), new List<T2>());
+        }
+
+        public T OneRecord<T>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                var value = sqlCon.Query<T>(procedureName, parm, commandType: CommandType.StoredProcedure);
+                return (T)Convert.ChangeType(value.FirstOrDefault(), typeof(T));
+            }
+        }
+        public T Single<T>(string procedureName, DynamicParameters parm = null)
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                return (T)Convert.ChangeType(sqlCon.ExecuteScalar<T>(procedureName, parm, commandType: CommandType.StoredProcedure), typeof(T));
+            }
+        }
+
+
+
+
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

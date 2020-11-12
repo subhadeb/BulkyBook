@@ -1,0 +1,130 @@
+Now we have the Repository Class and the IRepository Interface, We need individual repositories for Categories and all the other models that we would be adding in future.
+
+Now inside Repository Folder, Added a class Named it CategoryRepository.cs
+
+After creation, make the Class public.
+
+Now inside IRepository folder create an Interface named ICategoryRepository.cs
+
+Back to the class CategoryRepository.cs.
+
+This will implement Repository<Category> and ICategoryRepository. So now we have replaced the Generic T with Category. 
+
+Now we get the error on hovering over CategoryRepository:
+
+There is no argument given that corresponds to the required formal parameter 'db' of 'Repository<Category>.Repository(ApplicationDbContext)'
+
+This is because we have not initialized _db through the constructor. 
+
+So here will the _db initialization through constructor and dependency Injection. We need have :base(db) here otherwise it will give error. So these are like:
+
+        private readonly ApplicationDbContext _db;
+
+        public CategoryRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+
+
+The error is gone now.
+
+One thing we need to notice is, In our Repository we have not written any code for Update, and This we will do in our inidividual repositories. This is because update can be different for different objects. We will write a method to update category repository later.
+
+
+Now open Interface ICategoryRepository,
+
+Make it public and should implement IRepository<Category>
+
+So it will have all the methods that were present in IRepository. 
+
+Now added the method Update returning nothing(void) and having the parameter Category category
+
+void Update(Category category);
+
+Now if we go to class CategoryRepository,
+
+It will give error in ICategoryRepository because we are yet to implement the method Update. Presse Ctrl + . and then Select Implement Interface. 
+
+The method Update is created now.
+
+Inside it first we will have the var objFromDb that will use FirstOrDefault passing category.id to get the Category object.
+var objFromDb = _db.Categories.FirstOrDefault(x => x.Id == category.Id);
+
+Next we have a null check for objFromDb and then will update the Name and then execute _db.SaveChanges(). The method is like:
+
+        public void Update(Category category)
+        {
+            var objFromDb = _db.Categories.FirstOrDefault(x => x.Id == category.Id);
+            if (objFromDb != null)
+            {
+                objFromDb.Name = category.Name;
+                _db.SaveChanges();
+            }
+        }
+
+Now we have CategoryRepository through which we can perform all the CRUD operations- Update,Get,Remove etc.
+
+We should now directly access Category Repository, we would have one more Wrapper that will wrap all of the Repositories. Because we will have Category Repository/Product Repository orderheader/OrderDetails .
+
+We will also have a repository that will call stored procedures. If they are wrapped inside one umbrella it would be easier for us to access. 
+
+
+
+
+---------------------------------------------------------------
+--ICategoryRepository.cs
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+   public interface ICategoryRepository : IRepository<Category>
+    {
+        void Update(Category category);
+    }
+}
+
+
+--CategoryRepository.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class CategoryRepository : Repository<Category>,ICategoryRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public CategoryRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+
+        public void Update(Category category)
+        {
+            var objFromDb = _db.Categories.FirstOrDefault(x => x.Id == category.Id);
+            if (objFromDb != null)
+            {
+                objFromDb.Name = category.Name;
+                _db.SaveChanges();
+            }
+        }
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

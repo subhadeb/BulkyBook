@@ -1,0 +1,219 @@
+Now we have implemented CategoryRepository and SP_Call, let's add a wrapper.
+
+Now in IRepository Folder, Add Interface IUnitOfWork.
+
+It will be a public interface implementing IDisposable.
+
+Now the things that we would like to wrap would be the getter for ICategoryRepository and ISP_Call. 
+
+It's like:
+
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ISP_Call SP_Call { get; }
+    }
+
+Now In Repository Folder, added a class, named it UnitOfWork.
+
+Make the class public and implement IUnitOfWork
+
+Now Add the constructor and initialize _db for Context using Dependency Injection.
+
+Now we would add the property for ICategoryRepository, the setter would be private.
+
+public ICategoryRepository Category { get; private set; }
+
+Now in the constructr we will initialize it passing _db.
+
+Category = new CategoryRepository(_db);
+
+Done the same thing for ISP_Call.
+public ISP_Call SP_Call { get; private set; }
+In constructor,
+SP_Call = new SP_Call(_db);
+
+The Dispose method would be
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+Now we will have the Save method, and it is simple, we will only call _db.SaveChanges inside.
+
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+
+The Reason for having the Save() method is In CategoryRepository we are calling SaveChanges, but in Repository class, we are having Add and Remove and there we are not saving to the database. So all the changes will be saved once we call Save method of UnitOfWork. 
+
+So we have set up our UnitOfWork.
+
+
+But Right now it is not accessible from the main project.
+
+To Register that we need to Open Startup.cs in the Main project(ConfigureServices method).
+Here we need Dependency Injection, for Registering UnitOfWork.
+
+So in the Method ConfigureServices, after AddDefaultIdentity, add
+
+services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+In the Next Module we will do CRUD Operations on Category.
+
+
+
+---------------------------------------------------------------
+Pushed the Changes to Github.
+
+
+--IUnitOfWork.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ISP_Call SP_Call { get; }
+    }
+}
+
+
+--UnitOfWork.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _db;
+        public UnitOfWork(ApplicationDbContext db)
+        {
+            _db = db;
+            Category = new CategoryRepository(_db);
+            SP_Call = new SP_Call(_db);
+        }
+
+        public ICategoryRepository Category { get; private set; }
+        public ISP_Call SP_Call { get; private set; }
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+    }
+}
+
+
+--Startup.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BulkyBook.DataAccess.Data;
+using BookListRazor.Constants;
+using BulkyBook.DataAccess.Repository;
+using BulkyBook.DataAccess.Repository.IRepository;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            if (Environment.MachineName == Constants.Win10MachineName)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("Win10DefaultConnection")));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+          
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

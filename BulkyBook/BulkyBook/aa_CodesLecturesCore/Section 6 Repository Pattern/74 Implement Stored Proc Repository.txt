@@ -1,0 +1,69 @@
+Now we would like to wrap multiple repositories inside a UnitOfWork.
+
+Now we would create a repository for Stored Procedure calls. So inside the Folder IRepository added the Interface ISP_Call.cs
+
+Made it Public and it would extend IDisposable. 
+public interface ISP_Call : IDisposable
+
+Now we would use Something callled Dapper, we can install that from Nuget or instal it from here(With Ctrl + . and then Install package)
+
+First we would be returning a Single value, like
+
+T Single<T>(string procedureName, DynamicParameters parm = null);
+
+The line is not complete, Press Controll + . on DynamicParameters and Option will come Install Package 'Dapper', selected that and then select find and install latest version. 
+
+After the error is gone, Name the DynamicParameters as param and set it to null.
+
+A common scenario is sometimes we want to insert/update to the database and we dont want to retrieve anything. So for that we can directly call Execute Returning void similar to the above one.
+
+void Execute(string procedureName, DynamicParameters parm = null);
+
+Now we would like to Retrive a one row or one record, for that it will retrun T OneRecord<T>. 
+
+
+
+The difference between single and OneRecord, is that Single will execute like ExecuteScalar, And example is first column in the first row in the result set.
+But in OneRecord, we will retrieve complete row. 
+
+Now if we want to retrieve multiple rows, it would return IEnumerable<T> we will call this List<T> with the same parameters.
+
+Now, what if we have a SP that returns two tables, Then we will have Tuple<IEnumberable<T1>,IEnumberable<T2>> and we will call this List<T1,T2> and them have the same params.
+
+Tuple<IEnumerable<T1>,IEnumerable<T2>> List<T1,T2>(string procedurename, DynamicParameters parm = null);
+
+So now we have the Five Stored Procedure Calls. Now in the next part we will implement these in a concrete class.
+---------------------------------------------------------------
+---ISP_Call.cs
+
+using Dapper;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface ISP_Call : IDisposable
+    {
+        T Single<T>(string procedureName, DynamicParameters parm = null);
+
+        void Execute(string procedureName, DynamicParameters parm = null);
+
+        T OneRecord<T>(string procedureName, DynamicParameters parm = null);
+
+        IEnumerable<T> List<T>(string procedureName, DynamicParameters parm = null);
+
+        Tuple<IEnumerable<T1>,IEnumerable<T2>> List<T1,T2>(string procedureName, DynamicParameters parm = null);
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
