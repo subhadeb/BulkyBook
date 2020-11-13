@@ -1,0 +1,145 @@
+In the Category Index page we will have two link, one to The Upsert Page and One to Delete Page. 
+
+With Upsert, we will have the single page to insert and update. So the Create New Category and the Edit Link will navigate to the same Page Upsert, the difference being with Edit we will be passing the CategoryId.
+
+For Upsert link, at the end of Index.cshtml, added a div with class text-center. This is just to design the buttons we will move the codes to our Javascript data table(No intellisence there).
+
+Inside that we will have an anchor tag navigating to  href="/Admin/Category/Upsert/id", class btn success, style with cursor pointer. and inside that we will have font awesome icon, he opened the portal, searched and found fa-edit. so it's like:
+
+    <a href="/Admin/Category/Upsert/id" class="btn btn-success text-white" style="cursor:pointer">
+        <i class="fas fa-edit"></i>
+    </a>
+
+
+Now, made a copy of the above for delete, after pasiting removed the href tag as we would be executing a funciton, changed the class to btn-danger. For the FA(font awesome) icon, searched the portal with trash and found the class fa-trash-alt. 
+
+    <a  class="btn btn-danger text-white" style="cursor:pointer">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+
+On running/refreshing we see the two buttons are visible. Now Stopped the solution.
+
+Now in the folder wwwroot>js>, created a new Javascript file, named it category.js
+
+The code would be similar to the one we created for BookListRazor.
+
+first added a variable dataTable.
+var dataTable;
+
+Now created document.ready.
+
+after that(after ready() end) created the function loadDatatable().
+
+function loadDataTable() {
+
+}
+
+called the function, from document.ready.
+
+$(document).ready(function () {
+    loadDataTable();
+});
+
+Now in the Index.cshtml, we can see the table have the Id tblData, we will use it in initializing dataTable
+
+So in the function loadDataTable, initialized the variable dataTable as
+
+dataTable = $('#tblData').DataTable({
+
+    })
+
+Make sure we have the proper casing because JS is case sensitive. dataTable and DataTable is not the same.
+
+Then we need to define ajax call and then the URL for GetAll(In croller). Then we will define the columns, the Name of the elements in camelCase. So Name will be name and NameOfEmployee will be nameOfEmployee. for the first column set the width as 60%. The next column will have only buttons. In the button we need the id, so the data for the second column will be id.  We will write a render funciton for returning the html div for the buttons that we have written in Index.cshtml with the help of intellisence. intellisense will not work here. we will add the html codes for multi line with `` symbol. So moved the codes from cshtml to here.
+
+ So as of now the code insed DataTable is 
+
+    dataTable = $('#tblData').DataTable({
+        "ajax": {
+           'url': '/Admin/Category/GetAll'
+        },
+        "columns": [
+            { "data": "name", "width": '60%' },
+            {
+                'data': 'id',
+                'render': function (data) {
+                    return `
+                        <div class="text-center">
+                            <a href="/Admin/Category/Upsert/id" class="btn btn-success text-white" style="cursor:pointer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a class="btn btn-danger text-white" style="cursor:pointer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+`
+
+                }
+            }
+        ]
+    })
+
+Now we will update the href for passing the id to edit. So replace /id with /${data}. ${} takes a variable inside it. 
+
+Now after render function end, add 'width': '40%'
+
+Now In Index.cshtml we are not having the dummy button codes for Edit delete and at the end we need to render category.js.
+
+We will use @section Scripts to refer the category js file.
+
+@section Scripts{ 
+<script src="~/js/category.js"></script>
+}
+
+Now let's run and our application to test if the Datatable is loaded.
+
+We are able to see the Records in the datatable. Next we would work on Edit/Create and Delete category.
+
+
+---------------------------------------------------------------
+Pushed the codes to github.
+
+
+--category.js
+
+var dataTable;
+
+$(document).ready(function () {
+    loadDataTable();
+});
+
+function loadDataTable() {
+    dataTable = $('#tblData').DataTable({
+        "ajax": {
+           'url': '/Admin/Category/GetAll'
+        },
+        "columns": [
+            { "data": "name", "width": '60%' },
+            {
+                'data': 'id',
+                'render': function (data) {
+                    return `
+                        <div class="text-center">
+                            <a href="/Admin/Category/Upsert/${data}" class="btn btn-success text-white" style="cursor:pointer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a class="btn btn-danger text-white" style="cursor:pointer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+`
+
+                }, 'width': '40%'
+            }
+        ]
+    })
+}
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

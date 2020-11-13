@@ -1,4 +1,54 @@
-﻿<!DOCTYPE html>
+Earlier we have added UnitOfWork in Startup.cs, it will be accessible using dependency injection in any of the controllers.
+
+
+Now first closed all opened files in VS with Close all tabs.
+
+Now in the Main project, Areas>Admin>Controllers added a Controller, 
+
+[First he have shown how code is generated automatically on Creating a controller with EF model, selecting a context and layout]
+
+
+Now Opened _Layout.cshtml from main project Views>Shared
+
+We would change the Privacy to Categories, so for Privacy change
+asp-controller="Home" to asp-controller="Categories", change the action from Privacy to Index and set asp-area as Admin and change the Text Privacy to Category Test.
+
+
+------------Automatic Code Controller View Explanation Starts
+[With the Automatic Controller/View Codes he have run the solution and was able to perform CRUD on Categories Below is his explanation from the Automated codes, I did not create the controller as of now.]
+1. They created _context for ApplicationDbContext, And populated it with dependency Injection(Controller).
+2. In Index method they have directly returned _context.Categories.ToListAsync().
+3. Now opened the Index View, here the @model is set as IEnumureable of Models.Category, it should be in synch with what we return from ActionMethod.
+3. In Index view, we are using Html.DisplayFor for displaying the labels. 
+4. This is How ASP.Net automatically generates the codes, but we do not want the ready made solution, Now he deleted Category Controller and the CategoryFolder from Views of Admin Area. This was just for showing how things work. I did not Add it.
+------------Automatic Code Controller View Explanation Ends
+
+Now In the Areas>Admin Add Controller, Selected MVC Controller - Empty named it CategoryController
+
+Now a brand new Controller is created with only the Index Action Method.
+
+Now in _Layout.cshtml, changed asp-controller to Category(Instead of Categories)
+---------------------------------------------------------------
+--CategoryController
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    public class CategoryController : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+    }
+}
+
+--_Layout.cshtml
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -25,12 +75,15 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Category" asp-action="Index">Categores Test</a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Content Management
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
+                                <a class="dropdown-item" href="#">Action</a>
                                 <a class="dropdown-item" href="#">Another action</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#">Something else here</a>
@@ -63,3 +116,13 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

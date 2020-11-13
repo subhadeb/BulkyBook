@@ -1,3 +1,7 @@
+In this Module we would be Performing CRUD Operations on Category.
+
+We will use Repository Pattern so we will have an idea on how everything comes together.
+
 
 
 ---------------------------------------------------------------

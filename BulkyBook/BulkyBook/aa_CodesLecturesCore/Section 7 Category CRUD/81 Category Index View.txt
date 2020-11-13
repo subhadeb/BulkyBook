@@ -1,0 +1,183 @@
+Now we will work on the Index view.
+
+Go to Views Folder under Admin Area, We will create a folder matching the Controller name, so named it Category.
+
+In That Right Click, Add View, 
+
+Named it Index.cshtml, his visual studio had the Option of customizing by selecting Template(Get/Delete/Insert), selecting Model and Layout View, but Mine dont have any such option.
+
+Kept the Name as Index.cshtml and Clicked Add, the veiw was created with no layout(Unlike him).
+
+He have removed everything except the Layout, I am adding it manually like:
+
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+To test if the view creation was succesful, we can go to the Index action in the Controller, Right click, and Select Go To View, it should open the newly created Index view.
+
+Now in Index.cshtml
+
+He added an attachment(Category+Index+View.txt) it does not have any asp code, this is plain html. Below are the codes:
+
+<br />
+    <div class="row">
+        <div class="col-6">
+            <h2 class="text-primary">Category List </h2>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-primary"><i class="fas fa-plus"></i> &nbsp; Create New Category</a>
+        </div>
+    </div>
+
+<br />
+<div class="p-4 border rounded">
+    <table id="tblData" class="table table-striped table-bordered" style="width:100%">
+        <thead class="thead-dark">
+            <tr class="table-info">
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>  
+       
+
+Now after the Layout, pasted the codes.
+In the codes, We have a row, in the first half we are displaying the Title, in the second have we are adding the button to Create New Category.
+
+In the button he have used Font Awesome, opened the portal and shown the + Icon.
+class="fas fa-plus"
+
+Next we have a div, with a table inside it, the table has two headers Name and a blank one we will have the buttons here.
+
+Now Ran the Application, Opened SQL server as well.
+
+We will insert a Category to the Table in database with the the query.(also kept a backup in Scripts.sql in the folder DataSubha)
+
+Insert into Categories values('Fiction');
+
+On running the solution, we see the Category is not yet displayed because we are yet to get the data in the table, we can also see the + Icon from font awesome is visible.
+
+Now we would Like to Move Category Test to Content Management.
+So in _Layout.cshtml
+
+Cut the below code:
+<a class="nav-link" asp-area="Admin" asp-controller="Category" asp-action="Index">Categores Test</a>
+
+and paste it by replacing Action Dropdown under navbarDropdown, also renamed Category Test to Category and change the class nav-link to dropdown-item(to be in synch with other links). It's
+
+<a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
+
+Also removed nav-item li element which is of no use now from the top where we have moved from.
+
+Now on running we see Category is under Content Management. In the next part we would add Datatables.
+
+---------------------------------------------------------------
+--Index.cshtml under Areas/Admin/Views/Category
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<br />
+<div class="row">
+    <div class="col-6">
+        <h2 class="text-primary">Category List </h2>
+    </div>
+    <div class="col-6 text-right">
+        <a class="btn btn-primary"><i class="fas fa-plus"></i> &nbsp; Create New Category</a>
+    </div>
+</div>
+
+<br />
+<div class="p-4 border rounded">
+    <table id="tblData" class="table table-striped table-bordered" style="width:100%">
+        <thead class="thead-dark">
+            <tr class="table-info">
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+--_Layout.cshtml
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BulkyBook</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BulkyBook</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <partial name="_LoginPartial" />
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Content Management
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-white-50 bg-primary">
+        <div class="container">
+            &copy; 2020 - BulkyBook
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://kit.fontawesome.com/e19c476714.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

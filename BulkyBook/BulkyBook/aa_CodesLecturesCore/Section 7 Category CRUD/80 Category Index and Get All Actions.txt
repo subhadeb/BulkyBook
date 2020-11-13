@@ -1,0 +1,110 @@
+In the newly created CategoryController, Area Attribute is not define, So to CategoryController, added  [Area("Admin")].
+
+When we add the Controller with the Template using EntityFramework and Views, we need not add it(Area attribute) is already added.
+
+Now We would add IUnitOfWork(private readonly instance field).
+
+private readonly IUnitOfWork _unitOfWork;
+
+One thing to not here is we should always added the classes and interfaces in other libraries(that are to be exposed) as public, otherwise we would not be able to access  them. For example in IUnitOfWork.cs interface if we remove public, we will get error in Category Controller while referencing it.
+
+Now we need to load _unitOfWork from Depenedency Injection. So created constructor, 
+
+        public CategoryController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+Now first we will work on Index view.
+
+Now in Index, we will show the data in tabular format, and for that we would like to use DataTable and for that we need API and Javascript. In the same controller, we can have API Calls, we can not do the Same in Razor pages. 
+
+With Razor pages we would have to add a separate controller. 
+
+So now in the same controller(CategoryController), added #regin at the bottom, named it API calls.
+
+
+        #region API Calls
+
+        #endregion
+
+Inside the region, first we would want a getAction method for retrieving all data. Named it GetAll retruning IActionResult, with HttpGet attribute.
+
+ public IActionResult GetAll()
+        { 
+        
+        }
+
+Now we defined what is IActionResult, if we hover over that, we see:
+Defines a contract that represents the result of an action method.
+
+The IActionResult has various returns times including Bad Request like 404, Not Found Result, OkObject Result, if we would retrun NotFound(), it will work.
+
+Instead of IActionResult we would have also returned ActionResult, IActionResult is the interface, ActionResult is an abstract class. With IActionResult we can return some resources other than the predefined actions. 
+
+In GetAll we want all the categories in JSON format.
+
+
+So in a variable we can use Category.GetAll(), and then return it in Json in the variable data like
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.Category.GetAll();
+            return Json(new { data = allObj });
+        }
+
+
+
+
+---------------------------------------------------------------
+--CategoryController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class CategoryController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+
+
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.Category.GetAll();
+            return Json(new { data = allObj });
+        }
+
+        #endregion
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
