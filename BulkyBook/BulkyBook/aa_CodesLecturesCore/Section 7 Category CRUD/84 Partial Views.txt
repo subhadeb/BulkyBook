@@ -1,0 +1,111 @@
+Opened Upsert.cshtml
+
+Whenever we are working with a view, the first thing we need to check is, we need a model.
+
+Go to the action method and check what are we returning to View. In the actionmethod for Upsert we can see that we are returning category of type Category, so we need a viewmodel of type Category. So added @model in the Upsert.cshtml at the top like:
+
+@model BulkyBook.Models.Category
+
+Now, in the attachment he added Category upsert view, so I can copy paste the code.
+
+The filename is
+Category+Upsert+View.txt
+
+The code in the file is:
+
+<form method="post">
+    <div class="row p-3 border">
+        <div class="col-12 border-bottom">
+            <h2 class="text-primary">TITLE</h2>
+        </div>
+        <div class="col-8 pt-4">
+            <div class="form-group row">
+                <div class="col-4">
+                    NAME
+                </div>
+                <div class="col-8">
+                    TEXTBOX FOR NAME
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-8 offset-4">
+                   EDIT | BACK
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+so copy pasted this in Upsert.cshtml
+
+In the pasted code, we have a form and then we have a div where we are displaying the title of the page, then a div with col-md-8 there we have a name and then a textbox and after that we will have links for edit and back.
+
+The Edit functionality will be common for the pages, we can have a partial view for this. 
+
+Now in the Main project inside Views>Shared, add View, Named it _CreateAndBackToListButton, it's a Empty Razor view. 
+
+Removed everything from inside the view, 
+
+It will have a div with class row, inside it we will have two divs with class col. The first div will have the button Create with classes btn, btn-primary and form control.
+
+    <div class="col">
+        <button type="submit" class="btn btn-primary form-control">Create</button>
+    </div>
+
+ 
+
+Now one thing to note here is if we would redirect to the same controller, we need not specify the controller name, the action name is sufficient.
+
+similarly for the Back to List button, it is an anchor tag, with asp-action Index, we will set the class as btn, btn-success and form-control like:
+
+    <div>
+        <a asp-action="Index" class="btn btn-success form-control">Back To List</a>
+    </div>
+
+Took the backup of the whole partial view below.
+
+Now we will copy and paste the same file in the same foler to create it's copy. Renamed that _EditAndBackToListButton .cshtml
+
+Opened it. Now we will have a model for this partial view, it will have an id that would be an integer. It can be productid/categoryid etc. 
+
+So at the top, we would add
+@model int
+
+For the first button changed the text Create to Update. and added a tag helper for the button for routing like asp-route-id = @Model, here model will refer to the id. like:
+
+<button type="submit" class="btn btn-primary form-control" asp-route-id="@Model">Update</button>
+
+In the next part we will wrap up upsert view.
+
+---------------------------------------------------------------
+--_CreateAndBackToListButton.cshtml under shared
+<div class="row">
+    <div class="col">
+        <button type="submit" class="btn btn-primary form-control">Create</button>
+    </div>
+    <div class="col">
+        <a asp-action="Index" class="btn btn-success form-control">Back To List</a>
+    </div>
+</div>
+
+--_EditAndBackToListButton .cshtml in the same folder
+
+@model int
+<div class="row">
+    <div class="col">
+        <button type="submit" class="btn btn-primary form-control" asp-route-id="@Model">Update</button>
+    </div>
+    <div class="col">
+        <a asp-action="Index" class="btn btn-success form-control">Back To List</a>
+    </div>
+</div>
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

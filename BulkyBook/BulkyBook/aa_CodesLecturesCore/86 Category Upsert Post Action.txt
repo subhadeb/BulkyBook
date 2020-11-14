@@ -1,0 +1,188 @@
+Now we will work on Creating and Editing Category.
+
+Stopped the solution.
+
+Go To CategoryController(after Upsert Get).
+
+We need to use [HttpPost] attribute to define that it is a post action method.
+
+We also need the Attribute [ValidateAntiForgeryToken] - with this HTTP writes only unique values to cookies and the same value is written to the form. An error is raised if cookie value does not match form value, This feature prevents cross site request forgery. That is a form from another site, requests our site, AntiForgeryToken will prevent that.
+
+The action name is Upsert and this will have Category object category. First we will check if the ModelState.IsValid, this will check all the Validations that we have defined in the model are valid or not. Eg. If Name is Required, It's max length is less than 51 etc. 
+
+We are doing this for Double Security(Client + Server). 
+
+If the ModelState is not valid we will return view passing the category. So as of now it is like:
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Upsert(Category category)
+        {
+            if (ModelState.IsValid)
+            { 
+            
+            }
+            return View(category);
+        }
+
+Now if the ModelState is valid, first we will check if Id is 0, if it is zero we will Add like:
+_unitOfWork.Category.Add(category);
+
+else we would Update like:
+_unitOfWork.Category.Update(category);
+
+
+Now we need to update IUnitOfWork interface, because the Save() method is there only in UnitOfWork concrete class, it is missing in the Interface. So in IUnitOfWork.cs added:
+
+void Save();
+
+
+
+And to Be consistent, go to CategoryRepository, in method Update, remove the line _db.SaveChanges().
+
+Now Back to CategoryController,
+Added _unitOfWork.Save(); at the end.
+ 
+After that return RedirectToAction and instead of hardcoding, we can pass like below to avoid spelling mistake:
+return RedirectToAction(nameof(Index));
+
+Now On running we should be able to create and update Category.
+
+Next we will work on Deleting Category.
+
+Checked in To The code changes as create/update is working now
+
+---------------------------------------------------------------
+--CategoryController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class CategoryController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Upsert(int? id)
+        {
+            Category category = new Category();
+            if (id == null)
+            {
+                return View(category); ;
+            }
+            category = _unitOfWork.Category.Get(id.GetValueOrDefault());
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Upsert(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                if (category.Id == 0)
+                {
+                    _unitOfWork.Category.Add(category);
+                }
+                else
+                {
+                    _unitOfWork.Category.Update(category);
+                }
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
+
+            }
+            return View(category);
+        }
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.Category.GetAll();
+            return Json(new { data = allObj });
+        }
+
+        #endregion
+    }
+}
+
+
+--CategoryRepository.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class CategoryRepository : Repository<Category>,ICategoryRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public CategoryRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+
+        public void Update(Category category)
+        {
+            var objFromDb = _db.Categories.FirstOrDefault(x => x.Id == category.Id);
+            if (objFromDb != null)
+            {
+                objFromDb.Name = category.Name;
+            }
+        }
+    }
+}
+
+
+--IUnitOfWork.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ISP_Call SP_Call { get; }
+        void Save();
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

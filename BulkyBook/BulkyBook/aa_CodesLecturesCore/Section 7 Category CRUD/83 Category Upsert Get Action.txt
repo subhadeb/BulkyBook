@@ -1,0 +1,134 @@
+Now let's work on Creating a new Category.
+
+Create and Edit will have a common view. So we will call Upsert.
+
+Now lets add an Action(get) for Upsert in CategoryController. It will have a nullable parameter int? id. 
+
+For Edit we will have the Id and for Create id will be null.
+
+
+        public IActionResult Upsert(int? id)
+        {
+            return View();
+        }
+
+In the method first we will initialize Category:
+Category category = new Category();
+
+Now if id will be null, we will return View passing the initalized category
+
+            if (id == null)
+            {
+                return View(category); ;
+            }
+
+Now after the if block ends, it means the id is not null, so here we will have the code for edit. First fetched category with _unitOfwork.Category.Get passing the id.GetValueOrDefault()
+
+category = _unitOfWork.Category.Get(id.GetValueOrDefault());
+
+Now if the category will be null meaning incorrect id, we will return NotFound.
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+At the end we will return view with the category.
+return View(category);
+        public IActionResult Upsert(int? id)
+        {
+            Category category = new Category();
+            if (id == null)
+            {
+                return View(category); ;
+            }
+            category = _unitOfWork.Category.Get(id.GetValueOrDefault());
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+
+
+Now we will add the View. Previously we have added the view manually by creating folder and then creating cshtml file.
+
+[This is not working in my VS I had to name the view manually]
+Here we will directly create the view from the ActionMethod. Right Click on the Action and Select Add View.
+
+Added view Upsert.cshtml. Inside it I have kept only
+
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+We will add the contents in the next part.
+
+---------------------------------------------------------------
+--CategoryController.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class CategoryController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Upsert(int? id)
+        {
+            Category category = new Category();
+            if (id == null)
+            {
+                return View(category); ;
+            }
+            category = _unitOfWork.Category.Get(id.GetValueOrDefault());
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.Category.GetAll();
+            return Json(new { data = allObj });
+        }
+
+        #endregion
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

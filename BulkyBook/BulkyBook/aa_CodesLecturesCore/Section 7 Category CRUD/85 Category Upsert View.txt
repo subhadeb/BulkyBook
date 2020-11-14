@@ -1,0 +1,117 @@
+We are back to Upsert.cshtml
+
+We have form post and we have the TITLE.
+
+In the @{} block at the top we will initalize var title to Create Category. 
+var title = "Create Category";
+
+No after teh dhv class = row, added if check for When we will have the id not null/0 it means title is Edit Category. Id null means id is 0.
+
+       @if (Model.Id != 0)
+        {
+            title = "Edit Category";
+        }
+Replace TITLE with @title for the header to display
+
+Before this(after div class=row), we will add a validation summary, so added
+
+In Category.cs we can see we have [Display(Name="Category Name")] attribut set for name, so in the cshtml we can replace NAME with 
+
+<label asp-for="Name"></label>
+
+Now replace TEXTBOX FOR NAME with the the input tag for Name and will add the validation in a span after that.
+
+                   <input asp-for="Name" class="form-control">
+                    <span asp-validation-for="Name" class="text-danger"></span>
+
+The validations are also based on the Model. For name the below validations will work.
+
+        [Required]
+        [MaxLength(50)]
+
+Now in EDIT | BACK, it's time to replace them with the partial view, here also we will check the Model.Id, for loading the partial view that we have created earlier, For Edit partial view we will pass @Model.Id in modal.
+
+                <div class="col-8 offset-4">
+                    @if (Model.Id != 0)
+                    {
+                        <partial name="_EditAndBackToListButton .cshtml" model="@Model.Id" />
+                    }
+                    else
+                    {
+                        <partial name="_CreateAndBackToListButton.cshtml" />
+                    }
+                </div>
+
+NOw open Index.cshtml,
+
+To Create New Category Anchor tag, set asp-action as Upsert.
+<a class="btn btn-primary" asp-action="Upsert"><i class="fas fa-plus"></i> &nbsp; Create New Category</a>
+
+Now on running we we are able to see the Create and Edit, both are using the same file Upsert and the headers are also loaded properly, and we can see that currently the validation is not working as we have not implemented the post yet. 
+
+
+We have the client side valiations as well. and this is there in _ValidationScriptsPartial. To add tis in Upsert.cshtml at the bottom add this partial view like:
+
+Now on running we see the client side validations for both create and edit.
+
+In the next part we will work on server side validations and saving to the DB.
+---------------------------------------------------------------
+--Upsert.cshtml
+
+@model BulkyBook.Models.Category
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var title = "Create Category";
+}
+
+<form method="post">
+    <div class="row p-3 border">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (Model.Id != 0)
+        {
+            title = "Edit Category";
+        }
+        <div class="col-12 border-bottom">
+            <h2 class="text-primary">@title</h2>
+        </div>
+        <div class="col-8 pt-4">
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Name"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Name" class="form-control">
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-8 offset-4">
+                    @if (Model.Id != 0)
+                    {
+                        <partial name="_EditAndBackToListButton" model="@Model.Id" />
+                    }
+                    else
+                    {
+                        <partial name="_CreateAndBackToListButton" />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts{ 
+
+<partial name="_ValidationScriptsPartial">
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
