@@ -1,0 +1,131 @@
+Now open category.js
+
+We would add a function Delete at the very end, that will have the url as a parameter and will have a sweetalert(swal) inside it.
+
+function Delete(url) {
+    swal({
+
+    })
+}
+
+Now in the rener method of the datable in the second anchor<a> tag for delete, added onClick attribute calling delete passing the url same as edit.(It would be an API Call).
+
+<a onClick=Delete('/Admin/Category/Delete/${data}') class=....
+
+Now in the DeleteFunction, in sweetalert(swal) we will set the title, text, icon as warning, buttons will be true, dangerMode will be true.
+
+    swal({
+        title: "Are You sure you want to Delete",
+        text: "You will not be able to restore the data!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+    })
+
+Now it will have a then promise, it will have an argument, we will name it willDelete and it will be a boolean value, so if willDelete will be true we will make an ajax call to web api.
+
+The ajax will have type as DELETE, url will be the url parameter, it will have success element this will be a function
+
+    }).then(willDelete => {
+        if (willDelete) {
+        $.ajax({
+            type: 'DELETE',
+            url: url,
+            success: function (data) {
+
+            }
+        })
+	}
+    })
+
+
+Now in the funciton if data.success will be true we will show the notification using toastr(toastr.success) and then will relaod the datatable. Else(if data.success is false), we will use toastr.error and pass data.message.
+
+            success: function (data) {
+                if (data.success) {
+                    toastr.success(data.message);
+                    dataTable.ajax.reload()
+                }
+                else {
+                    toastr.error(data.message);
+                }
+
+Now On running on trying to delete a category, we see the sweetalert. And after delete we see the toastr notification saying Delete Succesful.
+
+So now the CRUD Operations are complete for Category.
+
+
+
+---------------------------------------------------------------
+
+--Pushed the codes to Github as the section is complete
+
+--category.js
+var dataTable;
+
+$(document).ready(function () {
+    loadDataTable();
+});
+
+function loadDataTable() {
+    dataTable = $('#tblData').DataTable({
+        "ajax": {
+           'url': '/Admin/Category/GetAll'
+        },
+        "columns": [
+            { "data": "name", "width": '60%' },
+            {
+                'data': 'id',
+                'render': function (data) {
+                    return `
+                        <div class="text-center">
+                            <a href="/Admin/Category/Upsert/${data}" class="btn btn-success text-white" style="cursor:pointer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a onClick=Delete('/Admin/Category/Delete/${data}') class="btn btn-danger text-white" style="cursor:pointer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+`
+
+                }, 'width': '40%'
+            }
+        ]
+    })
+}
+function Delete(url) {
+    swal({
+        title: "Are You sure you want to Delete",
+        text: "You will not be able to restore the data!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+    }).then(willDelete => {
+        if (willDelete) {
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message);
+                        dataTable.ajax.reload()
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                }
+            })
+        }
+
+    })
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

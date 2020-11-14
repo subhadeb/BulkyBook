@@ -1,4 +1,46 @@
-﻿using System;
+Last thing that is Remaining in Category is Deleting a Category.
+
+Opened CategoryController.cs
+
+We will have an API Call for Delete. For Delete we need to Annotate with [HttpDelete]. Created the ActonMethod returning IActionResult, Delete having parameter id.
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+
+        }
+
+Now first we will try to get the object from Database based on the id
+var objFromDb = _unitOfWork.Category.Get(id);
+
+Now if objFromDb will be null then we will return Json object with success false and with and error message.
+
+            if (objFromDb == null)
+            {
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+
+If the control passes beyond if block means objFromDb is not null in this case we will use Remove method to delete and then Save, and return json object with success true and a success message. Overall the method is like:
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var objFromDb = _unitOfWork.Category.Get(id);
+            if (objFromDb == null)
+            {
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+            _unitOfWork.Category.Remove(objFromDb);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+Next we will work on the JS.
+
+---------------------------------------------------------------
+--CategoryController.js
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -83,3 +125,14 @@ namespace BulkyBook.Areas.Admin.Controllers
         #endregion
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
