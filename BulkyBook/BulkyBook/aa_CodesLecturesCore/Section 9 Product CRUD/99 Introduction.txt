@@ -1,0 +1,20 @@
+Now we would be performing CRUD operations on Product.
+
+It would be complex as compared to the other two earlier, because now we would save images for our products.
+
+We could have kept Category and CoverType using Enums, but his main intention was to make us familiar with Repository Pattern.
+
+He wanted the first one to be very simple. We will get started with products from the next part.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

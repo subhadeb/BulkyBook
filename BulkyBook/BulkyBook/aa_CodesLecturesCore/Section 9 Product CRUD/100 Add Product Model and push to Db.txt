@@ -1,0 +1,215 @@
+Now we will add the Main Model of our project, it is the Products.
+
+Now go to BulkyBook.Models project, add a model, named it Product.cs
+
+Made the class Public.
+
+we will add few properties with prop tab tab these are int Id, string Title, string Description, stirng ISBN, string Author, then there are four types of price, we pasted them from some where with the [Range] Attribute. These are double ListPrice, Price, Price50 and Price100.
+
+Adeed annotation Requied and Range(1,10000) for all the four prices.
+
+Among ListPrice and Price, Price is valid if we order quantity less than 50.
+
+Price50 is the price if we order books in between quantity 50 and 99.
+
+Anothing over 100 will be for Price100.
+
+Now added string ImageUrl. 
+
+Now added int CategoryId and CoverTypeId that would reference to Category and CoverType tables and added [Required] annotation to both of them.
+
+Now we need to do one thing, we need to establish a foreign key Relation to Cateory. so for that it is very easy in EFCore, we will add an object of Category and to that we will add the Attribute [ForeignKey("CategoryId")], so both the properties would look like:
+
+        [Required]
+        public int CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public Category Category { get; set; }
+
+Done the same thing for CoverType.
+
+Now, let's open Repository.cs for noting one thing.
+In GetFirstOrDefault method we have includeProperties, with the help of this we can acess an object that is having a foreign key reference like for example with this we would be able to get Category Object while we try to get Product properties. We will see it's implementation later.
+
+Now Opened ApplcationDBContext under DataAcess project Data folder. there added
+
+public DbSet<Product> Products { get; set; }
+
+Now open PM Console, the database should be BulkyBook.DataAccess.
+
+Now run
+PM> add-migration addProductToDb
+
+Now in sql server run the below to confirm Products is not a table
+
+SELECT * from sys.tables
+
+Now run the below
+
+PM> update-database
+
+Now on running the below in sql server, we see Products table:
+SELECT * from sys.tables
+
+
+and on running the below we see all the columns
+select * from Products
+
+Now make few fields required in the Products Model - Title, ISBN, and Author. Also Id was taken as an Identity column, I forgot to add Key attribut to to id. so made it [Key] .
+
+Now after the changes, we will add a new migration named it 
+
+PM> add-migration addValidationsToProduct
+
+Now ran PM> update-database
+
+So now we have added the Product Model to Database.
+---------------------------------------------------------------
+
+--Product.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+    public class Product
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        public string Title { get; set; }
+        public string Description { get; set; }
+
+        [Required]
+        public string ISBN { get; set; }
+        [Required]
+        public string Author { get; set; }
+        [Required]
+        [Range(1, 10000)]
+        public double ListPrice { get; set; }
+        [Required]
+        [Range(1, 10000)]
+        public double Price { get; set; }
+        [Required]
+        [Range(1, 10000)]
+        public double Price50 { get; set; }
+        [Required]
+        [Range(1, 10000)]
+        public double Price100 { get; set; }
+        [Required]
+        public int CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public Category Category { get; set; }
+        [Required]
+        public int CoverTypeId { get; set; }
+
+        [ForeignKey("CoverTypeId")]
+        public CoverType CoverType { get; set; }
+    }
+}
+
+
+---Repository.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class Repository<T> : IRepository<T> where T : class
+    {
+        private readonly ApplicationDbContext _db;
+        internal DbSet<T> dbSet;
+
+        public Repository(ApplicationDbContext db)
+        {
+            _db = db;
+            this.dbSet = _db.Set<T>();
+        }
+
+        public void Add(T entity)
+        {
+            dbSet.Add(entity);
+        }
+
+        public T Get(int id)
+        {
+            return dbSet.Find(id);
+        }
+
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(includeProp);
+                }
+            }
+            if (orderBy != null)
+            {
+                return orderBy(query).ToList();
+            }
+
+            return query.ToList();
+        }
+
+        public T GetFirstOrDefault(Expression<Func<T, bool>> filter = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(includeProp);
+                }
+            }
+            return query.FirstOrDefault();
+        }
+
+        public void Remove(int id)
+        {
+            T entity = dbSet.Find(id);
+            Remove(entity);
+        }
+
+        public void Remove(T entity)
+        {
+            dbSet.Remove(entity);
+        }
+
+        public void RemoveRange(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

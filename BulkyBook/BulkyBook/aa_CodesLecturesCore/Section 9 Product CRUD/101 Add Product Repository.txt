@@ -1,0 +1,188 @@
+Now it's Time to Add Product Repository.
+
+In the last part I(Not him) missed to add ImageUrl so in the model added the below between Price100 and Category,
+   public string ImageUrl { get; set; }
+
+Now ran migration
+
+PM> add-migration AddedImageUrlToProduct
+
+First, made a copy of ICategoryRepository.cs, renamed to IProductRepository.cs
+
+Now renamed the interface to IProductRepository, updated the Model to Product from Category like:
+
+public interface IProductRepository : IRepository<Product> and also
+void Update(Product product);
+
+Now, made a copy of CategoryRepository and renamed to ProductRepository
+
+Update all the places with Category to Product. Took help of control + F.
+
+Now we will make customization in Update method.
+
+We will not update Image all the time, we will update Image only if ImageUrl is not null. so inside if (objFromDb != null), we will have the check like:
+ if (product.ImageUrl != null)
+                {
+                    objFromDb.ImageUrl = product.ImageUrl;
+                }
+
+After that we will update all the element with the values from product object.
+
+                objFromDb.ISBN = product.ISBN;
+                objFromDb.Price = product.Price;
+                objFromDb.Price50 = product.Price50;
+                objFromDb.ListPrice = product.ListPrice;
+                objFromDb.Price100 = product.Price100;
+                objFromDb.Description = product.Description;
+                objFromDb.CategoryId = product.CategoryId;
+                objFromDb.Author = product.Author;
+                objFromDb.CoverTypeId = product.CoverTypeId;
+
+Make sure we update all the properties.
+
+We will not call saveChages to be conistent with what we did for category.
+
+Now go to IUnitOfWork.cs, Add
+IProductRepository Product { get; }
+
+Now go to UnitOfWork.cs
+public IProductRepository Product { get; private set; }
+
+And in constructor,
+Product = new ProductRepository(_db);
+
+Next we will work on The CRUD Operations for Product.
+
+Pushed the codes to Github
+
+---------------------------------------------------------------
+--IProductRepository
+
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IProductRepository : IRepository<Product>
+    {
+        void Update(Product product);
+    }
+}
+
+
+--ProductRepositroy.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class ProductRepository : Repository<Product>, IProductRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public ProductRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+
+        public void Update(Product product)
+        {
+            var objFromDb = _db.Products.FirstOrDefault(x => x.Id == product.Id);
+            if (objFromDb != null)
+            {
+                if (product.ImageUrl != null)
+                {
+                    objFromDb.ImageUrl = product.ImageUrl;
+                }
+                objFromDb.ISBN = product.ISBN;
+                objFromDb.Price = product.Price;
+                objFromDb.Price50 = product.Price50;
+                objFromDb.ListPrice = product.ListPrice;
+                objFromDb.Price100 = product.Price100;
+                objFromDb.Description = product.Description;
+                objFromDb.CategoryId = product.CategoryId;
+                objFromDb.Author = product.Author;
+                objFromDb.CoverTypeId = product.CoverTypeId;
+            }
+        }
+    }
+}
+
+--IUnitOfWork.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ICoverTypeRepository CoverType { get; }
+
+        IProductRepository Product { get; }
+
+        ISP_Call SP_Call { get; }
+        void Save();
+    }
+}
+
+
+--UnitOfWork.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _db;
+        public UnitOfWork(ApplicationDbContext db)
+        {
+            _db = db;
+            Category = new CategoryRepository(_db);
+            CoverType = new CoverTypeRepository(_db);
+            Product = new ProductRepository(_db);
+            SP_Call = new SP_Call(_db);
+        }
+
+        public ICategoryRepository Category { get; private set; }
+
+        public ICoverTypeRepository CoverType { get; private set; }
+
+        public IProductRepository Product { get; private set; }
+        public ISP_Call SP_Call { get; private set; }
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

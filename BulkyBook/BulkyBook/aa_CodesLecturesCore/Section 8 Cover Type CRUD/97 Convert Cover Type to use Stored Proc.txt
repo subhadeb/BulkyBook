@@ -1,0 +1,254 @@
+Now we need To Modify our Covered Type controller to use our Stored Procedures.
+
+
+Opened CoverType, we would use the same _unitOfWork.
+
+Now we first we will create few constants in SD.CS in the project BulkyBook.Utility
+
+He have created five constants for the procedure names. He have directly pasted the names from somewhere, I am writing manually like:
+
+    public static class SD
+    {
+        public const string Proc_CoverType_GetAll = "usp_GetCoverTypes";
+        public const string Proc_CoverType_Get = "usp_GetCoverType";
+        public const string Proc_CoverType_Update = "usp_UpdateCoverType";
+        public const string Proc_CoverType_Delete = "usp_DeleteCoverType";
+        public const string Proc_CoverType_Create = "usp_CreateCoverType";
+    }
+
+Now we will start with index API.
+Currently it's like:
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.CoverType.GetAll();
+            return Json(new { data = allObj });
+        }
+
+In SP_Call.cs, In the method List(), We get IEnumerable, so we will call that. So in the controller Index method, we will pass null as th dynamic parameter, the proc name from constant.
+
+var allObj = _unitOfWork.SP_Call.List<CoverType>(SD.Proc_CoverType_GetAll,null);
+
+Now let's work on Delete API call.
+
+Here we need to get one Category based on the id. So we will create a variable parameter using Dapper. We would refer id as @id as it is required in the stored procedure paream. So it is like
+
+
+            var parameter = new DynamicParameters();
+            parameter.Add("@id", id);
+
+And now we can get the objectFrom db using the proc Get like:
+
+var objFromDb = _unitOfWork.SP_Call.OneRecord<CoverType>(SD.Proc_CoverType_Get, parameter);
+
+Now we need to replace _unitOfWork.CoverType.Remove(objFromDb) with the sp call by calling the Execute method as it is not returning anything.
+
+_unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Delete, parameter);
+
+Finally the Delete method is like:
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("@id", id);
+
+            var objFromDb = _unitOfWork.SP_Call.OneRecord<CoverType>(SD.Proc_CoverType_Get, parameter);
+            if (objFromDb == null)
+            {
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+            _unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Delete, parameter);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+Now go to Upsert Method.
+
+We will replace CoverType.Add() with Execute spcall passing the parameter. So first at the top if the ModelState is valid, will add the Name parameter with Dapper like:
+
+                var parameter = new DynamicParameters();
+                parameter.Add("@Name", coverType.Name);
+
+So we can replace the Add(coverType) code with the sp call like:
+
+_unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Create, parameter);
+
+Now in the else block(For update). we will add a parameter id like:
+
+parameter.Add("@id", coverType.Id);
+ And now replace the Update call with:
+
+So this is done. The method is now like:
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Upsert(CoverType coverType)
+        {
+            if (ModelState.IsValid)
+            {
+                var parameter = new DynamicParameters();
+                parameter.Add("@Name", coverType.Name);
+                if (coverType.Id == 0)
+                {
+                    _unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Create, parameter);
+                }
+                else
+                {
+                    parameter.Add("@id", coverType.Id);
+                    _unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Update, parameter);
+                }
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
+
+            }
+            return View(coverType);
+        }
+
+
+Now go to Upsert get,
+
+we can directly copy paste the code for getting the CoverType object based on id.
+
+            var parameter = new DynamicParameters();
+            parameter.Add("@id", id);
+            var objFromDb = _unitOfWork.SP_Call.OneRecord<CoverType>(SD.Proc_CoverType_Get, parameter);
+
+and we can replace var objFromDb with coverType and remove the below line as it is not required:
+coverType = _unitOfWork.CoverType.Get(id.GetValueOrDefault());
+
+So we have modified everything with proc and there is no use of CoverTypeRepository now. But we will keep that as reference. 
+
+
+Now on running.
+
+We are able to Perform the CRUD operations as earlier.
+---------------------------------------------------------------
+Code Backups
+
+--SD.cs under utility
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Utility
+{
+    public static class SD
+    {
+        public const string Proc_CoverType_GetAll = "usp_GetCoverTypes";
+        public const string Proc_CoverType_Get = "usp_GetCoverType";
+        public const string Proc_CoverType_Update = "usp_UpdateCoverType";
+        public const string Proc_CoverType_Delete = "usp_DeleteCoverType";
+        public const string Proc_CoverType_Create = "usp_CreateCoverType";
+    }
+}
+
+---CoverTypeController.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Utility;
+using Dapper;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class CoverTypeController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        public CoverTypeController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Upsert(int? id)
+        {
+            CoverType coverType = new CoverType();
+            if (id == null)
+            {
+                return View(coverType); ;
+            }
+            var parameter = new DynamicParameters();
+            parameter.Add("@id", id);
+            coverType = _unitOfWork.SP_Call.OneRecord<CoverType>(SD.Proc_CoverType_Get, parameter);
+            
+            if (coverType == null)
+            {
+                return NotFound();
+            }
+            return View(coverType);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Upsert(CoverType coverType)
+        {
+            if (ModelState.IsValid)
+            {
+                var parameter = new DynamicParameters();
+                parameter.Add("@Name", coverType.Name);
+                if (coverType.Id == 0)
+                {
+                    _unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Create, parameter);
+                }
+                else
+                {
+                    parameter.Add("@id", coverType.Id);
+                    _unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Update, parameter);
+                }
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
+
+            }
+            return View(coverType);
+        }
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.SP_Call.List<CoverType>(SD.Proc_CoverType_GetAll,null);
+            return Json(new { data = allObj });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("@id", id);
+            var objFromDb = _unitOfWork.SP_Call.OneRecord<CoverType>(SD.Proc_CoverType_Get, parameter);
+            if (objFromDb == null)
+            {
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+            _unitOfWork.SP_Call.Execute(SD.Proc_CoverType_Delete, parameter);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+        #endregion
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
