@@ -1,0 +1,38 @@
+I have seen the solution of the Assignment in 1.5x mode. and will be Coding it here taking the Github reference of his codes.
+
+Add Controller by Renaming.
+First Copy Paste CategoryController, open it and rename to CoverTypeController.cs
+
+Now open it, Strl Shif F, For Find And Replace, Go to Replace in Files tab, Select the Match case checkbox, [*IMP*]Select Lookin as Current document[*IMP*] and Replace Category with CoverType--11 Occurences Replaced
+
+Now, Replace category with coverType-- 10 Occurences Replaced
+
+Inside it Replace All Category with CoverType using replace all select match case and then replace category with coverType.
+
+Now In Views, copy paste the Folder Category and Rename to CoverType.
+
+Open Index.cshtml, then Ctrl + F for Category and then Rename to Covertype/covertype in all the paces mantaining the casing. The js script reference name would be coverType.js
+
+Done the same thing for Upsert.cshtml
+
+Now copy paste category.js and rename to coverType.js
+
+Opened it, 
+Control + F on Category rename to CoverType based on the casing.
+
+go to _Layout add a link as a dropdown-item, the Controller name is CoverType
+<a class="dropdown-item" asp-area="Admin" asp-controller="CoverType" asp-action="Index">Cover Type</a>
+
+Now on running we see Everything Running as usual(CRUD).
+---------------------------------------------------------------
+PUshed the Codes to Github.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

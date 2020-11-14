@@ -1,0 +1,214 @@
+Now I am seen the solution of the Assignment in 1.5x mode. and will be Coding it here taking the Github reference of his codes.
+
+Gone to Models Project, made a copy of Category pasted in the same folder renamed the copy to CoverType.cs
+
+Opened it renamed the class CoverType.
+
+Changed the Display attribute to
+[Display(Name="Cover Type")]
+
+Now opened ApplicationDbContext.cs under DataAccess Project/ Data
+Copy paste below the code for DbSet Categories, and after modification it's like 
+
+public DbSet<CoverType> CoverTypes { get; set; }
+
+Now go to Repository under DataAccess,
+Made a copy of ICategoryRepository.cs after pasting Renamed to ICoverTypeRepository.cs
+
+Opened it and changed the interface name to ICoverTypeRepository, and It would Inherit IRepository<CoverType>(not Category)
+
+public interface ICoverTypeRepository : IRepository<CoverType>
+
+Modified the Update parameter to have CoverType class and coverType object.
+void Update(CoverType coverType);
+
+Now make a copy of CategoryRepository.cs and then rename that to CoverTypeRepository.cs, opened that.
+
+Upage the class name and constructor to CoverTypeRepository, And it should implement Repository<CoverType>,ICoverTypeRepository
+
+public class CoverTypeRepository : Repository<CoverType>,ICoverTypeRepository
+
+Now change the Update method to have CoverType codes, it would be like:
+
+Now go to IUnitOfWork.cs
+
+Copy paste ICategoryRepository and rename to like:
+
+ICoverTypeRepository CoverType { get; }
+
+Now go to UnitOfWork.cs
+
+Copy paste ICategoryRepository code and after modification it would be like:
+public ICoverTypeRepository CoverType { get; private set; }
+
+In the construcotr, we will initialize like:
+CoverType = new CoverTypeRepository(_db);
+
+Now Let's build the solution.
+Build Passed now we would add Migration, Select the Default Project
+
+So in PM console, run
+
+PM> add-migration addCoverTypeToDb
+
+A Class with Some date is created at the end with _addCoverTypeToDb.cs
+
+Now we will run update-database
+
+PM> update-database
+
+The table CoverTypes is created in the database.
+---------------------------------------------------------------
+--CoverType.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+   public class CoverType
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Display(Name="Cover Type")]
+        [Required]
+        [MaxLength(50)]
+        public string Name { get; set; }
+    }
+}
+
+
+--ApplicationDbContext
+using System;
+using System.Collections.Generic;
+using System.Text;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace BulkyBook.DataAccess.Data
+{
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+       public DbSet<Category> Categories { get; set; }
+        public DbSet<CoverType> CoverTypes { get; set; }
+    }
+}
+
+--IConverTypeRepository.cs
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface ICoverTypeRepository : IRepository<CoverType>
+    {
+        void Update(CoverType coverType);
+    }
+}
+--CoverTypeRepository.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class CoverTypeRepository : Repository<CoverType>,ICoverTypeRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public CoverTypeRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+
+        public void Update(CoverType coverType)
+        {
+            var objFromDb = _db.CoverTypes.FirstOrDefault(x => x.Id == coverType.Id);
+            if (objFromDb != null)
+            {
+                objFromDb.Name = coverType.Name;
+            }
+        }
+    }
+}
+
+--IUnitOfWork.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ICoverTypeRepository CoverType { get; }
+
+        ISP_Call SP_Call { get; }
+        void Save();
+    }
+}
+
+
+--UnitOfWork.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _db;
+        public UnitOfWork(ApplicationDbContext db)
+        {
+            _db = db;
+            Category = new CategoryRepository(_db);
+            CoverType = new CoverTypeRepository(_db);
+            SP_Call = new SP_Call(_db);
+        }
+
+        public ICategoryRepository Category { get; private set; }
+
+        public ICoverTypeRepository CoverType { get; private set; }
+        public ISP_Call SP_Call { get; private set; }
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

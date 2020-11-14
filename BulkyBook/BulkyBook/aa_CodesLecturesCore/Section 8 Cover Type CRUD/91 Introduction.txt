@@ -1,4 +1,6 @@
+In this section we will be performing CRUD Operations on Cover Type.
 
+Cover Type will be similar to what we have for Category. It would be kind of Practice for us on what we learnt from category.
 
 ---------------------------------------------------------------
 

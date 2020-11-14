@@ -1,0 +1,28 @@
+Now we need to Perform CRUD Operations on CoverType.
+
+Opened PPT.
+1. Perform CRUD Operations on Cover Type.
+>>Add Covert Type to NavBar
+>>Add CoverType Controller will all the required Action Methods.
+>>CoverType Index View should use DataTables.
+>>Cover Type Upesrt View Should take care of crating and updating CoverType.
+>>Deleteing CoverType should be done using API Call.
+
+
+Explanation:
+Now we will perform multiple tasks on CoverType.
+
+We whould use Javascript for the ajax call. Everything is similar to Category.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

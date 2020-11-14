@@ -1,0 +1,34 @@
+Opened PPT.
+
+Assignment -1
+1. Add CoverType.cs in the Model's Folder
+> CoverType Model-->ID, NAME.
+> Push Covertype to Databse.
+
+2. Add CoverType to Repository
+> Add CoverTypeRepository Class.
+> Add ICoverTypeRepository Interface.
+> Add CoverType to UnitOfWork and IUnitOfWork.
+
+Explanation:
+In this Assignment we will be performing CRUD for Cover Type it would be similar to the one we did for Category so that we can implement what we have leard..
+
+CoverType will have two properties ID and Name.
+
+For Database we will have to create Migrations.
+
+So we need to create a newclass for Repository. Then will add CoverType to UnitOfWork. We have done already.
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
