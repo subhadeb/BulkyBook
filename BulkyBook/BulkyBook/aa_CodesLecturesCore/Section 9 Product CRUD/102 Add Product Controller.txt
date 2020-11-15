@@ -1,0 +1,45 @@
+Now It's time to create the controller to Perform all the CRUD Operations.
+
+Made a copy of CategoryController and renamed that to ProductController
+
+Opened and Renamed the class and the constructor.
+
+
+Now we will replace all Category with Product. to do that do Ctrl + Shift + F.
+
+Replace in files, Current Document should be select, and Match Case should be checked.
+
+Replace Category with Product-- 9 Replaced.
+
+Now replace category with product - 10 Replaced.
+
+NOw in this controller we would need something called IWebHostEnvironment along with _unitOfWork.
+
+private readonly IWebHostEnvironment _hostEnvironment;
+
+The reason we are adding this is we will be uploading images in the folder inside wwwroot. Now in the constructor we will inject that like;
+
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment hostEnvironment)
+        {
+            _unitOfWork = unitOfWork;
+            _hostEnvironment = hostEnvironment;
+        }
+
+Now for Upsert get, now we will be showing a dropdown for Category and CoveredType. We would have done this Dropdown thing with an Enum but his main goal was to teach us how to use the Repository Pattern in our Project. 
+
+So in the Upsert Get, we would need a list for category and covertype dropdown.
+
+For that we will be adding a viewmodel and we will see that in the next part.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

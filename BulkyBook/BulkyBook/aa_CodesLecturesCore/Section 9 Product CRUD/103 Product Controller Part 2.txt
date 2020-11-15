@@ -1,0 +1,238 @@
+Now for Upsert Get, we need something where we can hold the Product Object as well as the Select List for Category and CoverType.
+
+The most standard way of doing that is to have a view model
+
+ViewModel represents the data that we will show up in the view. It will be different than the domain model, it is a model specific to our view.
+
+
+As of now our Models were sufficient enough to display in a view.
+
+For Products upsert it is not sufficient, we need dropdown which would hold a list of Categories and CoverTypes.
+
+For that we will create a View Model. We donot add viewmodel to our DB, so we should not add them to ApplicationDB Context.
+
+No Inside BulkyBook.Models folder, 
+We have a ViewModels folder there we will add a class named it ProductVM.
+
+Made the class the public.
+
+First added the property Product, we will create update a Product from this view.
+
+public Product Product { get; set; }
+
+We need Dropdwons for CategoryList and CoveredType. 
+
+Now we would add Property IEnumberable of SelectListItem, for that, it will add a package. 
+
+public IEnumerable<SelectListItem>
+
+Press Ctrl + Dot in SelectListItem, select Install package Microsoft....ViewFeatures and then find and install latest version. after that name the property as CategoryList.
+
+public IEnumerable<SelectListItem> CategoryList { get; set; }
+
+Now copy paste the same and rename to CoveredTypeList.
+
+Now back to Controller, Upsert Get Action.
+
+
+
+Changed Product object creation to ProductVM and would add the Properties in the object creation itself. FIrst we initialized Product as new Product(). 
+
+now its
+
+            ProductVM productVM = new ProductVM()
+            {
+                Product = new Product()
+            };
+
+Now along with Product we will initalize the CategoryList, for that we would use _unitOfWork.Category.GetAll().Select(..)
+
+In the Select(), we would pass(i=>new SelectListItem{}), and at the top we can add the package to using statement like:
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+And now we can use SelectListItem having the text as i.Name and value as i.Id.ToString()
+
+ CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
+                { 
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                })
+
+Made a copy of the above to initialize CoverTypeList, here it would be _unitOfWork.CoverType
+
+Now, we already have a check for if id is null, now we would return the productVM object like:
+
+            if (id == null)
+            {
+                return View(productVM);
+            }
+
+And now after that instead of getting the product details from unitOfWork we would get
+productVM.Product = _unitOfWork.Product.Get(id.GetValueOrDefault());
+
+And now the check will be for productVM.Product,
+
+            if (productVM.Product == null)
+            {
+                return NotFound();
+            }
+
+At the end return View(productVM)
+
+This is all what we want to Do in Upsert Get.
+
+Now in Upsert Post, we would need to check if a file was uploaded, we will look into Upsert Post in a later video, for now commented the entire method.
+
+
+Now let's wrap up the API calls.
+
+In GetAll, we we would get all the products. Now we would modify GetAll call.
+
+Here we would includeProperties - Category and CoverType by passing them in Comma Separated String.
+
+var allObj = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+
+
+For Delete we would get the Product from DB based on id, and if the product will not be null we will delete it and return success message. Did not change anything here.
+
+
+Now most of the things in ProductController is done, except Upsert Post, before we work on this, we would work on the views and the js.
+
+
+
+
+---------------------------------------------------------------
+
+--ProductVM.cs
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Models.ViewModels
+{
+    public class ProductVM
+    {
+        public Product Product { get; set; }
+
+        public IEnumerable<SelectListItem> CategoryList { get; set; }
+
+        public IEnumerable<SelectListItem> CoveredTypeList { get; set; }
+    }
+}
+
+
+--ProductController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class ProductController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment hostEnvironment)
+        {
+            _unitOfWork = unitOfWork;
+            _hostEnvironment = hostEnvironment;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Upsert(int? id)
+        {
+            ProductVM productVM = new ProductVM()
+            {
+                Product = new Product(),
+                CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
+                { 
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                }),
+                CoveredTypeList = _unitOfWork.CoverType.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                })
+            };
+            if (id == null)
+            {
+                return View(productVM);
+            }
+            productVM.Product = _unitOfWork.Product.Get(id.GetValueOrDefault());
+            if (productVM.Product == null)
+            {
+                return NotFound();
+            }
+            return View(productVM);
+        }
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Upsert(Product product)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (product.Id == 0)
+        //        {
+        //            _unitOfWork.Product.Add(product);
+        //        }
+        //        else
+        //        {
+        //            _unitOfWork.Product.Update(product);
+        //        }
+        //        _unitOfWork.Save();
+        //        return RedirectToAction(nameof(Index));
+
+        //    }
+        //    return View(product);
+        //}
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+            return Json(new { data = allObj });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var objFromDb = _unitOfWork.Product.Get(id);
+            if (objFromDb == null)
+            {
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+            _unitOfWork.Product.Remove(objFromDb);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+        #endregion
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

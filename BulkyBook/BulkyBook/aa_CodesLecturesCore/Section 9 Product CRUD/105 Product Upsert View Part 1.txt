@@ -1,0 +1,274 @@
+Now opened Upsert.cshtml(That we have copied earlier and kept the contents unchanged).
+
+At the top for @model, it would be 
+@model BulkyBook.Models.ViewModels.ProductVM
+
+Now search all Category and rename to Product.
+
+Now we will check for Model.Product.Id to understand it is Edit, also at the same time we will set the hidden field for Product.Id like:
+
+        @if (Model.Product.Id != 0)
+        {
+            title = "Edit Product";
+            <input type="hidden" asp-for="Product.Id">
+        }
+
+Now at the end for loading partial view _EditAndBackToListButton, it would be Model.Product.Id and the check above will also be Model.Product.Id
+
+                    @if (Model.Product.Id != 0)
+                    {
+                        <partial name="_EditAndBackToListButton" model="@Model.Product.Id" />
+                    }
+
+
+Now we have to display all the Properties.
+
+For the first form-group-row, label would be Product.Title and the same will be set for input and span.
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Title"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Title" class="form-control">
+                    <span asp-validation-for="Product.Title" class="text-danger"></span>
+                </div>
+            </div>
+
+Now copy pasted the same below. Here Title is replaced with ISBN.
+
+Made another copy this time it is Author.
+
+Now made a copy now it is Description. It will not have input and span instead we will have a textarea with class form-control.
+
+                <div class="col-8">
+                    <textarea asp-for="Product.Description" class="form-control"></textarea>
+                </div>
+
+
+Now after Description we will have Four copies of the ealier form-group-row(not for the description). First is for ListPrice.
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.ListPrice"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.ListPrice" class="form-control">
+                    <span asp-validation-for="Product.ListPrice" class="text-danger"></span>
+                </div>
+            </div>
+
+Next is for Price, then Price50 and at last Pirce100
+
+Now make a copy of the formgroup row again(may be the last one Price100).
+
+Here instead of Label directly show Category
+
+Next in the div with col-8, we will use the html helper @Html.DropdownListFor, here with expresstion m->m.something. there first we need to select the element in which the id would be saved. Next is what is the list that will populate this. Here it would be Model.CategoryList. Next is if we want any default valud to display, We can set "Select a Category". Next we can specify the classes in new.
+
+@Html.DropDownListFor(x=>x.Product.CategoryId,Model.CategoryList,"Select a Category",new { @class = "form-control"})
+
+After this(in the same div) we can have the validation for CategoryId like
+
+<span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+
+So the form-group-row is now like:
+
+
+            <div class="form-group row">
+                <div class="col-4">
+                    Category
+                </div>
+                <div class="col-8">
+                    @Html.DropDownListFor(x => x.Product.CategoryId, Model.CategoryList, "Select a Category",
+                   new { @class = "form-control" })
+                    <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+                </div>
+            </div>
+
+
+Now made a copy of this, and this time it is for CoverType whis is also similar. After copying replaced all Caegory with CoverType/Cover Type.
+
+The last thing would be for the image. Copied the same form group row for CoverType.
+
+The Label is Image.
+
+Now remove everything from the div of col-8.
+
+Now it's input of type file, name=files, id="uploadBox", muliple and class=form-control like
+
+                <div class="col-8">
+                    <input type="file" name="files" id="uploadBox" multiple class="form-control">
+                </div>
+
+Now go to the top <form> tag, along with method we need to set enctlype to multipart/form-data so that it can handle file upload
+
+
+<form method="post" enctype="multipart/form-data">
+
+Now we will to customize the _CreateAndBackToListButton, so we will not change in the main file, will copy contents from the file and replace with the <parital> .
+
+To the submit button we want to execute some js function. So we can write like
+
+<button type="submit" onClick="return validateInput()" class="btn btn-primary form-control">Create</button>
+
+We will work on this js function next part and also work on the text area in the next part.
+---------------------------------------------------------------
+
+--Upsert.cshtml
+@model BulkyBook.Models.ViewModels.ProductVM
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var title = "Create Product";
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="row p-3 border">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (Model.Product.Id != 0)
+        {
+            title = "Edit Product";
+            <input type="hidden" asp-for="Product.Id">
+        }
+        <div class="col-12 border-bottom">
+            <h2 class="text-primary">@title</h2>
+        </div>
+        <div class="col-8 pt-4">
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Title"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Title" class="form-control">
+                    <span asp-validation-for="Product.Title" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.ISBN"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.ISBN" class="form-control">
+                    <span asp-validation-for="Product.ISBN" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Author"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Author" class="form-control">
+                    <span asp-validation-for="Product.Author" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Description"></label>
+                </div>
+                <div class="col-8">
+                    <textarea asp-for="Product.Description" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.ListPrice"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.ListPrice" class="form-control">
+                    <span asp-validation-for="Product.ListPrice" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Price"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Price" class="form-control">
+                    <span asp-validation-for="Product.Price" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Price50"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Price50" class="form-control">
+                    <span asp-validation-for="Product.Price50" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Price100"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Price100" class="form-control">
+                    <span asp-validation-for="Product.Price100" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    Category
+                </div>
+                <div class="col-8">
+                    @Html.DropDownListFor(x => x.Product.CategoryId, Model.CategoryList, "Select a Category",
+                   new { @class = "form-control" })
+                    <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    Cover Type
+                </div>
+                <div class="col-8">
+                    @Html.DropDownListFor(x => x.Product.CoverTypeId, Model.CoveredTypeList, "Select a Cover Type",
+                   new { @class = "form-control" })
+                    <span asp-validation-for="Product.CoverTypeId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-4">
+                    Cover Type
+                </div>
+                <div class="col-8">
+                    <input type="file" name="files" id="uploadBox" multiple class="form-control">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-8 offset-4">
+                    @if (Model.Product.Id != 0)
+                    {
+                        <partial name="_EditAndBackToListButton" model="@Model.Product.Id" />
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col">
+                                <button type="submit" onClick="return validateInput()" class="btn btn-primary form-control">Create</button>
+                            </div>
+                            <div class="col">
+                                <a asp-action="Index" class="btn btn-success form-control">Back To List</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts{
+
+    <partial name="_ValidationScriptsPartial">
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

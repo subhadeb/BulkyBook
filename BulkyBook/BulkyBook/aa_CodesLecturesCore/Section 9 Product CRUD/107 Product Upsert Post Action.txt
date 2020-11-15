@@ -1,0 +1,240 @@
+Now we will configure Upsert Post.
+
+First in wwwroot created a folder images and under that created folder products for storing our products images/
+
+Opened Product Controller.
+
+In the Upsert.cshtml we can see, when we are havign Product.Id we are pasing the Id, and for insert we are not passing any Id.
+
+
+Now in Upsert Post, uncommented the codes first for Upsert Post.
+
+Now the parameter would be ProductVM(instead of Product) and the parameter name is productVM.
+
+public IActionResult Upsert(ProductVM productVM)
+
+So first we have check if ModelState is valid. Now if the ModelState would be valid(inside if block).
+
+We will get the rootpath in a string webRootPath with the help of _hostEnvironment that we have in the constructor like below in modelstate valid if block:
+
+string webRootPath = _hostEnvironment.WebRootPath;
+
+the file that would be uploaded will be present HttpContext and would capture files like:
+
+var files = HttpContext.Request.Form.Files;
+
+Now we will check if files count is greater than 0, and if it would be greater than 0 then we will have a fileName as a new Guid.
+                if (files.Count > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString();
+                }
+
+After fileName, we will have a variable for uploads that would use Path.combine to find our products folder like:
+
+var uploads = Path.Combine(webRootPath, @"images\products");
+
+now we will get the extension of the file like.
+
+var extension = Path.GetExtension(files[0].FileName);
+
+Now if imageUrl in the vm is not null, it means it is an edit and we would need to remove the old image and upload a new image. for that first found the imgagePath with the help of Path.Combine, and then used webRootPath, ImageUrl and Trimstart. and then if the file will exist we will Delete() the imagepath.
+
+                    if (productVM.Product.ImageUrl != null)
+                    {
+                        //this is an edit and we need to remove old image.
+                        var imagePath = Path.Combine(webRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            System.IO.File.Delete(imagePath);
+                        }
+                    }
+
+Now after the if block, we will upload the new image. so we would use using for FileStream. It will have a FileMode.Create. And inside the using block, we will use CopyTo.
+
+                    using (var fileStream = new FileStream(Path.Combine(uploads, fileName + extension), FileMode.Create))
+                    {
+                        files[0].CopyTo(fileStream);
+                    }
+
+Now after that. We will update the Image Url of the vm.
+
+productVM.Product.ImageUrl = @"\image\product" + fileName + extension;
+
+Now in the else block for files.count greter than 0, that is if they do not change the image, we will get the Product from from db in objFromDb and we would set the ImageUrl of vm to the imageUrl of objFromDb.
+
+                else
+                {
+                    //Update when they do not change the image.
+                    if (productVM.Product.Id != 0)
+                    {
+                        Product objFromDb = _unitOfWork.Product.Get(productVM.Product.Id);
+                        productVM.Product.ImageUrl = objFromDb.ImageUrl;
+                    }
+                }
+
+
+After all this we will upate the product.id ==0 check to productVM.Product.Id, and if ti woulld be 0, then we would add productVM.Product, else we would update productVM.Product like:
+
+                if (productVM.Product.Id == 0)
+                {
+                    _unitOfWork.Product.Add(productVM.Product);
+                }
+                else
+                {
+                    _unitOfWork.Product.Update(productVM.Product);
+                }
+
+We would save the changes and redirect to Index and at last we would return view productVM.
+
+We are done with writing this big method, but there are some errors which we would fix next and run.
+---------------------------------------------------------------
+ProductController.cs
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class ProductController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment hostEnvironment)
+        {
+            _unitOfWork = unitOfWork;
+            _hostEnvironment = hostEnvironment;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Upsert(int? id)
+        {
+            ProductVM productVM = new ProductVM()
+            {
+                Product = new Product(),
+                CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                }),
+                CoveredTypeList = _unitOfWork.CoverType.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                })
+            };
+            if (id == null)
+            {
+                return View(productVM);
+            }
+            productVM.Product = _unitOfWork.Product.Get(id.GetValueOrDefault());
+            if (productVM.Product == null)
+            {
+                return NotFound();
+            }
+            return View(productVM);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Upsert(ProductVM productVM)
+        {
+            if (ModelState.IsValid)
+            {
+                string webRootPath = _hostEnvironment.WebRootPath;
+                var files = HttpContext.Request.Form.Files;
+                if (files.Count > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString();
+                    var uploads = Path.Combine(webRootPath, @"images\products");
+                    var extension = Path.GetExtension(files[0].FileName);
+
+                    if (productVM.Product.ImageUrl != null)
+                    {
+                        //this is an edit and we need to remove old image.
+                        var imagePath = Path.Combine(webRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            System.IO.File.Delete(imagePath);
+                        }
+                    }
+                    using (var fileStream = new FileStream(Path.Combine(uploads, fileName + extension), FileMode.Create))
+                    {
+                        files[0].CopyTo(fileStream);
+                    }
+                    productVM.Product.ImageUrl = @"\image\product" + fileName + extension;
+                }
+                else
+                {
+                    //Update when they do not change the image.
+                    if (productVM.Product.Id != 0)
+                    {
+                        Product objFromDb = _unitOfWork.Product.Get(productVM.Product.Id);
+                        productVM.Product.ImageUrl = objFromDb.ImageUrl;
+                    }
+                }
+
+                if (productVM.Product.Id == 0)
+                {
+                    _unitOfWork.Product.Add(productVM.Product);
+                }
+                else
+                {
+                    _unitOfWork.Product.Update(productVM.Product);
+                }
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
+
+            }
+            return View(productVM);
+        }
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+            return Json(new { data = allObj });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var objFromDb = _unitOfWork.Product.Get(id);
+            if (objFromDb == null)
+            {
+                return Json(new { success = false, message = "Error While Deleting" });
+            }
+            _unitOfWork.Product.Remove(objFromDb);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+        #endregion
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
