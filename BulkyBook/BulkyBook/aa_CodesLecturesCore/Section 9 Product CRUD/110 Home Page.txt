@@ -1,0 +1,203 @@
+Now Added Four Products, I have inserted one from Screen and made copy of the Rest.
+
+Now we would like to display the Products in our homepage.
+
+Now stopped the solution with Shif F5
+
+Now open HomeController for the Customer Area and Index.cshtml for the same.
+
+We would retrive all the books and would pass that to the view.
+
+First declared
+private readonly IUnitOfWork _unitOfWork;
+
+And would load it with dependency injection like:
+
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        {
+            _logger = logger;
+            _unitOfWork = unitOfWork;
+        }
+
+
+Now in Index ActionMethod, we would declare variable of type IEnumberable<Product> and would use GetAll with includeProperties for Category and CovertType to load that.
+
+IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+
+And we would return productList to the View().
+
+
+Now right click and Go to View(Index.cshtml).
+
+Now we need to define the model, it should be @model m being lower. so the model is 
+
+@model IEnumerable<Product>
+
+Now removed all the other codes from the view.
+
+Now he added html codes to the Video. Home+Page+View.txt 
+Below are the codes.
+
+<div class="row pb-3 backgroundWhite">
+        <div class="col-lg-3 col-md-6" >
+            <div class="row p-2">
+                <div class="col-12  p-1" style="border:1px solid #008cba; border-radius: 5px;">
+                    <div class="card" style="border:0px;">
+                        <img src="https://via.placeholder.com/150" class="card-img-top rounded" />
+                        <div class="pl-1">
+                            <p class="card-title h5"><b style="color:#2c3e50">Title</b></p>
+                            <p class="card-title text-primary">by <b>Author</b></p>
+                        </div>
+                        <div style="padding-left:5px;">
+                            <p>List Price: <strike><b class="">$$$$$PRICE</b></strike></p>
+                        </div>
+                        <div style="padding-left:5px;">
+                            <p style="color:maroon">As low as: <b class="">$$$$$PRICE100</b></p>
+                        </div>
+                    </div>
+                    <div >
+                        DETAILS BUTTON
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+After pasting we can see these are all static html and css.
+
+Now we would like to iterate over the div of class col-lg-3 col-md-6"(second div)
+
+So inside the top div with class backgroundWhite, added foreach to interate over Model and named the var product.
+
+@foreach (var product in Model)
+
+Now ran(F5) with the changes as of now.
+
+On Running we see see Four Tiles, Each having a dummy Image saying 150 x 150 and the below details below that.
+
+Title
+
+by Author
+
+List Price: $$$$$PRICE
+
+As low as: $$$$$PRICE100
+
+DETAILS BUTTON
+
+
+Now we will populated these dynamically.
+
+First replaced img src with @product.ImageUrl
+
+Replaced Title with @product.Title
+
+Replaced Author with @product.Author
+
+Replaced $$$$$PRICE with $ @product.Price.ToString("0.00")
+
+Did the same thing for price hundred, it's like $  @product.Price100.ToString("0.00")
+
+Now on refresh we are able to see the data from our products.
+
+Now at the bottom we have a DETAILS BUTTON, we would provide a link for Details action now, which we are yet to create along with the view. Passed the asp-route-id as the @product.id. It's like:
+
+<a asp-action="Details" class="btn btn-primary form-control" asp-route-id="@product.Id">Details</a>
+
+Now on refresh are able to see the Buttons also looks good.
+
+so now we are done with the homepage and the CRUD Operations on product.
+
+---------------------------------------------------------------
+
+Pushed the Changes to Github
+
+--HomeController under Customer area
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+namespace BulkyBook.Areas.Customer.Controllers
+{
+    [Area("Customer")]
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        {
+            _logger = logger;
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+            return View(productList);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
+
+
+--Index.cshtml under Home
+@model IEnumerable<Product>
+
+<div class="row pb-3 backgroundWhite">
+    @foreach (var product in Model)
+    {
+        <div class="col-lg-3 col-md-6">
+            <div class="row p-2">
+                <div class="col-12  p-1" style="border:1px solid #008cba; border-radius: 5px;">
+                    <div class="card" style="border:0px;">
+                        <img src="@product.ImageUrl" class="card-img-top rounded" />
+                        <div class="pl-1">
+                            <p class="card-title h5"><b style="color:#2c3e50">@product.Title</b></p>
+                            <p class="card-title text-primary">by <b>@product.Author</b></p>
+                        </div>
+                        <div style="padding-left:5px;">
+                            <p>List Price: <strike><b class="">$ @product.Price.ToString("0.00")</b></strike></p>
+                        </div>
+                        <div style="padding-left:5px;">
+                            <p style="color:maroon">As low as: <b class="">$ @product.Price100.ToString("0.00")</b></p>
+                        </div>
+                    </div>
+                    <div>
+                        <a asp-action="Details" class="btn btn-primary form-control" asp-route-id="@product.Id">Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

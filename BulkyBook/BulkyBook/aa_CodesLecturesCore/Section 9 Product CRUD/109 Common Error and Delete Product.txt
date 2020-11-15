@@ -1,4 +1,57 @@
-﻿using System;
+Now we will take care of Delete, if we would try to delete a product, it would delete but it would not Remove the Image, so we will work on this now.
+
+
+For Delete, copy the below lines from upsert
+string webRootPath = _hostEnvironment.WebRootPath;
+var imagePath = Path.Combine(webRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            System.IO.File.Delete(imagePath);
+                        }
+
+
+In Delete Api call,
+After the if block of objFromDb set as null,
+
+Pasted the 4 lines.
+
+Changed productVM.Product to objFromDb.
+
+Now ran the solution and added a debugger here in the API method. One debugging we have seen the Image was deleted.
+
+Now we will make one fix. The issue was He(Not Me) removed the client side validation by commenting _ValidationScriptsPartial, and then while posting the page it gave error for Dropdown not binded. This is because in UpsertPost, If ModelState is invalid we are sending an empty model where CategoryList is Null and it is being used by the DDL.
+
+To fix that, shopped the solution with Shift + F5.
+
+In ProductController Upsert post, added an else block for ModelState IsValid.
+
+Now copied the codes of Upsert VM Initailiation, for CategoryList and CoveredTypeList, there added like productVM.CategoryList(instead of CategoryList)
+
+And after that we will have a check for If productVM.Product.Id is not 0, we will initialize productVM.Product from the database Get. So the overall else block is like:
+
+            else
+            {
+                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
+                productVM.CoveredTypeList = _unitOfWork.CoverType.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
+                if (productVM.Product.Id != 0)
+                {
+                    productVM.Product = _unitOfWork.Product.Get(productVM.Product.Id);
+                }
+            }
+
+
+With this change when he ran it was throwing proper errors and the code was not breaking.
+---------------------------------------------------------------
+--ProductController.cs
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -158,3 +211,15 @@ namespace BulkyBook.Areas.Admin.Controllers
         #endregion
     }
 }
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
