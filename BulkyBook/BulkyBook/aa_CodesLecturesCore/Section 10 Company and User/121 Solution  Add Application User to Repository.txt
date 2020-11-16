@@ -1,0 +1,157 @@
+Made a copy of ICategoryRepoistoy.cs named it IApplicationUserRepository.cs and we dont want any update method inside it.
+
+It's 
+
+    public interface IApplicationUserRepository : IRepository<ApplicationUser>
+    {
+        
+    }
+
+Now Made a copy of CategoryRepoistoy and renamed to ApplicationUserRepository Removed the update method.
+
+It's 
+    public class ApplicationUserRepository : Repository<ApplicationUser>,IApplicationUserRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public ApplicationUserRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+    }
+
+Configured the same in IUnitOfWork.cs
+
+IApplicationUserRepository ApplicationUser { get; }
+
+Now opened UnitOfWork.cs and configured in two places.
+
+public IApplicationUserRepository ApplicationUser { get; private set; }
+and
+ApplicationUser = new ApplicationUserRepository(_db);
+
+Now Build the solution. It was succesful
+
+We will not use it(Repository Pattern) in the near futrue, but he wanted it to be there.
+
+Pushed the Codes to Github.
+---------------------------------------------------------------
+
+--IAppliationuserRepository.cs
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IApplicationUserRepository : IRepository<ApplicationUser>
+    {
+        
+    }
+}
+
+
+
+---ApplicationUserRepository.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class ApplicationUserRepository : Repository<ApplicationUser>,IApplicationUserRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public ApplicationUserRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+    }
+}
+
+--IUnitOfWork.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ICoverTypeRepository CoverType { get; }
+
+        IProductRepository Product { get; }
+        ICompanyRepository Company { get; }
+
+        IApplicationUserRepository ApplicationUser { get; }
+
+        ISP_Call SP_Call { get; }
+        void Save();
+    }
+}
+
+
+--UnitOfWork.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _db;
+        public UnitOfWork(ApplicationDbContext db)
+        {
+            _db = db;
+            Category = new CategoryRepository(_db);
+            CoverType = new CoverTypeRepository(_db);
+            Product = new ProductRepository(_db);
+            Company = new CompanyRepository(_db);
+            ApplicationUser = new ApplicationUserRepository(_db);
+            SP_Call = new SP_Call(_db);
+        }
+
+        public ICategoryRepository Category { get; private set; }
+
+        public ICoverTypeRepository CoverType { get; private set; }
+
+        public IProductRepository Product { get; private set; }
+
+        public ICompanyRepository Company { get; private set; }
+
+        public IApplicationUserRepository ApplicationUser { get; private set; }
+        public ISP_Call SP_Call { get; private set; }
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

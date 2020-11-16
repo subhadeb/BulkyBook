@@ -1,3 +1,12 @@
+Assignment - 6
+
+
+Add Application User to Repository.
+
+Explantion:
+But we will not be using Repository Pattern in all the places. But for assignment purpose he want us to add Application user to Repository.
+
+The next part will be the solution.
 
 
 ---------------------------------------------------------------
