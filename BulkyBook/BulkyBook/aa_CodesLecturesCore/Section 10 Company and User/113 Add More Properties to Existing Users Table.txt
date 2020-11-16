@@ -1,0 +1,135 @@
+Ran the Solution.
+
+We see we have Login page on Click of Login and Register Page on click of Register.
+
+We would like Have more fields in Register.
+
+Now opened SQL Server, we have the [AspNetUsers] Users table, we see there are some columns added by ASP. Alt + F1 gives 15columns.
+
+WE would like to add more fields here like Name, Address, PhoneNumber etc.
+
+Now stopped(Shift + F5) the solution.
+
+
+Now to BulkyBook.Models project added a new class ApplicationUser.cs
+
+Made it public. As we would be updating the same table, we need to inherit the class IdentityUser.
+
+It will give Error, and On pressing Ctrl + .
+
+Select Install Package Microsot.AspNetCore.Identity.Stores.
+
+It will install the latest version and the error will go.
+
+Now whenever we would add new property and run Migration, it would push to the AspNetUsers table.
+
+He added Few Properties here(with prop tab tab), all are string. Added Required Annotation to Name, and [NotMapped] annotation to Role. The Role is what role the User belong to. This means this will now be added to our db. so the properties are:
+
+   public class ApplicationUser : IdentityUser
+    {
+        [Required]
+        public string Name { get; set; }
+
+        public string StreetAddress { get; set; }
+
+        public string City { get; set; }
+
+        public string State { get; set; }
+
+        public string PostalCode { get; set; }
+
+        [NotMapped]
+        public string Role { get; set; }
+    }
+
+Now Open ApplicationDbContext and add this as DbSet.
+
+public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
+Now we will run Migration, Build the solution, open PM Console, select Default project as DataAccess. And run
+
+PM> add-migration AddUserPropertiesToDb
+
+The Migration file is created with the new fields now run update-database
+
+In Sql server for the table,
+
+Alt+F1 gives 21Columns including the City/Name/PostalCode....
+
+We can see It added a Discriminator at the end, this means when a user is created we can identify if the User is an ApplicationUser or IdentityUser as we have define the class like:
+public class ApplicationUser : IdentityUser
+
+So now we have seen how we can add new properties to the existing ASPNet tables.
+
+Next, we would like to assign the users a company if they are company users.
+
+So we need to manage the Company operations, and this can be done by admin users. 
+
+In the next part we will add a new model.
+---------------------------------------------------------------
+
+--ApplicationUser.cs under BulkyBook.Models project
+
+using Microsoft.AspNetCore.Identity;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+   public class ApplicationUser : IdentityUser
+    {
+        [Required]
+        public string Name { get; set; }
+
+        public string StreetAddress { get; set; }
+
+        public string City { get; set; }
+
+        public string State { get; set; }
+
+        public string PostalCode { get; set; }
+
+        [NotMapped]
+        public string Role { get; set; }
+    }
+}
+
+
+--ApplicationDbContext
+using System;
+using System.Collections.Generic;
+using System.Text;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace BulkyBook.DataAccess.Data
+{
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+       public DbSet<Category> Categories { get; set; }
+        public DbSet<CoverType> CoverTypes { get; set; }
+
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

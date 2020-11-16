@@ -1,0 +1,111 @@
+Saw the solution in 1.5x speed and then implemented myselef.
+
+
+Added Model Company.cs to Models project. Below are the fields in it.
+
+        public int Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+        public string StreetAddress { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string PostalCode { get; set; }
+        public string PhoneNumber { get; set; }
+        public bool IsAuthorizedCompany { get; set; }
+
+Added the same to ApplicationDbContext.
+
+public DbSet<Company> Companies { get; set; }
+
+Now Build the solution and in PM Console, run migration AddCompanyToDb 
+
+PM> add-migration AddCompanyToDb 
+
+The migration class is created with the columns.
+
+No open ApplicationUser Model.
+
+Added the Two properties one is CompanyId and it is nullable(int? id) and another is Company prop with ForeignKey CompanyId
+
+        public int? CompanyId { get; set; }
+
+        [ForeignKey("CompanyId")]
+        public Company Company { get; set; }
+
+Now Build the solution and in PM Console, run migration addCompanyIdToUser 
+
+PM> add-migration addCompanyIdToUser 
+
+Now Migration Class is created having something like: AddForeignKey
+
+Now run update-database in PM Console.
+
+Now we are able to see the foreign key reference in SQL Server database as well.
+---------------------------------------------------------------
+
+--Company.cs
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+    public class Company
+    {
+        public int Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+        public string StreetAddress { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string PostalCode { get; set; }
+        public string PhoneNumber { get; set; }
+        public bool IsAuthorizedCompany { get; set; }
+    }
+}
+
+
+--ApplicationUser.cs
+using Microsoft.AspNetCore.Identity;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+    public class ApplicationUser : IdentityUser
+    {
+        [Required]
+        public string Name { get; set; }
+
+        public string StreetAddress { get; set; }
+
+        public string City { get; set; }
+
+        public string State { get; set; }
+
+        public string PostalCode { get; set; }
+
+        [NotMapped]
+        public string Role { get; set; }
+
+        public int? CompanyId { get; set; }
+
+        [ForeignKey("CompanyId")]
+        public Company Company { get; set; }
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

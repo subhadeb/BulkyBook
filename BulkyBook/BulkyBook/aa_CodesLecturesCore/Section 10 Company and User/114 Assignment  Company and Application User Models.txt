@@ -1,0 +1,36 @@
+Opened a PPT for Assignment.
+
+Assignment 3.
+
+--1. Add Company Modal.
+
+>>>>Add Company Modal and push that to the database.
+>>>>Company should have the following Properties.
+1. Id(Int)
+2. Name(string)
+3. StreetAdress(string)
+4. City(string)
+5. State(string)
+6. PostalCode(string)
+7. PhoneNumber(string)
+8. IsAuthenticatedCompany(bool)
+
+--2. Add Company as Foreign key inside Application User Table.
+Note: CompanyId inside Application User MUST be Nullable field
+
+
+Explanation:
+We will be dealing with Companies, so we need to perform CRUD operations on Company. Now Application User should be linked to company and it's possible some users will not have a company. For that we need to make sure CompanyId is a nullable field.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

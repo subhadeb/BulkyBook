@@ -1,0 +1,23 @@
+Opened PPT For Assignment - 4
+
+>> Add Company to Repository Pattern.
+>> Add Company Controller to Perform CRUD Operations.
+>> Add Company JS to Load all company using Datatables and Delete a Company.
+
+Explanation:
+We need to Work on Adding Company to Repository Pattern.
+Next we will create Controller
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

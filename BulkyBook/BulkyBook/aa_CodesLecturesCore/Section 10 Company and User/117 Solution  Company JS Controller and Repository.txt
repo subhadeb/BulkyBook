@@ -1,0 +1,348 @@
+Saw the Solution in 1.5x and then done the coding myself.
+
+First in wwwroot js folder, made a copy of category.js and renamed to company.js
+
+Opened it. Ctrl + F on Category and Replace with Company keeping the casing in mind.
+
+Now earlier there was only one column with data name and widht to 60% now we have multiple columnns and the width will be less now. so added the columns.
+
+            { "data": "name", "width": "15%" },
+            { "data": "streetAddress", "width": "15%" },
+            { "data": "city", "width": "10%" },
+            { "data": "state", "width": "10%" },
+            { "data": "phoneNumber", "width": "15%" },
+
+Now for isAuthorizedCompany a we will render a Checkbox  inside div, If it is true it will be checked disabled else only disabled, the code is like:
+
+            {
+                "data": "isAuthorizedCompany",
+                "render": function (data) {
+                    if (data) {
+                        return `<input type="checkbox" disabled checked />`
+                    }
+                    else {
+                        return `<input type="checkbox" disabled/>`
+                    }
+                },
+                "width": "10%"
+            },
+
+Now changed the widht of the buttons column from 40% to 25%.
+
+Now Made a copy of CategoryController and renamed that to CompanyController.cs
+
+Inside it Ctrl + Shift + A for Find All, Go to Replace in Files, Select Current Document and Check Match Case. 
+
+First Replace Category with Company -- 11 Replaced
+Now Replace category with company -- 10 Replaced.
+
+
+There are few error with _unitOfWork.Company, as we are yet to create Company Repository. This will be fixed once we add the Repository.
+
+Now go To DataAccess>Repository>IRepository,
+
+Made a copy of ICategoryRepository and Renamed to ICompanyRepository
+--Replaced Category with Company mantaining the casing.
+
+Now go To DataAccess>Repository
+
+Made a copy of CategoryRepository and renamed to CompanyRepository.
+
+Now in the Update method, we will simply implement like:
+
+        public void Update(Company company)
+        {
+            _db.Update(company);
+        }
+
+
+Now gone to IUnitOfWork.cs and added:
+ICompanyRepository Company { get; }
+
+And In UnitOfWork.cs, Added the below in two places
+public ICompanyRepository Company { get; private set; }
+and 
+
+Company = new CompanyRepository(_db);
+
+Now Build is Succedded and the error in CompanyController is also gone.
+---------------------------------------------------------------
+--CompanyController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class CompanyController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        public CompanyController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Upsert(int? id)
+        {
+            Company company = new Company();
+            if (id == null)
+            {
+                return View(company); ;
+            }
+            company = _unitOfWork.Company.Get(id.GetValueOrDefault());
+            if (company == null)
+            {
+                return NotFound();
+            }
+            return View(company);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Upsert(Company company)
+        {
+            if (ModelState.IsValid)
+            {
+                if (company.Id == 0)
+                {
+                    _unitOfWork.Company.Add(company);
+                }
+                else
+                {
+                    _unitOfWork.Company.Update(company);
+                }
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
+
+            }
+            return View(company);
+        }
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var allObj = _unitOfWork.Company.GetAll();
+            return Json(new { data = allObj });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var objFromDb = _unitOfWork.Company.Get(id);
+            if (objFromDb == null)
+            {
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+            _unitOfWork.Company.Remove(objFromDb);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+        #endregion
+    }
+}
+
+--company.js
+var dataTable;
+
+$(document).ready(function () {
+    loadDataTable();
+});
+
+function loadDataTable() {
+    dataTable = $('#tblData').DataTable({
+        "ajax": {
+            'url': '/Admin/Company/GetAll'
+        },
+        "columns": [
+            { "data": "name", "width": "15%" },
+            { "data": "streetAddress", "width": "15%" },
+            { "data": "city", "width": "10%" },
+            { "data": "state", "width": "10%" },
+            { "data": "phoneNumber", "width": "15%" },
+            {
+                "data": "isAuthorizedCompany",
+                "render": function (data) {
+                    if (data) {
+                        return `<input type="checkbox" disabled checked />`
+                    }
+                    else {
+                        return `<input type="checkbox" disabled/>`
+                    }
+                },
+                "width": "10%"
+            },
+            {
+                'data': 'id',
+                'render': function (data) {
+                    return `
+                        <div class="text-center">
+                            <a href="/Admin/Company/Upsert/${data}" class="btn btn-success text-white" style="cursor:pointer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a onClick=Delete('/Admin/Company/Delete/${data}') class="btn btn-danger text-white" style="cursor:pointer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+`
+
+                }, 'width': '40%'
+            }
+        ]
+    })
+}
+function Delete(url) {
+    swal({
+        title: "Are You sure you want to Delete",
+        text: "You will not be able to restore the data!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+    }).then(willDelete => {
+        if (willDelete) {
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message);
+                        dataTable.ajax.reload()
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                }
+            })
+        }
+
+    })
+}
+
+--ICompanyRepository.cs
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface ICompanyRepository : IRepository<Company>
+    {
+        void Update(Company company);
+    }
+}
+
+--CompanyRepository.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class CompanyRepository : Repository<Company>, ICompanyRepository
+    {
+        private readonly ApplicationDbContext _db;
+
+        public CompanyRepository(ApplicationDbContext db): base(db)
+        {
+            _db = db;
+        }
+
+        public void Update(Company company)
+        {
+            _db.Update(company);
+        }
+    }
+}
+
+--IUnitOfWork.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ICoverTypeRepository CoverType { get; }
+
+        IProductRepository Product { get; }
+        ICompanyRepository Company { get; }
+
+        ISP_Call SP_Call { get; }
+        void Save();
+    }
+}
+
+
+---UnitOfWork.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _db;
+        public UnitOfWork(ApplicationDbContext db)
+        {
+            _db = db;
+            Category = new CategoryRepository(_db);
+            CoverType = new CoverTypeRepository(_db);
+            Product = new ProductRepository(_db);
+            Company = new CompanyRepository(_db);
+            SP_Call = new SP_Call(_db);
+        }
+
+        public ICategoryRepository Category { get; private set; }
+
+        public ICoverTypeRepository CoverType { get; private set; }
+
+        public IProductRepository Product { get; private set; }
+
+        public ICompanyRepository Company { get; private set; }
+        public ISP_Call SP_Call { get; private set; }
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,4 +1,10 @@
+Opened PPT For Assignment-5
 
+> Add Company Index and Upsert Views.
+> Add Company To Navigation Bar.
+
+Explanation:
+Now the controller is Done. In this assignment we would be working on Adding Index and Upsert Views for Company.
 
 ---------------------------------------------------------------
 

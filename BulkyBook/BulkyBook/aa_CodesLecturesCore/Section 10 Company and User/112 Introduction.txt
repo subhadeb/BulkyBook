@@ -1,4 +1,8 @@
+In this Section, we will be working on Company and User.
 
+Here we would perform CRUD Operations on Company and we would also want to display users.
+
+SO we would have add users in Repository Pattern.
 
 ---------------------------------------------------------------
 
