@@ -1,3 +1,8 @@
+In this secton we would be working on Registration.
+
+It will deal with Roles and Authentication in our Website.
+
+It would be a Razor Class Library.
 
 
 ---------------------------------------------------------------

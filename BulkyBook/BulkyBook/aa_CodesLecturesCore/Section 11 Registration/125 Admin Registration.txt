@@ -1,0 +1,504 @@
+Now we need to Add Roles to Our Website.
+
+We would have four constants for the four categories of Roles.
+
+Under Utility Project, we have class SD.cs and in that we would add four roles
+
+        public const string Role_User_Indi = "Individual Customer";
+        public const string Role_User_Comp = "Company Customer";
+        public const string Role_Admin = "Admin";
+        public const string Role_Employee = "Employee";
+
+
+Difference between Admin and Employee would be Admin can manage the content of the website. Employees would be able to change the status of packages/manatainence etc.
+
+First we want to Register as Admin User.
+
+In Register.cshtml.cs we have two methods OnGetAsync and OnPostAsync
+
+In Post it is creating an instance of IdentityUser, but with username
+var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
+
+But we would like to have ApplicationUser. So created an object of user with all the fields like below and add reference to ApplicationUser(With ctrl + .)
+
+		var user = new ApplicationUser
+                {
+                    UserName = Input.Email,
+                    Email = Input.Email,
+                    CompanyId = Input.CompanyId,
+                    StreetAddress = Input.StreetAddress,
+                    City = Input.City,
+                    State = Input.State,
+                    PostalCode = Input.PostalCode,
+                    Name = Input.Name,
+                    PhoneNumber = Input.PhoneNumber,
+                    Role = Input.Role
+                };
+
+So the above are the fiels that we have added in the pagemodel as well as in the html.
+
+The below line now would create the user
+var result = await _userManager.CreateAsync(user, Input.Password);
+
+If result.Succeeded, It was logging that user creation was successful and then it was sending confirmation email. We would comment all of these starting from var code.. till await _eamilSender for Now, in the later videos we will configure the email
+
+In the existing code it was Redirect to some other page, but we would add something to the database, so after _logger.LogInformation(.. under the block result.Succeeded.
+
+We want to register the admin users. First we would create roles if they do not exist and for that we need Need Role manager by injecting it through dependency Injection.
+
+So at the top in class RegisterModel, after IEmailSender, added
+
+private readonly RoleManager<IdentityRole> _roleManager;
+
+And also we need to work on UnitOfWork(not now though) 
+private readonly IUnitOfWork _unitOfWork;
+
+Now in the constructor(RegisterModel), we need to pass two params and initialize the above two, the Consturctor would be like(After addin):
+
+        public RegisterModel(
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            ILogger<RegisterModel> logger,
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager,
+            IUnitOfWork unitOfWork)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+            _emailSender = emailSender;
+            _roleManager = roleManager;
+            _unitOfWork = unitOfWork;
+        }
+
+NOw we have the role manager in place, we can assign roles to the user and as per him it is very simple.
+
+After  _logger.LogInformation,
+
+First we will check if the role exist in the database and we will check this with Admin Role taking the help of our Static Details class.
+
+                    if (!await _roleManager.RoleExistsAsync(SD.Role_Admin))
+                    { 
+                    
+                    }
+
+So if the role will not exist it will enter the if block and inside it we will create the role in the database like:
+
+await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+
+So after the if block, we will add similar if blocks for all the other roles, for employee it would be like:
+                    if (!await _roleManager.RoleExistsAsync(SD.Role_Employee))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
+                    }
+
+Done the same for User_comp and User_Indi.
+
+
+Next(after all if blocks) what we need to do is(Only now) we would like to assign admin role. Anyone who register will be granted admin role by default.
+
+await _userManager.AddToRoleAsync(user,SD.Role_Admin);
+
+Now Before we run the solution we need to setup a configuration. Go to Startup.cs
+
+Currntly in ConfigureServices() method we have AddDefaultIdentity, and it does not have support for IdentityRole. We need to change it to AddIdentity and we need to pass IdentityRole as a second argument. And as we have commented GenerateEmailConfirmationTokenAsync in Register.cshtml.cs, we need to add AddDefaultTokenProviders() It's like:
+
+            services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+Now run the solution. And on opening the Register page we see the error like:
+
+InvalidOperationException: Unable to resolve service for type 'Microsoft.AspNetCore.Identity.UI.Services.IEmailSender' while attempting to activate 'BulkyBook.Areas.Identity.Pages.Account.RegisterModel'.
+
+We will fix them next.
+
+---------------------------------------------------------------
+--SD.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Utility
+{
+    public static class SD
+    {
+        public const string Proc_CoverType_GetAll = "usp_GetCoverTypes";
+        public const string Proc_CoverType_Get = "usp_GetCoverType";
+        public const string Proc_CoverType_Update = "usp_UpdateCoverType";
+        public const string Proc_CoverType_Delete = "usp_DeleteCoverType";
+        public const string Proc_CoverType_Create = "usp_CreateCoverType";
+
+        public const string Role_User_Indi = "Individual Customer";
+        public const string Role_User_Comp = "Company Customer";
+        public const string Role_Admin = "Admin";
+        public const string Role_Employee = "Employee";
+    }
+}
+
+--Register.cshtml
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <h4>Create a new account.</h4>
+            <hr />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.Name"></label>
+                <input asp-for="Input.Name" class="form-control" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber"></label>
+                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.StreetAddress"></label>
+                <input asp-for="Input.StreetAddress" class="form-control" />
+                <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.City"></label>
+                <input asp-for="Input.City" class="form-control" />
+                <span asp-validation-for="Input.City" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.State"></label>
+                <input asp-for="Input.State" class="form-control" />
+                <span asp-validation-for="Input.State" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.PostalCode"></label>
+                <input asp-for="Input.PostalCode" class="form-control" />
+                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Password"></label>
+                <input asp-for="Input.Password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.ConfirmPassword"></label>
+                <input asp-for="Input.ConfirmPassword" class="form-control" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+    <div class="col-md-6 col-md-offset-2">
+        <section>
+            <h4>Use another service to register.</h4>
+            <hr />
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <div>
+                        <p>
+                            There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                            for details on setting up this ASP.NET application to support logging in via external services.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div>
+                            <p>
+                                @foreach (var provider in Model.ExternalLogins)
+                                {
+                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                }
+                            </p>
+                        </div>
+                    </form>
+                }
+            }
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+--Register.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+
+namespace BulkyBook.Areas.Identity.Pages.Account
+{
+    [AllowAnonymous]
+    public class RegisterModel : PageModel
+    {
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<RegisterModel> _logger;
+        private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public RegisterModel(
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            ILogger<RegisterModel> logger,
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager,
+            IUnitOfWork unitOfWork)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+            _emailSender = emailSender;
+            _roleManager = roleManager;
+            _unitOfWork = unitOfWork;
+        }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public string ReturnUrl { get; set; }
+
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
+
+            [Required]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Password)]
+            [Display(Name = "Password")]
+            public string Password { get; set; }
+
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+            [Required]
+            public string Name { get; set; }
+
+            public string StreetAddress { get; set; }
+
+            public string City { get; set; }
+
+            public string State { get; set; }
+
+            public string PostalCode { get; set; }
+
+            public string PhoneNumber { get; set; }
+
+            public string Role { get; set; }
+
+            public int? CompanyId { get; set; }
+
+        }
+
+        public async Task OnGetAsync(string returnUrl = null)
+        {
+            ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        }
+
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = Input.Email,
+                    Email = Input.Email,
+                    CompanyId = Input.CompanyId,
+                    StreetAddress = Input.StreetAddress,
+                    City = Input.City,
+                    State = Input.State,
+                    PostalCode = Input.PostalCode,
+                    Name = Input.Name,
+                    PhoneNumber = Input.PhoneNumber,
+                    Role = Input.Role
+                };
+                var result = await _userManager.CreateAsync(user, Input.Password);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User created a new account with password.");
+                    if (!await _roleManager.RoleExistsAsync(SD.Role_Admin))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+                    }
+                    if (!await _roleManager.RoleExistsAsync(SD.Role_Employee))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
+                    }
+                    if (!await _roleManager.RoleExistsAsync(SD.Role_User_Comp))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Comp));
+                    }
+                    if (!await _roleManager.RoleExistsAsync(SD.Role_User_Indi))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Indi));
+                    }
+                    await _userManager.AddToRoleAsync(user,SD.Role_Admin);
+
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    //var callbackUrl = Url.Page(
+                    //    "/Account/ConfirmEmail",
+                    //    pageHandler: null,
+                    //    values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
+                    //    protocol: Request.Scheme);
+
+                    //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    {
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return LocalRedirect(returnUrl);
+                    }
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return Page();
+        }
+    }
+}
+
+--Startup.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BulkyBook.DataAccess.Data;
+using BookListRazor.Constants;
+using BulkyBook.DataAccess.Repository;
+using BulkyBook.DataAccess.Repository.IRepository;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            if (Environment.MachineName == Constants.Win10MachineName)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("Win10DefaultConnection")));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+          
+            services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,188 @@
+Currently the error we have seen is Email Services is not configured.
+
+This is because in Register.cshtml.cs we can see:
+
+private readonly IEmailSender _emailSender;
+
+We will implement this later, but for now will create a class that could only Bypass the error.
+
+In UtilityProject, Add a class EmailSender, make it public and let it inherit from IEmailSender.
+
+public class EmailSender : IEmailSender
+
+IEmailSender will give error, ctrl + dot and install Microsoft.AspNetCore.Identity.UI from Nuget.
+
+AspNetCore and IEmailSender was still giving package error:
+
+Detected package downgrade: Microsoft.AspNetCore.Identity.UI from 5.0.0 to 3.1.9. Reference the package directly from the project to select a different version. 
+
+
+To fix it right click on Utility project, Manage Nuget Package, Select the Installed Package for Identity.UI, Change the Version to 3.1.9 and click Update.
+
+Now there will be only an error on IEmailSender and this is interface implementation error.
+
+Ctrl + dot on IEmailSender and Implement Interface, it will create the Task method 
+SendEmailAsync.
+
+Now In Startup.cs, go to ConfigureServices method, between AddIdentity and AddScoped, we need to register another service for EmailSender like below(Added reference packages for both of them):
+
+services.AddSingleton<IEmailSender, EmailSender>();
+
+Now Run the solution and try going to Register page. Now there is no error.
+
+Now go to SQL server, and run 
+select * from AspNetUsers
+
+Currently there is no user, no try to add a new User.
+
+Give the Password as Admin123* to be consistent with him.
+
+After Register we can see at the top right it's
+Hello adminksldj@lsdjfl.com!
+
+Now go to SQL server, and run 
+select * from AspNetUsers
+
+We see the new user is created and is present in the DB.
+
+Now run
+select * from AspNetRoles
+
+We see we have all the four roles. And the roleid for Admin is commented to right, and the same is available in AspNetUserRoles. So Admin role is added to our website.
+
+select * from AspNetRoles--7bc7900f-509f-4caf-bd2d-95b9def5076e	Admin	ADMIN
+select * from AspNetUserRoles--7bc7900f-509f-4caf-bd2d-95b9def5076e
+
+
+Now, in Register.cshtml.cs we have the logics like:
+
+  if (!await _roleManager.RoleExistsAsync(SD.Role_Admin))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+                    }
+
+These four if blocks will never be executed now, But we will keep them as it is for now and will remove them during cleanup at the end and while we use DBInitalizer class. For now it will not bother us.
+
+
+---------------------------------------------------------------
+As the code is running, Pushed the Codes to Github.
+
+--EmailSender.cs
+using Microsoft.AspNetCore.Identity.UI.Services;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BulkyBook.Utility
+{
+    public class EmailSender : IEmailSender
+    {
+        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+--Startup.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BulkyBook.DataAccess.Data;
+using BookListRazor.Constants;
+using BulkyBook.DataAccess.Repository;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using BulkyBook.Utility;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            if (Environment.MachineName == Constants.Win10MachineName)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("Win10DefaultConnection")));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+          
+            services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

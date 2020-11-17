@@ -1,0 +1,310 @@
+First we would be working on the Register Page.
+
+Currently we are having only Three properites, but we have added few other fields like phonenumber/address etc.
+
+Now stopped the solution.
+
+Inside the Areas folder, 
+
+We have Identity Folder, and there we have Pages, but we are not able to see the Register page, this is because Identity is a razor class library.
+
+This is because Identity is a Scafolded item.
+
+Now, In the Identity Folder, if we add New Scafolded Item, In the Add New Scaffolded Item popup, from the left selected Identity. Selected Add.
+
+Now a popup with Add Identity came.
+
+Now Select Override all files, it will select multiple files.
+
+Then it Asked for Data Context Class, selected ApplicationDbContext in that.
+
+Now click Add
+
+Now multiple Razor Pages in Identity/Pages/Account will be created with ScaffoldReadMe.txt being open.
+
+To make sure Razor pages will work go to Startup.cs and make sure we have endpoints.MapRazorPages();
+
+
+Now First we will be working on Register.
+
+So Under Identity>Pages>Account we have Register.cshtml and we have the page model as Register.cshtml.cs.
+
+Now in the page model(.cs file) we can see in InputModel we have only Email, Password and ConfirmPassword.
+
+Now Under BuilkyBook.Models project, Opened ApplicationUser.cs, Copy everything from it starting from Name till Company Prop.
+
+Paste all of them in InputModel under Register.cshtml.cs
+
+Now added a PhoneNumber prop after PostalCode.
+public string PhoneNumber { get; set; }
+
+In the databse AspNetUsers table we can see we already have PhoneNumber field so we need not add it again to ApplicationUser.
+
+Also we dont need Company Property here along with the ForeignKey so removed that also removed NotMapped annotation from Role. This is because none of the properties would be mapped to the database.]
+
+We will focus on Role and CompanyId in the later Parts, right now we would only focus on the other fields like: Name Addreess etc.
+
+Now go back to Register.cshtml
+
+Made a copy of the form-group div for Email and pasted above it and then changed Email to Name in three places. So now we have Name first and then Email. And the form-group with Name is like:
+
+            <div class="form-group">
+                <label asp-for="Input.Name"></label>
+                <input asp-for="Input.Name" class="form-control" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+
+
+Now after Email pasted it six times.
+After Email first we need to replace three times with PhoneNumber
+
+Next is StreetAddress, then City, State, PostalCode and at last we have Password and ConfirmPassword.
+
+
+Now on running, in the Register page we see a lot of Fields.
+
+We need to work a lot more on it.
+
+---------------------------------------------------------------
+--Register.cshtml
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <h4>Create a new account.</h4>
+            <hr />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.Name"></label>
+                <input asp-for="Input.Name" class="form-control" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber"></label>
+                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.StreetAddress"></label>
+                <input asp-for="Input.StreetAddress" class="form-control" />
+                <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.City"></label>
+                <input asp-for="Input.City" class="form-control" />
+                <span asp-validation-for="Input.City" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.State"></label>
+                <input asp-for="Input.State" class="form-control" />
+                <span asp-validation-for="Input.State" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.PostalCode"></label>
+                <input asp-for="Input.PostalCode" class="form-control" />
+                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Password"></label>
+                <input asp-for="Input.Password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.ConfirmPassword"></label>
+                <input asp-for="Input.ConfirmPassword" class="form-control" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+    <div class="col-md-6 col-md-offset-2">
+        <section>
+            <h4>Use another service to register.</h4>
+            <hr />
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <div>
+                        <p>
+                            There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                            for details on setting up this ASP.NET application to support logging in via external services.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div>
+                            <p>
+                                @foreach (var provider in Model.ExternalLogins)
+                                {
+                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                }
+                            </p>
+                        </div>
+                    </form>
+                }
+            }
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+--Register.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+
+namespace BulkyBook.Areas.Identity.Pages.Account
+{
+    [AllowAnonymous]
+    public class RegisterModel : PageModel
+    {
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<RegisterModel> _logger;
+        private readonly IEmailSender _emailSender;
+
+        public RegisterModel(
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            ILogger<RegisterModel> logger,
+            IEmailSender emailSender)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+            _emailSender = emailSender;
+        }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public string ReturnUrl { get; set; }
+
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
+
+            [Required]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Password)]
+            [Display(Name = "Password")]
+            public string Password { get; set; }
+
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+            [Required]
+            public string Name { get; set; }
+
+            public string StreetAddress { get; set; }
+
+            public string City { get; set; }
+
+            public string State { get; set; }
+
+            public string PostalCode { get; set; }
+
+            public string PhoneNumber { get; set; }
+
+            public string Role { get; set; }
+
+            public int? CompanyId { get; set; }
+
+        }
+
+        public async Task OnGetAsync(string returnUrl = null)
+        {
+            ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        }
+
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if (ModelState.IsValid)
+            {
+                var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
+                var result = await _userManager.CreateAsync(user, Input.Password);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User created a new account with password.");
+
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
+                        protocol: Request.Scheme);
+
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    {
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return LocalRedirect(returnUrl);
+                    }
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return Page();
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

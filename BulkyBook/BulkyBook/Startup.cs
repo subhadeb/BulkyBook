@@ -15,6 +15,8 @@ using BulkyBook.DataAccess.Data;
 using BookListRazor.Constants;
 using BulkyBook.DataAccess.Repository;
 using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using BulkyBook.Utility;
 
 namespace BulkyBook
 {
@@ -44,8 +46,9 @@ namespace BulkyBook
             }
 
           
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddSingleton<IEmailSender, EmailSender>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();
