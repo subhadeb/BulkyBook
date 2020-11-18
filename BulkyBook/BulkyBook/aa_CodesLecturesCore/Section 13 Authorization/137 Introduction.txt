@@ -1,4 +1,8 @@
+In this section we will be working on Authorization. 
 
+We will be registering an user using Google or Facebook.
+
+Lets start from next part.
 
 ---------------------------------------------------------------
 

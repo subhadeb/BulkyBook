@@ -1,3 +1,76 @@
+As of now our application is preety well.
+
+In this section we will cover authorization.
+
+Whenever a normal user logs in they should never see Content Management and User/Company.
+
+These are the options that should only be available to Admin/Employees.
+
+Along with the visibility if someone tries to navigate to the url Unauthorized message should come.
+
+So let's first work on showing the message that they are not authorized.
+
+In VS, close all tabs and stop solution.
+
+If we go to Startup.cs in Configure method we se we already have:
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+
+These are created automatically when we created the Identity Account Project. So we will consume this authorization.
+
+The way we would do is Controllers, Category, CoverType and Product can only be modified by Admin users. Other controllers in Admin Area would be modified by Employee as well.
+
+Opened CategoryController. After [Area("Admin")] added attribute Authorize(added using for Microsoft.AspNetCore.Authorization). there we have used Roles and set that as SD.Role_Admin
+
+[Authorize(Roles = SD.Role_Admin)]
+
+This means all action methods in this Controller would be accessible only by Admin. BUt in future we will look at scenarios where there we would need to segrate role amonng the actionmethods. like one will be admin another would be for other user.
+
+Copy pasted the same(Authorize attribute) in CoverTypeController and ProductController.
+
+Now we have the Company and User Controllers remaining.
+
+For CompanyController, we can add multiple roles separated by comma string. so here we would have Admin Role as well as Employee role.
+
+
+[Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+
+So both can access all the actionmethods in a controller. And Employees can manage Company and users.
+
+In MVC when we hit a URL, the first thing that is Triggered is the ActionMethod. Copy pasted the authorize attribut code for Admin+Employee in UsersController.
+
+Now run the solution. login as customer@gmail If we go to company, we get the below error:
+
+https://localhost:44339/Account/AccessDenied?ReturnUrl=%2FAdmin%2FCompany
+
+And the Area should have been Identity, to fix that we need to make changes in Starutup.cs
+
+He opened microsoft docs, and from there copied the below codes and pasted.
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+
+
+Now try to go to Go To Company, we see the screen Access Denied(Properly). And after logout if we try to go to Company it redirects to Login Page.
+
+Next we would work on not displaying the links for Incorrect users.
+---------------------------------------------------------------
+
+In this part
+Only added the below two in the controllers:
+
+[Authorize(Roles = SD.Role_Admin)]
+and
+[Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+
+So not taking backups of the controllers. Below is the Startup.cs class.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,3 +166,14 @@ namespace BulkyBook
         }
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

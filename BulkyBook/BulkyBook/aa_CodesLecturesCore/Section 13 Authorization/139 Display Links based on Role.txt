@@ -1,4 +1,39 @@
-﻿@using BulkyBook.Utility
+Now we would display the Links only if the user logs in and the user is Admin or Employee.
+
+Go to _Layout.cshtml
+
+From the first dropdown-menu/navbarDropdown removed the unwanted links. that is removed the below:
+
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Something else here</a>
+
+For SD.cs class, we would @using BulkyBook. Utility at the top of the file.
+
+Now above the first nav-item dropdown for Content Management, added an if check like.
+
+@if(User.IsInRole(SD.Role_Admin)) 
+inside this if block the entire li codes for Content Management would be present for Content Management.
+
+For the next li, added the if condition to check if the User is Admin or Employee.
+
+@if (User.IsInRole(SD.Role_Employee) || User.IsInRole(SD.Role_Admin))
+
+Now on running, 
+If we are not logged in we are not able to see the links at the top.
+
+And if we login, as an admin. we see both the links.
+
+Now lets regiester an employee user with email employeeuser@gmail, The Role would be Employee and we will not assign any company
+
+On registering we see the Role as Employee without any company.
+
+And now if we login with the new user employeeuser@gmail, we see only User/Company Link.
+---------------------------------------------------------------
+Pushed the codes to GIT.
+
+--_Layout.cshtml
+@using BulkyBook.Utility
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,3 +116,13 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
