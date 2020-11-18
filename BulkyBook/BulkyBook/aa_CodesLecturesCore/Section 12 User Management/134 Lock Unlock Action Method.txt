@@ -1,0 +1,140 @@
+
+Opened UserController.cs
+
+Under region API Calls, added a new Method LockUnlock with attribute HttpPost retruning IActionResult. Here we will receive [FormBody] string id. like:
+
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody] string id)
+        { 
+        
+        }
+
+
+We will lock the user if the User is unlocked and Unlock the user if it is Locked. We will take help of _db.ApplicationUsers and pass the id to get the ApplicationUser object. If the data from db is null we will return a Json Data with sucess false and message Error while Locking/Unlocking.
+
+            var objFromDb = _db.ApplicationUsers.FirstOrDefault(x=>x.Id == id);
+            if (objFromDb == null)
+            {
+                return Json(new { success = false, message = "Error in Locking Unlocking" });
+            }
+
+Now after that, we will have a check if objFromDb.LockoutEnd is not null and is greater than today, it means it is User is currently locked and we will unlock them. else we will lock them for 100yeears by letting the LockoutEnd and taking help of AddYears.  At the end we would do _db.SaveChanges() and then return json with a success message. The overall method is like:
+
+
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody] string id)
+        {
+            var objFromDb = _db.ApplicationUsers.FirstOrDefault(x => x.Id == id);
+            if (objFromDb == null)
+            {
+                return Json(new { success = false, message = "Error in Locking Unlocking" });
+            }
+            if (objFromDb.LockoutEnd != null && objFromDb.LockoutEnd > DateTime.Now)
+            {
+                //user is currently locked, we will unlock them.
+                objFromDb.LockoutEnd = DateTime.Now;
+            }
+            else
+            {
+                objFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
+            }
+            _db.SaveChanges();
+            return Json(new { success = true, message = "Operation Succesfull" });
+        }
+
+
+So we have a single actionmethod for get and post. Next we will call this method from js.
+
+
+
+
+
+---------------------------------------------------------------
+--UserController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class UserController : Controller
+    {
+        private readonly ApplicationDbContext _db;
+        public UserController(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var userList = _db.ApplicationUsers.Include(u => u.Company).ToList();
+            var userRole = _db.UserRoles.ToList();
+            var roles = _db.Roles.ToList();
+            foreach (var user in userList)
+            {
+                var roleId = userRole.FirstOrDefault(x => x.UserId == user.Id).RoleId;
+                user.Role = roles.FirstOrDefault(u => u.Id == roleId).Name;
+                if (user.Company == null)
+                {
+                    user.Company = new Company()
+                    {
+                        Name = ""
+                    };
+
+                }
+            }
+            return Json(new { data = userList });
+        }
+
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody] string id)
+        {
+            var objFromDb = _db.ApplicationUsers.FirstOrDefault(x => x.Id == id);
+            if (objFromDb == null)
+            {
+                return Json(new { success = false, message = "Error in Locking Unlocking" });
+            }
+            if (objFromDb.LockoutEnd != null && objFromDb.LockoutEnd > DateTime.Now)
+            {
+                //user is currently locked, we will unlock them.
+                objFromDb.LockoutEnd = DateTime.Now;
+            }
+            else
+            {
+                objFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
+            }
+            _db.SaveChanges();
+            return Json(new { success = true, message = "Operation Succesfull" });
+        }
+
+        #endregion
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,137 @@
+Now we would be working in user.js to call LockUnlock API.
+
+Opened user.js
+
+At the bottom we have Delete method, which is not yet deleted(after copying from category.js).
+
+Updated the funciton name from Delete to LockUnlock and the param will be id.
+
+Removed everything before $ajax(at the closing braces at the end as well).
+
+The ajax call type will be POST here. the url would be url: '/Admin/User/LockUnlock',
+
+we need to pass data, and it would be JSON.stringify(id). We will add contentType as applicaiton/json. SO it's like:
+
+function LockUnlock(id) {
+    $.ajax({
+        type: 'POST',
+        url: '/Admin/User/LockUnlock',
+        data: JSON.stringify(id),
+        contentType: 'application/json',
+        success: function (data) {
+            if (data.success) {
+                toastr.success(data.message);
+                dataTable.ajax.reload()
+            }
+            else {
+                toastr.error(data.message);
+            }
+        }
+    })
+}
+
+Now run the solution.
+
+In sql server all the users are Unlocked.
+
+select LockoutEnd,* from AspNetUsers
+
+Added a debugger in LockUnlock in controller, clicked Lock for the second user.
+
+We see in debugging LockoutEnd was set as 1000 years later and in datatable The button changed to red with unlock account. And in SQL server the LockoutEnd is:
+3020-11-18 10:27:08.1915791 +05:30
+
+
+And again if we Unlock it. It is Unlocked and in DB it is set as current date.
+
+This is how lock unlock works.
+
+Now made a small stying change in user.js
+
+IN both the buttons anchor tag to the style, added width: 100px. now it looks better.
+<a onClick=LockUnlock('${data.id}') class="btn btn-danger text-white" style="cursor:pointer;width:100px">
+
+Now logged in again as Admin and added an user of non authorized company.
+
+Set the email as nonauthcomp@gmail.com
+Se the Role as Company Customer and Company as Non AUthorized company.
+
+So we have added all the four category of users.
+---------------------------------------------------------------
+Pushed the codes to Github.
+
+--user.js
+var dataTable;
+
+$(document).ready(function () {
+    loadDataTable();
+});
+
+function loadDataTable() {
+    dataTable = $('#tblData').DataTable({
+        "ajax": {
+            'url': '/Admin/User/GetAll'
+        },
+        "columns": [
+            { "data": "name", "width": '15%' },
+            { "data": "email", "width": '15%' },
+            { "data": "phoneNumber", "width": '15%' },
+            { "data": "company.name", "width": '15%' },
+            { "data": "role", "width": '15%' },
+            {
+                'data': { id: 'id', lockoutEnd: 'lockoutEnd' },
+                'render': function (data) {
+                    var today = new Date().getTime();
+                    var lockout = new Date(data.lockoutEnd).getTime();
+                    if (lockout > today) {
+                        //User is currently locked
+                        return `
+                        <div class="text-center">
+                            <a onClick=LockUnlock('${data.id}') class="btn btn-danger text-white" style="cursor:pointer;width:100px">
+                                <i class="fas fa-lock-open"></i>Unlock
+                            </a>
+                        </div>
+`
+                    }
+                    else {
+                        return `
+                        <div class="text-center">
+                            <a onClick=LockUnlock('${data.id}') class="btn btn-success text-white" style="cursor:pointer;width:100px">
+                                <i class="fas fa-lock"></i>Lock
+                            </a>
+                        </div>
+`
+                    }
+
+
+                }, 'width': '25%'
+            }
+        ]
+    })
+}
+function LockUnlock(id) {
+    $.ajax({
+        type: 'POST',
+        url: '/Admin/User/LockUnlock',
+        data: JSON.stringify(id),
+        contentType: 'application/json',
+        success: function (data) {
+            if (data.success) {
+                toastr.success(data.message);
+                dataTable.ajax.reload()
+            }
+            else {
+                toastr.error(data.message);
+            }
+        }
+    })
+}
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

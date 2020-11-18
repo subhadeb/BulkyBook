@@ -1,0 +1,145 @@
+Now we would add the Lock and Unlock buttons in Users List summary grid.
+
+In Database if we query 
+select * from AspNetUsers
+
+We see a property LockoutEnd, if it is less than today's date this means the account is unlocked.
+
+If it is greater than today's date this means it is locked, so we can modify and trigger this property.
+
+Gone to user.js uncommented the codes for id
+
+Here data would be combination of id and lockoutEnd like:
+
+'data': { id: 'id', lockoutEnd: 'lockoutEnd'},
+
+in the render funciton, we will first get Today's date like:
+var today = new Date().getTime();
+
+After that we will get the lockout date in the same format from data.lockoutEnd, and then we will check if lockout is greater than today this means the user is currently locked, 
+
+
+                    var lockout = new Date(data.lockoutEnd).getTime();
+                    if (lockout > today) {
+                        //User is currently locked
+                    }
+
+In the if block(if user is currently locked) copied the return html codes for upsert and Delete and pasted it here. Removed the Codes for Upsert kept the anchor tag for Delete only. Changed the MethodName from Delete to LockUnlock, we would be passing only data.id to the method. we will keep the danger class as it is. 
+
+Font awesome already have the icon fa-lock-open for Unlock. And we will also display the text Unlock. So the return div is like:
+
+                    return `
+                        <div class="text-center">
+                            <a onClick=LockUnlock('${data.id}') class="btn btn-danger text-white" style="cursor:pointer">
+                                <i class="fas fa-lock-open"></i>Unlock
+                            </a>
+                        </div>
+`
+
+in the else block of (lockout > today), copy pasted the above codes for Unlock and this would be for Lock. Here the btn class would be btn-success. the font awesome class would be fa-lock and the text would be Lock here. The else block is like:
+
+                    else {
+                        return `
+                        <div class="text-center">
+                            <a onClick=LockUnlock('${data.id}') class="btn btn-success text-white" style="cursor:pointer">
+                                <i class="fas fa-lock"></i>Lock
+                            </a>
+                        </div>
+`
+                    }
+
+
+
+Gave this datatable column an with of 25%(not 40%).
+
+Now if we run this we see the three Lock buttons with the proper icons.
+
+In the next part we would add method to lock and unlock user.
+
+
+---------------------------------------------------------------
+--user.js
+var dataTable;
+
+$(document).ready(function () {
+    loadDataTable();
+});
+
+function loadDataTable() {
+    dataTable = $('#tblData').DataTable({
+        "ajax": {
+           'url': '/Admin/User/GetAll'
+        },
+        "columns": [
+            { "data": "name", "width": '15%' },
+            { "data": "email", "width": '15%' },
+            { "data": "phoneNumber", "width": '15%' },
+            { "data": "company.name", "width": '15%' },
+            { "data": "role", "width": '15%' },
+            {
+                'data': { id: 'id', lockoutEnd: 'lockoutEnd'},
+                'render': function (data) {
+                    var today = new Date().getTime();
+                    var lockout = new Date(data.lockoutEnd).getTime();
+                    if (lockout > today) {
+                        //User is currently locked
+                        return `
+                        <div class="text-center">
+                            <a onClick=LockUnlock('${data.id}') class="btn btn-danger text-white" style="cursor:pointer">
+                                <i class="fas fa-lock-open"></i>Unlock
+                            </a>
+                        </div>
+`
+                    }
+                    else {
+                        return `
+                        <div class="text-center">
+                            <a onClick=LockUnlock('${data.id}') class="btn btn-success text-white" style="cursor:pointer">
+                                <i class="fas fa-lock"></i>Lock
+                            </a>
+                        </div>
+`
+                    }
+                   
+
+                }, 'width': '25%'
+            }
+        ]
+    })
+}
+function Delete(url) {
+    swal({
+        title: "Are You sure you want to Delete",
+        text: "You will not be able to restore the data!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+    }).then(willDelete => {
+        if (willDelete) {
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message);
+                        dataTable.ajax.reload()
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                }
+            })
+        }
+
+    })
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
