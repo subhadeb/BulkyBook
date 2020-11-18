@@ -1,4 +1,58 @@
-﻿using System;
+Now we made changes in the Register Get mainly, now we have to handle the Register Post(the two dropdowns).
+
+In Register.cshtml.cs we have OnPostAsync. The code was to set up the user roles and we were setting up admin role for all users with.
+await _userManager.AddToRoleAsync(user, SD.Role_Admin);
+
+
+In var user we already have the code for Role = Input.Role, that is whatever is selected in the ddl we would get in user.Role.
+
+So we would remove the code statement with AddToRoleAsync.
+
+Now first if user.Role would be null, it means he is an individual user. so we would assign the role like:
+
+                    if (user.Role == null)
+                    {
+                        await _userManager.AddToRoleAsync(user, SD.Role_User_Indi);
+                    }
+
+In the else block of the above we wil check if the user.CompanyId is greater than 0 then we would assign the rule User Company. else we would assign whatever role is there for the user(from the dropdown). So the else block is like:
+
+                    else 
+                    {
+                        if (user.CompanyId > 0)
+                        {
+                            await _userManager.AddToRoleAsync(user, SD.Role_User_Comp);
+                        }
+                        await _userManager.AddToRoleAsync(user, user.Role);
+                    }
+
+For Admin we would also display a page where we have the list of users.
+
+Now, At the end we have the code for await _signInManager.SignInAsync inside an else block. there we before await _signInManager.SignInAsync, we can have a if check with user.Role == null and wrap both the codes inside that, the else block means admin is registering a new user. So in this case we will redirect to admin to some page where there will be the list of all users(The page is not yet created it is Index action under User Controller of Admin area). We will create that controller/page in our upcoming videos. So the else block is modifed to:
+
+                    else
+                    {
+                        if (user.Role == null)
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            return LocalRedirect(returnUrl);
+                        }
+                        else
+                        {
+                            //admin is registering a new user.
+                            return RedirectToAction("Index", "User", new { Area = "Admin" });
+                        }
+                    }
+
+In the upcoming videos we will create a user controller where we would display the user list and that would be inside Admin Area.
+
+
+
+---------------------------------------------------------------
+--Did not push the code to Github as we are yet to Run the codes.
+
+--Register.cshtml.cs
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -206,3 +260,14 @@ namespace BulkyBook.Areas.Identity.Pages.Account
         }
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,145 @@
+Now we would display a list of all the Users.
+
+In Controllers folder under admin area.
+
+Made a copy of CategoryController and Renamed to UserController.cs
+
+Inside it changed the class name and the constructor to UserController.
+
+Here he will show another way of working with the ApplicationDbContext other than the Repository pattern.
+
+So we will replace the below:
+private readonly IUnitOfWork _unitOfWork;
+
+with 
+private readonly ApplicationDbContext _db;
+
+Made the constructor to use this like:
+        public UserController(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+So it means we will directly work with our db.
+
+He suggested that , in our Products projects we should never mix two of the technologies - RepositoryPattern or ApplicationDbContext, we should use any one through out.
+
+In this project he would show all of them so that we chosse what we want.
+
+He have shown Dapper/RepositoryPattern and now he is showing how to use ApplicationDbContext directly.
+
+Here also we would be using API calls for Index. 
+
+We would not need Upsert so removed both get and post for this.
+
+In API calls region delete the entire method for Delete
+
+Now in the API Calls region, in method GetAll, we would not use _unitOfWork and we would get allObj differntly, and we would use Include to get the company of the user and would convert toList at the end like:
+
+var userList = _db.ApplicationUsers.Include(u => u.Company).ToList();
+
+Now we would also like to show the userRoles along with the users. UserRoles will have the mapping between the user and the roles. and we would get roles from _db.Roles.ToList(). So both of them are like:
+
+            var userRole = _db.UserRoles.ToList();
+            var roles = _db.Roles.ToList();
+
+So userList will have the list of users, roles will have the list of roles and userRole will be the mapping of the other two.
+
+Now we will have a foreach loop and will iterate through each user in the user list. Inside that we will first fetch the roleId from userRole based on userId, then we will get the RoleName base on roleId.
+
+            foreach (var user in userList)
+            {
+                var roleId = userRole.FirstOrDefault(x => x.UserId == user.Id).RoleId;
+                user.Role = roles.FirstOrDefault(u => u.Id == roleId).Name;
+
+            }
+
+After that we will create an object for Company if it would be null in the same foreach loop. and in the object we will set the company name as an empty string like:
+
+               if (user.Company == null)
+                {
+                    user.Company = new Company()
+                    {
+                        Name = ""
+                    };
+
+		}
+
+At the end we would be returning userList in data.
+
+return Json(new { data = userList });
+
+Now there are no build errors in the file.
+
+
+
+
+---------------------------------------------------------------
+--UserController.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    public class UserController : Controller
+    {
+        private readonly ApplicationDbContext _db;
+        public UserController(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var userList = _db.ApplicationUsers.Include(u => u.Company).ToList();
+            var userRole = _db.UserRoles.ToList();
+            var roles = _db.Roles.ToList();
+            foreach (var user in userList)
+            {
+                var roleId = userRole.FirstOrDefault(x => x.UserId == user.Id).RoleId;
+                user.Role = roles.FirstOrDefault(u => u.Id == roleId).Name;
+                if (user.Company == null)
+                {
+                    user.Company = new Company()
+                    {
+                        Name = ""
+                    };
+
+                }
+            }
+            return Json(new { data = userList });
+        }
+
+        #endregion
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

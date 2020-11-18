@@ -1,4 +1,8 @@
+In this section we would be working with User List. And now we have multiple roles in our website.
 
+We would display a list of all the users for Locking or unlocking account. 
+
+We will manage all of that starting from the next part.
 
 ---------------------------------------------------------------
 
