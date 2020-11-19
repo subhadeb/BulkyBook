@@ -1,4 +1,93 @@
-﻿using System;
+In the last part at the end we are the end in the url
+https://localhost:44339/Identity/Account/ExternalLogin?handler=Callback#_=_
+
+Now, under Identity Area, Pages> Account we have ExternalLogin.
+
+We also have the same Page under Manage Folder, but we will not use that one.
+
+So opened
+Areas\Identity\Pages\Account\ExternalLogin.cshtml
+
+For the properties opened Register.cshtml.cs
+
+Copied the Below Properties(Name to PhoneNumber):
+
+            [Required]
+            public string Name { get; set; }
+
+            public string StreetAddress { get; set; }
+
+            public string City { get; set; }
+
+            public string State { get; set; }
+
+            public string PostalCode { get; set; }
+
+            public string PhoneNumber { get; set; }
+
+Pasted all the properties in the InputModel of ExternalModel.cshtml.cs
+
+Now go to ExternalLogin.cshtml for adding the labels and the inputs.
+
+Made a copy of the div with form-group, first pasted above it, called this as Name(Replaced Email with Name in three places.)
+
+Now after Email pasted it five more times.
+
+First is PhoneNumber, then StreetAddress, then City, then State and PostalCode at last.
+
+Now Can get the Name from Facebook, along with the email.
+
+Now we have the method OnGetCallbackAsync, there at the end we see the comments
+// If the user does not have an account, then ask the user to create an account.
+
+We see that it is fetching the Email like:
+Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+
+Similaryly we can populate the Name(after a comma) like:
+
+
+Last thing we need to do is We need to create an Application user and we would use the same codes from Register.cshtml.cs like:
+
+First copied:
+                var user = new ApplicationUser
+                {
+                    UserName = Input.Email,
+                    Email = Input.Email,
+                    CompanyId = Input.CompanyId,
+                    StreetAddress = Input.StreetAddress,
+                    City = Input.City,
+                    State = Input.State,
+                    PostalCode = Input.PostalCode,
+                    Name = Input.Name,
+                    PhoneNumber = Input.PhoneNumber,
+                    Role = Input.Role
+                };
+
+And pasted it in ExternalLogin.cshtml, OnPostConfirmationAsync, replacing the below line with the above:
+
+   var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
+
+After pasting resolve the Reference Error for ApplicationUser, then remove CompanyId and Role
+
+With the below existing line, the user was created:
+var result = await _userManager.CreateAsync(user);
+
+Before we log them in with AddLoginAsync, we would assign them a role. And we would assign Individual User role with:
+
+So with facebook we can only create Individual Accounts, the company accounts needs to be created by the Admin.
+
+Now let's run our application and register the facebook user.
+
+Go To Login, use Facebook. Now we see the Name and Email is already populated.
+
+I Changed email to subha123@gmail
+
+We can fill the Details and click on Register button. We see send email async error(NotImplementedException: The method or operation is not implemented.). This is fine as we have not yet Used any email service. In our AspNetUsers, table we see the user is already created. We can fix that later.
+
+Next we would work with Google SignIn.
+---------------------------------------------------------------
+--ExternalLogin.cshtml.cs
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -191,3 +280,83 @@ namespace BulkyBook.Areas.Identity.Pages.Account
         }
     }
 }
+
+
+--ExternalLogin.cshtml
+
+@page
+@model ExternalLoginModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4 id="external-login-title">Associate your @Model.ProviderDisplayName account.</h4>
+<hr />
+
+<p id="external-login-description" class="text-info">
+    You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
+    Please enter an email address for this site below and click the Register button to finish
+    logging in.
+</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.Name"></label>
+                <input asp-for="Input.Name" class="form-control" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber"></label>
+                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.StreetAddress"></label>
+                <input asp-for="Input.StreetAddress" class="form-control" />
+                <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.City"></label>
+                <input asp-for="Input.City" class="form-control" />
+                <span asp-validation-for="Input.City" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.State"></label>
+                <input asp-for="Input.State" class="form-control" />
+                <span asp-validation-for="Input.State" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.PostalCode"></label>
+                <input asp-for="Input.PostalCode" class="form-control" />
+                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

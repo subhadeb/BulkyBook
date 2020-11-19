@@ -1,3 +1,87 @@
+Now we will implement Sign In with google/Sign in with Facebook.
+
+In the Register page, in the right we have
+Use another service to register
+
+Go to Facebook Developers.
+
+https://developers.facebook.com/
+
+Selected Get Started,
+
+Then it asked to add my account.
+
+Then Create an App popup, from there selected.
+I have selected the Reason as Build Connected Experiences.
+
+Set the Display Name as Bulky.
+
+Set the contact Email as 
+subhadeb93@hotmail.com
+
+A Dashboard came.
+
+From there selected Facebook Login and then Set Up button then selected Web. Copied the url from the project.
+https://localhost:44339/
+
+Clicked save.
+
+Then conitnue, there was some js code. ASP.Net core has done everything for us so we need not click Next Next...
+
+Now go to Settings.
+
+There we need 
+Valid OAuth Redirect URIs
+
+This would be our url /signin-facebook like:
+
+https://localhost:44339/signin-facebook
+
+Now Save changes.
+
+Now go to application.
+After DNCore 3.x Facebook plugin is a separate package.
+
+Browse Nuget Packages. Search for
+Microsoft.AspNetCore.Authentication.Facebook.
+
+Install it in the BulkyBook Project. Selected the version as 3.1.10
+
+Now along with this let's install the Google version as well.
+Microsoft.AspNetCore.Authentication.Google
+
+Its also 3.1.10 in BulkyBook Project.
+
+Built the solution, now we would make some config changes in Startup class.
+
+In ConfigureServices, after ConfigureApplicationCookie, added the below:
+            services.AddAuthentication().AddFacebook(options => {
+                options.AppId = "";
+                options.AppSecret = "";
+            });
+
+Now we will put the AppId Present in the Developers Dashboard- 2859494254281667. Copied the App Secrt from there as well(Under Settings/Basic) its 7a6cba804.....
+
+
+Now on running, if we go to Register page. We see the Facebook Button.On click of the Button.
+
+We see a popup like:
+Bulky will receive:
+your name and profile picture and email address.
+
+Clicked Continue as Subha.
+
+Now we are back in our project and see the message:
+You've successfully authenticated with Facebook. Please enter an email address for this site below and click the Register button to finish logging in.
+
+We would add more fields on this page. And on click of Register we will make them register as a customer. So we will make changes in the File ExternalLogin in the below path:
+
+https://localhost:44339/Identity/Account/ExternalLogin?handler=Callback#_=_
+
+
+---------------------------------------------------------------
+--Startup.cs
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,12 +146,6 @@ namespace BulkyBook
                 options.AppId = "2859494254281667";
                 options.AppSecret = "7a6cba804bd8cd880ad3539337b74469";
             });
-            services.AddAuthentication().AddGoogle(options =>
-            {
-                options.ClientId = "246232864900-ifabvjm0ck8dpn0dnnf7v8f85htjifrs.apps.googleusercontent.com";
-                options.ClientSecret = "lKFA1HjDcorcq3KJZdj4-75v";
-            });
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -103,3 +181,14 @@ namespace BulkyBook
         }
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

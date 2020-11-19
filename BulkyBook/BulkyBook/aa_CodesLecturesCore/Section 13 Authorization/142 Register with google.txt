@@ -1,3 +1,102 @@
+First Run the Applicatoin and track teh URL, It's:
+https://localhost:44339/
+
+
+Now Googled Console Goolge Developers.
+
+Opened
+https://console.developers.google.com/?pli=1
+
+From the Top Right selected Select a Project.
+
+Selected New Project, named it BuilkyBook Clicked CREATE Button.
+
+It takes around a minute to create the project.
+
+Now in the Top BulkyBook should be selected in the Dropdown.
+
+Now select + ENABLE APIS AND SERVICES from the top.
+
+Now searched Google+
+
+From the Result selected Google+ API.
+
+Now Click on the Enable button.
+
+Now a Dashboard for APIs & Services Google + API will come.
+
+Go to Credentials tab from the left.
+
+Select CONFIGURE CONSET SCREEN from the right.
+
+Now OAuth consent screen will come. 
+
+Select Radio External
+
+Now Click Create.
+
+Now Gave teh App name as Bulky.
+
+Selected User support email as sd93@gmail.com and In Developer Contact Information also gave the same.
+
+Clicke Save and Create.
+
+Clicked Save..Save.. and gone till Summary.
+
+
+No go to Credentials.
+
+We are able to see OAuth 2.0 Client IDs(No rows inside it though)
+
+From the top select + CREATE CREDENTIALS and then selected OAuth Client Id
+
+Now a form came for Create OAuth and Client ID.
+
+Selected Application type as Web Application.
+
+Name as Bulky web.
+
+Now in Authorized JavaScript origins selected the URIs
+
+https://localhost:44339
+
+For Authorized redirect URIs selectd
+
+https://localhost:44339/signin-google
+
+Now hit the create button and a popup will come with Client Id and Client Secret.
+
+Now go back to the Applicaiton.
+
+We already added the Nuget Package for Google. Now we will only update the ConfigureServices method. Similar to Facebook. Here we will use the ClientId and the Client Secret so at the end added.
+
+            services.AddAuthentication().AddGoogle(options =>
+            {
+                options.ClientId = "246232864900-ifabvjm0ck8dpn0dnnf7v8f85htjifrs.apps.googleusercontent.com";
+                options.ClientSecret = "lKFA1HjDcorcq3KJZdj4-75v";
+            });
+
+Now run the solution. Now clicked Register, we see the google Icon now.
+
+Selected Google, it asked to select an Account. And on selecting my email.
+
+We see the name and email is populated in the Register form.
+
+I changed the name and email- custgmail@gmail.
+
+Clicked Register we see the same 
+NotImplementedException: The method or operation is not implemented.
+
+Need not worry we can go to localhost home, and then login, select google, Was able to login with custgmail@gmail
+
+
+So it is fixed.
+
+---------------------------------------------------------------
+Pushed the codes to Github
+
+--Startup.cs
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -103,3 +202,14 @@ namespace BulkyBook
         }
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
