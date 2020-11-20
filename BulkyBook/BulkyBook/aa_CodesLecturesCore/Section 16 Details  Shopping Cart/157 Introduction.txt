@@ -1,4 +1,6 @@
+In this Section we will be designing our Details stage and Designing the Shopping cart.
 
+We will be dealing with all the views.
 
 ---------------------------------------------------------------
 

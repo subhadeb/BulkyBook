@@ -1,0 +1,254 @@
+Now let's start working On the Details of a Product.
+
+Run the solution.
+
+Once we click on a product Details we open the url:
+https://localhost:44339/Customer/Home/Details/2
+
+And we see 
+This localhost page can’t be foundNo webpage was found for the web address: https://localhost:44339/Customer/Home/Details/2
+
+Stopped the solution.
+
+In the Details page we will have the option of Adding the item to the Shopping Cart.
+
+For that we can use the Shopping Cart Model.
+
+Now opened HomeController.cs inside Customer Area.
+
+here we will add and action method for Details().
+
+        public IActionResult Details(int id)
+        {
+            return View();
+        }
+
+Inside the method, First we will get the Product from db based on the id, we will take help of _unitOfWork.Product and also includeProperties: "Category,CoverType" as we would need to display bot like:
+
+Now we will create an object of ShoppingCart named it cartObj,  here the Product will be productFromDb and ProductId will be productFromDb.Id.
+
+            ShoppingCart cartObj = new ShoppingCart()
+            {
+                Product = productFromDb,
+                ProductId = productFromDb.Id
+            };
+
+We will return the cartObj in return().
+
+Now in the Views/Home folder added Details.cshtml
+
+Now rather than typing it, he copy pasted from a notepad and the codes are available in attachment(Details+View+UI.txt)
+
+I have also copy pasted the codes in Details.cshtml
+
+
+At the top declared @model It's 
+@model BulkyBook.Models.ShoppingCart
+
+Now Ran the Application.
+
+To see how things are, currently everything is static in the page.
+
+On click of details, the below url is opened:
+https://localhost:44339/Customer/Home/Details/2
+
+And we see some contents all these are static - With --TITLE--, ISBN : --ISBN--
+List Price: $ --LIST PRICE--, Count etc.
+
+Now we will fill the actual data.
+
+Inside the form first added a hidden ProductId.
+<input hidden asp-for="ProductId">
+
+Next replace --TITLE-- with @Model.Product.Title
+
+Replace --AUTHOR-- with @Model.Product.Author
+
+--COVER TYPE-- with @Model.Product.CoverType.Name, we are eager loading CoverType.
+
+--CATEGORY -- with @Model.Product.Category.Name, it is same as CoverType
+
+--ISBN-- with @Model.Product.ISBN
+
+--LIST PRICE-- with @Model.Product.ListPrice.ToString("c") , this is converted to Currency with ToString('c') we dont need $ any more and can remove that
+
+--PRICE-- inside div with @Model.Product.Price.ToString("c")
+
+--PRICE 50-- with @Model.Product.Price50.ToString("c")
+
+--PRICE 100-- with @Model.Product.Price100.ToString("c")
+
+--DESCRIPTION-- with @Html.Raw(Model.Product.Description)
+
+To the input for count, we can add asp-for="Count" like:
+<div class="col-10"><input asp-for="Count" class="form-control" /></div>
+
+For image, https://via.placeholder.com/150 with @Model.Product.ImageUrl
+
+
+Now in the anchor tag for Back to List, added asp-action = "Index" to take us back to Index.
+
+<a asp-action="Index" class="btn btn-success form-control  btn-square btn-lg" style="height:50px;">Back to List</a>
+
+
+On Running this we see the Nice View of the Product, and everything is loaded dynamically.
+
+
+Next on Click of Add to Cart we would like to Add the item to the card and calculate the price based on the quantity.
+---------------------------------------------------------------
+
+Pushed the Codes to Github.
+
+--HomeController.cs
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+namespace BulkyBook.Areas.Customer.Controllers
+{
+    [Area("Customer")]
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        {
+            _logger = logger;
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+            return View(productList);
+        }
+
+        public IActionResult Details(int id)
+        {
+            var productFromDb = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id, includeProperties: "Category,CoverType");
+            ShoppingCart cartObj = new ShoppingCart()
+            {
+                Product = productFromDb,
+                ProductId = productFromDb.Id
+            };
+            return View(cartObj);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
+
+
+--Details.cshtml
+@model BulkyBook.Models.ShoppingCart
+
+<form method="post">
+    <input hidden asp-for="ProductId">
+    <div class="container backgroundWhite">
+        <div class="card">
+            <div class="card-header bg-light text-light ml-0 row container">
+                <div class="col-12 col-md-6">
+                    <h1 class="text-primary">@Model.Product.Title</h1>
+                    <p class="text-warning">by @Model.Product.Author</p>
+                </div>
+                <div class="col-12 col-md-6 text-md-right pt-4">
+                    <span class="badge badge-success pt-2" style="height:30px;">@Model.Product.CoverType.Name</span>
+                    <span class="badge badge-warning pt-2" style="height:30px;">@Model.Product.Category.Name</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="container rounded p-2">
+                    <div class="row">
+                        <div class="col-8 col-lg-8">
+
+                            <div class="row pl-2">
+                                <h5 class="text-muted">ISBN : @Model.Product.ISBN</h5>
+                            </div>
+                            <div class="row pl-2">
+                                <h5 class="text-muted pb-2">List Price: <strike>@Model.Product.ListPrice.ToString("c")</strike></h5>
+                            </div>
+                            <div class="row text-center pl-2">
+                                <div class="p-1 col-2 bg-secondary border-bottom">
+                                    <div>Quantity</div>
+                                </div>
+                                <div class="p-1 col-2 bg-secondary border-bottom">
+                                    <div>1-49</div>
+                                </div>
+                                <div class="p-1 col-2 bg-secondary border-bottom">
+                                    <div>50-99</div>
+                                </div>
+                                <div class="p-1 col-2 bg-secondary border-bottom">
+                                    <div>100+</div>
+                                </div>
+                            </div>
+                            <div class="row text-center pl-2" style="color:maroon; font-weight:bold">
+                                <div class="p-1 col-2 bg-secondary">
+                                    <div>Price</div>
+                                </div>
+                                <div class="p-1 col-2 bg-secondary">
+                                    <div>@Model.Product.Price.ToString("c")</div>
+                                </div>
+                                <div class="p-1 col-2 bg-secondary">
+                                    <div>@Model.Product.Price50.ToString("c")</div>
+                                </div>
+                                <div class="p-1 col-2 bg-secondary">
+                                    <div>@Model.Product.Price100.ToString("c")</div>
+                                </div>
+                            </div>
+                            <div class="row pl-2">
+                                <p class="text-secondary">@Html.Raw(Model.Product.Description)</p>
+                            </div>
+                            <div class="row pl-2">
+                                <div class="col-2 text-primary"><h4>Count</h4></div>
+                                <div class="col-10"><input asp-for="Count" class="form-control" /></div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3 offset-lg-1 text-center">
+                            <img src="@Model.Product.ImageUrl" width="100%" class="rounded" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-12 col-md-6 pb-1">
+                        <a asp-action="Index" class="btn btn-success form-control  btn-square btn-lg" style="height:50px;">Back to List</a>
+                    </div>
+                    <div class="col-12 col-md-6 pb-1">
+
+                        <button type="submit" value="Add to Cart" class="btn btn-primary btn-square btn-lg form-control" style="height:50px;">Add to Cart</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

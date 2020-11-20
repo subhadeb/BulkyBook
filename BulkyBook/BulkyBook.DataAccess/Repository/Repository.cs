@@ -63,7 +63,7 @@ namespace BulkyBook.DataAccess.Repository
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query.Include(includeProp);
+                    query =   query.Include(includeProp);
                 }
             }
             return query.FirstOrDefault();

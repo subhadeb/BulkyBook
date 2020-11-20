@@ -71,7 +71,7 @@ It's like:
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query.Include(includeProp);
+                    query =   query.Include(includeProp);
                 }
             }
 
@@ -103,7 +103,7 @@ So copied everything from GetAll and pasted here. After pasting removed orderBy 
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query.Include(includeProp);
+                    query =   query.Include(includeProp);
                 }
             }
             return query.FirstOrDefault();
@@ -182,7 +182,7 @@ namespace BulkyBook.DataAccess.Repository
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query.Include(includeProp);
+                    query =   query.Include(includeProp);
                 }
             }
             if (orderBy != null)
@@ -204,7 +204,7 @@ namespace BulkyBook.DataAccess.Repository
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query.Include(includeProp);
+                    query =   query.Include(includeProp);
                 }
             }
             return query.FirstOrDefault();
