@@ -1,4 +1,112 @@
-﻿using System;
+So Now in EmailSender.cs, we will get the keys using Dependency Injection. 
+
+First declared EmailOptions like:
+private readonly EmailOptions emailOptions;
+
+And now using dependency Injection and IOptions we can populated emailOptions like:
+
+        public EmailSender(IOptions<EmailOptions> options)
+        {
+            emailOptions = options.Value;
+        }
+
+
+And we can use this apporach that is create a separate class, and configure it with IOptions for getting some values from appsettings.json.
+
+So now we have SendGridKey and SendGridUser in emailOptions. We will be using only the Key for now.
+
+
+Now we would modify the method Execute. First remove async make it private, to only return Task. And add the below parameters.
+
+private static Task Execute(string sendGridKey, string subject,string message,string email)
+
+Removed the line with var apiKey =...
+
+Now there is error in the first line SendGridClient, do ctrl + dot and then FInd and istall the latest package. It resolves the error and imports using SendGrid;.
+
+Now pass the key as sendGridkey
+var client = new SendGridClient(sendGridKey);
+
+Now do ctrl + dot on EmailAddress and it adds using SendGrid.Helpers.Mail;
+
+Now set from as below:
+var from = new EmailAddress("admin@bulkyBook.com", "Bulky Book");
+
+Removed the var subject as it is paramterized.
+
+We will set to like:
+var to = new EmailAddress(email, "End User");
+
+Removed both var plainTextContent and htmlContent
+
+And var msg is modified to:
+var msg = MailHelper.CreateSingleEmail(from, to, subject, "", message);
+
+at the end we would return like:
+
+In the method SendEmailAsync, earlier it was throw new NotImplementedException.
+
+Now here we will call Execute passing the key, subject, htmlmessage, email like:
+
+return Execute(emailOptions.SendGridKey, subject, htmlMessage, email);
+
+So now whatever we will send to SendEmailAsync, it will send email accordingly.
+
+Now run the solution and add a brakpoint in Execute method of EmailSender.cs, 
+
+Go to Register and Regiser with a valid email.
+
+In the debugger in Execute method, we see all the parameters are populated correclty.
+
+But I did not receive mail in gmail inbox. Next tried with husmail(In this scenario both sender and recievier of the same domain :D and same email)
+
+Did not recievie email in Hushmail as well, not sure why are they blcoking email.
+[This issue was mentioned by him at the starting in a pdf file]
+
+But code is running fine.
+
+---------------------------------------------------------------
+--As module was ended and we are able to run(only :() the solution, pushed the codes to Github
+
+--EmailSender.cs
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BulkyBook.Utility
+{
+    public class EmailSender : IEmailSender
+    {
+
+        private readonly EmailOptions emailOptions;
+        public EmailSender(IOptions<EmailOptions> options)
+        {
+            emailOptions = options.Value;
+        }
+
+        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            return Execute(emailOptions.SendGridKey, subject, htmlMessage, email);
+        }
+        private static Task Execute(string sendGridKey, string subject, string message, string email)
+        {
+            var client = new SendGridClient(sendGridKey);
+            var from = new EmailAddress("admin@bulkyBook.com", "Bulky Book");
+            var to = new EmailAddress(email, "End User");
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, "", message);
+            return client.SendEmailAsync(msg);
+        }
+    }
+}
+
+
+---Register.cshtml.cs
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -206,3 +314,13 @@ namespace BulkyBook.Areas.Identity.Pages.Account
         }
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

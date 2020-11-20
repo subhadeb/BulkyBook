@@ -1,0 +1,99 @@
+We will be using SendGrid for Sending emails. 
+
+And with SendGrid we can send upto 100 emails for free everyday.
+
+In the portal
+https://sendgrid.com/
+
+Clicked Start For Free.
+
+Was not able to create The account with gmail or hotmail account, as they expect it be of our own domain(Not so reputed like gmail/hotmail).
+
+So signed up to hushmail.com for email.
+
+Selected 16Chars password.
+
+In Tell Us About Yourself, Gave the Name Company Details(as No company).
+
+Get Started.
+
+Now clicked Contact Support as they want more info.
+
+Selected username as my fullname in small, email as the one of hushmail.
+
+At the end they said request submitted successfully in toastr.
+
+Initiall The request was sumbitted for Account Creation(Confirmed from email) and later the Account was activated(Confirmed from email).
+
+In the next day I was able to login, it asked for phone number and verified that.
+
+----------------------------------------------------
+Now See the Next Part(Send Grid Sender Verification Fix) and Return
+----------------------------------------------------
+
+Now Under Send you first email 
+
+Selected - Integrate Using Web API and SMTP Relay at Start.
+
+Now Under Web API, selected Choose.
+
+The selected C # Choose.
+
+Selected Create an API Key as BulkyBook.
+
+It gave a key, and copied the key.
+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
+
+Also at the bottom it provided code snipped for Execute.
+
+ static async Task Execute()
+        {
+            var apiKey = Environment.GetEnvironmentVariable("NAME_OF_THE_ENVIRONMENT_VARIABLE_FOR_YOUR_SENDGRID_KEY");
+            var client = new SendGridClient(apiKey);
+            var from = new EmailAddress("test@example.com", "Example User");
+            var subject = "Sending with SendGrid is Fun";
+            var to = new EmailAddress("test@example.com", "Example User");
+            var plainTextContent = "and easy to do anywhere, even with C#";
+            var htmlContent = "<strong>and easy to do anywhere, even with C#</strong>";
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+            var response = await client.SendEmailAsync(msg);
+        }
+
+
+
+
+Now gone to Appsettings.json added SendGridKey as the big key, Also added SendGridUser as BulkyBook
+
+
+  "SendGridKey": "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",
+  "SendGridUser": "BulkyBook"
+
+---------------------------------------------------------------
+
+--appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=SUKLA\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "Win10DefaultConnection": "Server=USMUMSUBDEB3\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "SendGridKey": "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",
+  "SendGridUser": "BulkyBook"
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

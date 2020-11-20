@@ -1,0 +1,27 @@
+In SendGrid portal, Go to Settings>Sender Authentication.
+
+Under Single Sender Verification, Select Get Started.
+
+Selected Name as: Learner Sdeb
+Email: sdhushmail
+and filled all the other details.
+
+Now Single Sender Verification 
+Is having the senders with X mark in Verified Column.
+
+
+Now click Resent Verification from the options at the right.
+
+Verified from email and there is Tick mark in the Verified Column
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,4 +1,6 @@
+I this section we will work with emails. We will configiure emails inside the classes that we have to.
 
+We will setup SengGrind API and call that for Emails
 
 ---------------------------------------------------------------
 
