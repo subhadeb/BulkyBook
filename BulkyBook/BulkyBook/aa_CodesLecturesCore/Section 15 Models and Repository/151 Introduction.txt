@@ -1,4 +1,6 @@
+In this module we would be adding three more models, these are Shopping Cart, Order Header and Order Details.
 
+We will also push all three using repository pattern.
 
 ---------------------------------------------------------------
 

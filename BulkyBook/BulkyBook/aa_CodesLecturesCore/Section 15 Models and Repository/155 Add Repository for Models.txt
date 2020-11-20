@@ -1,0 +1,169 @@
+In this part we will setup the repository for all the three models.
+
+Go to Repository Folder under Data,
+
+Made Three copies of CategoryRepository and renamed them to:
+OrderHeaderRepository.cs
+OrderDetailsRepository.cs
+ShoppingCartRepository.cs
+
+Opeened OrderDetailsRepository.cs, changed classname declaration to the below(Although we are yet to create IOrderDetailsRepository)
+
+public class OrderDetailsRepository : Repository<OrderDetails>, IOrderDetailsRepository
+
+Updated the Update method to :)
+
+        public void Update(OrderDetails obj)
+        {
+            _db.Update(obj);
+        }
+
+Now took a copy of the above Update method and pasted to OrderHeader and ShoppingCart Repositories and updated thier Parameter/Model to their respecitve classes.
+
+Now In OrderHeaderRepository.cs, 
+
+Changed class declaration to
+public class OrderHeaderRepository : Repository<OrderHeader>, IOrderHeaderRepository
+
+Also changed the constructor.
+
+Opened ShoppingCartRepository
+Class Declaration is like:
+public class ShoppingCartRepository : Repository<ShoppingCart>, IShoppingCartRepository
+
+Now in IRepositoryFolder, 
+
+Copied ICompanyRepository.cs three times and renamed them to:
+IOrderHeaderRepository.cs
+IOrderDetailsRepository.cs
+IShoppingCartRepository.cs
+
+Opened all of them and changed the class name and models(Inside IRepository<>).
+And also the Parameters/Model inside the Update method, kept the Parameter name as obj for all of them.
+
+
+Now Build the solution, there should not be any build errors.
+
+Now we need to update UnitOfWork and IUnitOfWork.
+
+Opened UnitOfWork.cs
+
+Made three copies of the below line:
+public ICompanyRepository Company { get; private set; }
+
+and updated the three to
+	public IShoppingCartRepository ShoppingCart { get; private set; }
+        public IOrderDetailsRepository OrderDetails { get; private set; }
+        public IOrderHeaderRepository OrderHeader { get; private set; }
+
+
+And also in constructor added:
+            ShoppingCart = new ShoppingCartRepository(_db);
+            OrderDetails = new OrderDetailsRepository(_db);
+            OrderHeader = new OrderHeaderRepository(_db);
+
+Now go to IUnitOfWork.cs
+Added the three:
+
+        IShoppingCartRepository ShoppingCart { get; }
+        IOrderHeaderRepository OrderHeader { get; }
+        IOrderDetailsRepository OrderDetails { get; }
+
+
+---------------------------------------------------------------
+Pushed the codes to Github.
+
+Did not take backup here as these are all copy paste. we can take backup only of the belwo:
+
+--UnitOfWork.cs'
+
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _db;
+        public UnitOfWork(ApplicationDbContext db)
+        {
+            _db = db;
+            Category = new CategoryRepository(_db);
+            CoverType = new CoverTypeRepository(_db);
+            Product = new ProductRepository(_db);
+            Company = new CompanyRepository(_db);
+            ApplicationUser = new ApplicationUserRepository(_db);
+            ShoppingCart = new ShoppingCartRepository(_db);
+            OrderDetails = new OrderDetailsRepository(_db);
+            OrderHeader = new OrderHeaderRepository(_db);
+
+            SP_Call = new SP_Call(_db);
+        }
+
+        public ICategoryRepository Category { get; private set; }
+
+        public ICoverTypeRepository CoverType { get; private set; }
+
+        public IProductRepository Product { get; private set; }
+
+        public ICompanyRepository Company { get; private set; }
+        public IShoppingCartRepository ShoppingCart { get; private set; }
+        public IOrderDetailsRepository OrderDetails { get; private set; }
+        public IOrderHeaderRepository OrderHeader { get; private set; }
+
+        public IApplicationUserRepository ApplicationUser { get; private set; }
+        public ISP_Call SP_Call { get; private set; }
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+
+        public void Save()
+        {
+            _db.SaveChanges();
+        }
+    }
+}
+
+
+--UnitOfWork.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        ICategoryRepository Category { get; }
+
+        ICoverTypeRepository CoverType { get; }
+
+        IProductRepository Product { get; }
+        ICompanyRepository Company { get; }
+
+        IApplicationUserRepository ApplicationUser { get; }
+
+        ISP_Call SP_Call { get; }
+
+        IShoppingCartRepository ShoppingCart { get; }
+        IOrderHeaderRepository OrderHeader { get; }
+        IOrderDetailsRepository OrderDetails { get; }
+
+        void Save();
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

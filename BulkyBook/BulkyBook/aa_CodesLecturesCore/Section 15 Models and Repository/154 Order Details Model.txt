@@ -1,0 +1,131 @@
+Order Header Contains the generic information about Orders.
+
+OrderDetails would contain individual items that would be there inside the order.
+
+In Models project, Added Class OrderDetails.cs and then made it public.
+
+The Properties are below followed by Explanation:
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public int OrderId { get; set; }
+        [ForeignKey("OrderId")]
+        public OrderHeader OrderHeader { get; set; }
+
+        [Required]
+        public int ProductId { get; set; }
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
+
+        public int Count { get; set; }
+        public double Price { get; set; }
+
+Explanation:
+Added key for Id.
+
+Order Header and Order Details will be linked together so added the ForeignKey reference.
+
+We need the Product, Count and Price. 
+Count is the count of products that the user wants.
+
+Now let's add these 3 models to our database.
+
+Currently we dont have the three tables in database.
+
+--In SQL Server 12Tables
+select * from sys.tables
+
+Go to ApplicationDbContext under DataAccess and add the three DbSets like:
+
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+        public DbSet<OrderHeader> OrderHeaders { get; set; }
+        public DbSet<OrderDetails> OrderDetails { get; set; }
+
+Now open PM Console and make sure the Default Project is DataAccess.
+
+> add-migration AddShoppingCartAndOrderHeaderAndDetailsToDb
+
+The migration class was created. Now lets update the database
+
+> update-database
+
+Now the three tables are added to the database.
+
+--In SQL Server 15Tables
+select * from sys.tables
+
+So we have added all the models to our database.
+
+We will setup the Repository Next.
+---------------------------------------------------------------
+--OrderDetails.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+    public class OrderDetails
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public int OrderId { get; set; }
+        [ForeignKey("OrderId")]
+        public OrderHeader OrderHeader { get; set; }
+
+        [Required]
+        public int ProductId { get; set; }
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
+
+        public int Count { get; set; }
+        public double Price { get; set; }
+    }
+}
+
+--ApplicationDbContext.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace BulkyBook.DataAccess.Data
+{
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+       public DbSet<Category> Categories { get; set; }
+        public DbSet<CoverType> CoverTypes { get; set; }
+
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+        public DbSet<OrderHeader> OrderHeaders { get; set; }
+        public DbSet<OrderDetails> OrderDetails { get; set; }
+
+    }
+}
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

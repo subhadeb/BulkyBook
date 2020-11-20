@@ -1,0 +1,99 @@
+We have came a long way in our project.
+
+As of now, we can login, we can register, we can login using facebook/emails and lots of more functionalities.
+
+Now we want the shopping cart and the cart to be saved in the DB. And if the users logs our and logs in later he still would have the items.
+
+We will also need models to place order. We would need two basic models.
+One is Order Header and the other is Header Detail
+
+Order Header will have an overview of what we have. Order Details will contain all the items in the order.
+
+So we will set up the three models along with that we will also have individual repositories for all three.
+
+In the Models project add class ShoppingCart.cs
+
+The final code is below, and the explanation is below that:
+
+	public ShoppingCart()
+        {
+            Count = 1;
+        }
+        [Key]
+        public int Id { get; set; }
+
+        public string ApplicationUserId { get; set; }
+        [ForeignKey("ApplicationUserId")]
+        public ApplicationUser ApplicationUser { get; set; }
+
+        public int ProductId { get; set; }
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
+
+        [Range(1, 1000, ErrorMessage = "Please enter a value between 1 and 1000")]
+        public int Count { get; set; }
+
+        [NotMapped]
+        public double Price { get; set; }
+
+Explanation:
+
+We will have the int Id, it is the primary key.
+
+ApplicationUserId would be used for mantaining the user whose shopping cart it would be.
+
+Next would be the Product. And here we can use the Product model.
+
+Next is Count, it should be minimum 1 and maximum 1000, otherwise we will throw an error.
+
+We want the default value of Count to be 1. so added that in the constructor.
+
+Based on the count we would be loading the Price. So that we can display the Price in the view. 
+
+We will not add Price to the DB.
+
+---------------------------------------------------------------
+--ShoppingCart.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+    public class ShoppingCart
+    {
+        public ShoppingCart()
+        {
+            Count = 1;
+        }
+        [Key]
+        public int Id { get; set; }
+
+        public string ApplicationUserId { get; set; }
+        [ForeignKey("ApplicationUserId")]
+        public ApplicationUser ApplicationUser { get; set; }
+
+        public int ProductId { get; set; }
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
+
+        [Range(1, 1000, ErrorMessage = "Please enter a value between 1 and 1000")]
+        public int Count { get; set; }
+
+        [NotMapped]
+        public double Price { get; set; }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
