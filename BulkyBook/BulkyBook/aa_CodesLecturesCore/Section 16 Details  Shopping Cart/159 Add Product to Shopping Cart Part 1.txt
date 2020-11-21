@@ -1,4 +1,58 @@
-﻿using System;
+Now, whe will work on the Ad to Card Post method. and we understood this is a post method because at the top we have form method post and the button type of Add to Cart is submit.
+
+We have the hidden field for ProductId and we are also taking the input count.
+
+Go to HomeController.
+
+After Details get method add Details method with attributes [HttpPost] and [AutoValidateAntiforgeryToken], [Authorize]. We are using Authorize so that we would not allow a user to Submit by adding to cart without signing in. The paramter of the method would be ShoppingCart cartObject
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        [Authorize]
+        public IActionResult Details(ShoppingCart cartObject)
+        { 
+        
+        
+        }
+
+First, initialized cartObject.Id = 0
+
+Now we will have a check for ModelState.IsValid. in the else block first, copied the codes of Details get(codes with productFromDb) and returned view. Here the id would be cartObject.ProductId like:
+ var productFromDb = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == cartObject.ProductId, includeProperties: "Category,CoverType");
+
+
+Now in the if block of Model state valid, We would get the cliamsIdentity like:
+
+var claimsIdentity = (ClaimsIdentity)User.Identity; //imported System.Security.Claims;
+
+Next we would get claim like below and our ApplicationUserId would be claim.value:
+var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+cartObject.ApplicationUserId = claim.Value;
+
+Now opened SQL server to check the ShoppingCarts table. We can see that Every user and Product combination will be unique.(the count can match or be different), so we can retrieve record from the database based on this. Also we would use includeProperites in GetFirstOrDefault to get the Product object as well like:
+
+                ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                    u => u.ApplicationUserId == cartObject.ApplicationUserId && u.ProductId == cartObject.ProductId,
+                    includeProperties: "Product"
+                    );
+
+
+Now if cartFromDb would be null we would need to add records to the database for the user.
+
+IN this part only added an if check, the implementation will be done in the next part.
+
+                if (cartFromDb == null)
+                {
+                    //no records exists in db for that product for that user.
+                }
+
+As in shopping cart model we have [NotMapped] Price, it would be updated based on the productid and count, we would add a method in static details for that in the next part.
+
+---------------------------------------------------------------
+
+--HomeController(Details Post method is breaking as we are yet to return for all paths)
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -61,15 +115,8 @@ namespace BulkyBook.Areas.Customer.Controllers
                 if (cartFromDb == null)
                 {
                     //no records exists in db for that product for that user.
-                    _unitOfWork.ShoppingCart.Add(cartObject);
                 }
-                else 
-                {
-                    cartFromDb.Count += cartObject.Count;
-                    //_unitOfWork.ShoppingCart.Update(cartFromDb);
-                }
-                _unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+
             }
             else
             {
@@ -96,3 +143,14 @@ namespace BulkyBook.Areas.Customer.Controllers
         }
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
