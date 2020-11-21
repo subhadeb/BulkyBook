@@ -1,3 +1,83 @@
+Now we want to add Sessions. We need to configure sessions(not configured by default), especiall if we want list or objects.
+
+We will be using an Extension method for that. And we would be doing the same in Utility Project.
+
+In this project, created class SessionExtension.
+
+Made the class public static
+
+Here we will have two static ojects. First we will have SetObject, that returns void and have the parameters Issesion(with this), string key and string value. so this is like:
+
+    public static class SessionExtension
+    {
+        public static void SetObject(this ISession session, string key, object value)
+        { 
+        
+        }
+    }
+
+For setting the Session, we can use session.SetString and would use JsonConvert.SerializeObject.
+
+session.SetString(key,JsonConvert.SerializeObject(value));
+
+Now for getting the session value, made a copy of SetObject and renamed to GetObject. Here it would return a Generic type T, so added <T> in two places in the method declaration, and here we will only pass the key(not value)
+
+public static T GetObject<T>(this ISession session, string key)
+
+We would get the value in a variable like:
+var value = session.GetString(key);
+
+And then we will return default(T) if the value would be null else DeserializeObject like:
+
+return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
+
+Now we would also configure the same in Startup.cs, opened it.
+
+In ConfigureServices method, we will have have services.AddSession and would configure few options like:
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+
+Now in Configure method, after app.UseRouting(), we would use ap.UseSession().
+app.UseSession();
+
+So with this we have added session in our project.
+
+Now whenever we would update/add a product we will update the session. and we will do it in the next part.
+
+
+---------------------------------------------------------------
+
+--SessionExtension.cs
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Utility
+{
+    public static class SessionExtension
+    {
+        public static void SetObject(this ISession session, string key, object value)
+        {
+            session.SetString(key, JsonConvert.SerializeObject(value));
+        }
+        public static T GetObject<T>(this ISession session, string key)
+        {
+            var value = session.GetString(key);
+            return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
+        }
+    }
+}
+
+
+--Startup.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -113,3 +193,13 @@ namespace BulkyBook
         }
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

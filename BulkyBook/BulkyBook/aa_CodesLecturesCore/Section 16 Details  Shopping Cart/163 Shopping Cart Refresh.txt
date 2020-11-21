@@ -1,0 +1,504 @@
+Now let's say an item was alrady added to the cart user logs out and then logs in.
+
+That time we need to load the session there and in multiple places.
+
+In HomeController,
+First is in the Index method. We will check if the user is logged in, then we will get the count from db and then update the session. 
+
+So In Index() before return view, first copy pasted the codes for claimsIdentity and claim from Details Post, the two lines pasted are:
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+Now we will check if claim is not null, then we will retrieve the count from db copying the count code from Details post along with SetIntIn32 session code, after copying modifed the ApplicationUserId code with claim.Value, it's like:
+
+            if (claim != null)
+            {
+                var count = _unitOfWork.ShoppingCart
+                      .GetAll(x => x.ApplicationUserId == claim.Value)
+                      .ToList().Count();
+                HttpContext.Session.SetInt32(SD.ssShoppingCart, count);
+            }
+
+Along with the home page, we should do the same thing inside login. 
+
+Now we would do the samething in Login.cshtml.cs under Identity area.
+
+We have the method OnPostAsync we will update there, first initialized _unitOfWork in LoginModel at the top like:
+private readonly IUnitOfWork unitOfWork;
+
+Updated the same in the constructor taking IUnitOfWork unitOfWork as a parameter.
+
+Now go to OnPostAsync 
+
+First, inside the if block for result.Succeeded we will the the user based on Input.Email like:
+
+var user = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Email == Input.Email);
+
+Now we can copy paste the code for getting count like:
+                    var count = _unitOfWork.ShoppingCart
+                            .GetAll(x => x.ApplicationUserId == user.Id)
+                            .Count();
+
+The count can be 0 if there would be no item in the shopping cart.
+Now we will set the session like:
+
+So with these, we have set up the session in all the places.
+
+Now we would use the session and display in the NavBar.
+
+Now, go to _Layout.cshtml under views/shared
+
+At the top we need the below using and inject
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+Now inside <ul> for navbar-nav class, after the if conditions for User IsInRole, Added another check if we have any value in session or not. If value is not null the we would add a list where we will have an anchor tag which will have asp-area Customer, controller- Cart(Yet to be created), action-index, and we will display the count as the anchor text, and also use font awesome icon like:
+
+                        <li style="color:white">
+                            <a asp-area="Customer" asp-controller="Carat" asp-action="Index" class="nav-link">
+                                @{
+                                    var count = HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart);
+                                }
+                                <i class="fas fa-shopping-cart"></i> &nbsp; (@count)
+                            </a>
+                        </li>
+
+
+Now in the else block, copy pasted the codes of <li> from if block, 
+
+here a href will be #, because if there will be no item, we need not go to the view. Removed the codes @{ for finding count}, here we would be showing hard coded 0 in the anchor tag. The code is like:
+
+                       else
+                        {
+                            <li style="color:white">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (0)
+                                </a>
+                            </li>
+                        }
+
+
+
+Now run the solution, in db for admin we have two items added to cart and we should be able to view it.
+
+On logging in as admin we see the cart symbol with(2).
+
+If we log out it does not change. To fix that stop the solution, open Logout.cshtml.cs From Identity/Pages
+
+We would update the session to:
+HttpContext.Session.SetInt32(SD.ssShoppingCart, 0);
+
+Now run the solution and Login and Logout as Admin to validate the fix. So the session is working as expected.
+
+Next we would work on the ShoppingCartController and action methods to display the items in the Shopping Cart.
+
+---------------------------------------------------------------
+Pushed the codes to Github.
+
+--HomeController.cs
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+namespace BulkyBook.Areas.Customer.Controllers
+{
+    [Area("Customer")]
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        {
+            _logger = logger;
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null)
+            {
+                var count = _unitOfWork.ShoppingCart
+                      .GetAll(x => x.ApplicationUserId == claim.Value)
+                      .ToList().Count();
+                HttpContext.Session.SetInt32(SD.ssShoppingCart, count);
+            }
+            return View(productList);
+        }
+
+        public IActionResult Details(int id)
+        {
+            var productFromDb = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id, includeProperties: "Category,CoverType");
+            ShoppingCart cartObj = new ShoppingCart()
+            {
+                Product = productFromDb,
+                ProductId = productFromDb.Id
+            };
+            return View(cartObj);
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        [Authorize]
+        public IActionResult Details(ShoppingCart cartObject)
+        {
+            cartObject.Id = 0;
+            if (ModelState.IsValid)
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+                cartObject.ApplicationUserId = claim.Value;
+
+                ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                    u => u.ApplicationUserId == cartObject.ApplicationUserId && u.ProductId == cartObject.ProductId,
+                    includeProperties: "Product"
+                    );
+                if (cartFromDb == null)
+                {
+                    //no records exists in db for that product for that user.
+                    _unitOfWork.ShoppingCart.Add(cartObject);
+                }
+                else
+                {
+                    cartFromDb.Count += cartObject.Count;
+                    //_unitOfWork.ShoppingCart.Update(cartFromDb);
+                }
+                _unitOfWork.Save();
+                var count = _unitOfWork.ShoppingCart
+                    .GetAll(x => x.ApplicationUserId == cartObject.ApplicationUserId)
+                    .ToList().Count();
+                // HttpContext.Session.SetObject(SD.ssShoppingCart, count);
+                HttpContext.Session.SetInt32(SD.ssShoppingCart, count);
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                var productFromDb = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == cartObject.ProductId, includeProperties: "Category,CoverType");
+                ShoppingCart cartObj = new ShoppingCart()
+                {
+                    Product = productFromDb,
+                    ProductId = productFromDb.Id
+                };
+                return View(cartObj);
+            }
+
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
+
+
+
+--Login.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Http;
+using BulkyBook.Utility;
+
+namespace BulkyBook.Areas.Identity.Pages.Account
+{
+    [AllowAnonymous]
+    public class LoginModel : PageModel
+    {
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly ILogger<LoginModel> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public LoginModel(SignInManager<IdentityUser> signInManager,
+            ILogger<LoginModel> logger,
+            UserManager<IdentityUser> userManager,
+            IUnitOfWork unitOfWork)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+            _unitOfWork = unitOfWork;
+        }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+        public string ReturnUrl { get; set; }
+
+        [TempData]
+        public string ErrorMessage { get; set; }
+
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+
+            [Required]
+            [DataType(DataType.Password)]
+            public string Password { get; set; }
+
+            [Display(Name = "Remember me?")]
+            public bool RememberMe { get; set; }
+        }
+
+        public async Task OnGetAsync(string returnUrl = null)
+        {
+            if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                ModelState.AddModelError(string.Empty, ErrorMessage);
+            }
+
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            ReturnUrl = returnUrl;
+        }
+
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+            if (ModelState.IsValid)
+            {
+                // This doesn't count login failures towards account lockout
+                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    var user = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Email == Input.Email);
+                    var count = _unitOfWork.ShoppingCart
+                            .GetAll(x => x.ApplicationUserId == user.Id)
+                            .Count();
+                    HttpContext.Session.SetInt32(SD.ssShoppingCart, count);
+                    _logger.LogInformation("User logged in.");
+                    return LocalRedirect(returnUrl);
+                }
+                if (result.RequiresTwoFactor)
+                {
+                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+                }
+                if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("User account locked out.");
+                    return RedirectToPage("./Lockout");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
+            }
+            // If we got this far, something failed, redisplay form
+            return Page();
+        }
+    }
+}
+
+--Logout.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
+
+namespace BulkyBook.Areas.Identity.Pages.Account
+{
+    [AllowAnonymous]
+    public class LogoutModel : PageModel
+    {
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly ILogger<LogoutModel> _logger;
+
+        public LogoutModel(SignInManager<IdentityUser> signInManager, ILogger<LogoutModel> logger)
+        {
+            _signInManager = signInManager;
+            _logger = logger;
+        }
+
+        public void OnGet()
+        {
+        }
+
+        public async Task<IActionResult> OnPost(string returnUrl = null)
+        {
+            HttpContext.Session.SetInt32(SD.ssShoppingCart, 0);
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            if (returnUrl != null)
+            {
+                return LocalRedirect(returnUrl);
+            }
+            else
+            {
+                return RedirectToPage();
+            }
+        }
+    }
+}
+
+
+
+--_Layout.cshtml
+@using BulkyBook.Utility
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BulkyBook</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BulkyBook</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <partial name="_LoginPartial" />
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        @if (User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Content Management
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="CoverType" asp-action="Index">Cover Type</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
+
+                                </div>
+                            </li>
+                        }
+
+                        @if (User.IsInRole(SD.Role_Employee) || User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    User/Company
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">User</a>
+                                </div>
+                            </li>
+                        }
+                        @if (HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart) != null)
+                        {
+                            <li style="color:white">
+                                <a asp-area="Customer" asp-controller="Carat" asp-action="Index" class="nav-link">
+                                    @{
+                                        var count = HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart);
+                                    }
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (@count)
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li style="color:white">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (0)
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-white-50 bg-primary">
+        <div class="container">
+            &copy; 2020 - BulkyBook
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://kit.fontawesome.com/e19c476714.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
