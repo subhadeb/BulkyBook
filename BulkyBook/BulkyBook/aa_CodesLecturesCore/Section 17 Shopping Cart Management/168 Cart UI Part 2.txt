@@ -1,0 +1,192 @@
+Let's work on the View And upate the TITLE, DESCRIPTION, Price and Count.
+
+In the card-header div we have the button Continue Shopping, and we would like to Redirect the user back to HOme controller index method so modified to:
+
+ <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-info btn-sm">Continue Shopping</a>
+
+Now refresh the page and click Continue shopping to test.
+
+Now in card-body foreach loop, 
+
+Updated the img src to "@item.Product.ImageUrl"
+
+Update TITLE to @item.Product.Title
+
+Update DESCRIPTION to @item.Product.Description
+
+--Price -- and --Count-- would be updated to  $@item.Price and @item.Count
+
+
+Then we have buttons for Add and Remove icons. WE will work on that later.
+
+After that replaced --TOTAL-- with @Model.OrderHeader.OrderTotal
+
+At last we have summary and here we want to go to Action Summary in the same area and controller(cart), the standard is first we need to give the area, then controller then action like:
+
+<a asp-area="Customer", asp-controller="Cart" asp-action="Summary" class="btn btn-success form-control">Summary</a>
+
+Now save and refresh. We see the Products properly.
+
+On thing, we can test is currently we are having 30 products, and in database the Price and Price50 is 4 so it is diplaying correctly as: $4x 30, The Price100 is 5 in database, so if we add 80 more Products it would be in 100+ range.
+
+So gone to home and added the same product with count 80 and came back to shopping cart. Now we see it $5x 110.
+
+Now he want to add a condition like for Ordering, the email must be verified. So in card-footer, we is adding a check for Email Confirmed. 
+
+So after card-footer row added the if check for EmailConifrmed/IsAuthorizedCompany. and inise it added Email must be confirmed in a div of class danger like:
+
+ 			 @if (!Model.OrderHeader.ApplicationUser.EmailConfirmed
+                            && Model.OrderHeader.ApplicationUser.CompanyId != null
+                            && Model.OrderHeader.ApplicationUser.Company.IsAuthorizedCompany)
+                            {
+                                <div class="col-8 text-danger">
+                                    Email Must be confirmed for authorized customers!
+                                </div>
+                            }
+
+And then(in the same if block) we will add a submit button in a div with col-4 it would be for sending Confirmation Email, unfortunately this part of mine is not working.
+
+                                <div class="col-4">
+                                    <button type="submit" class="btn btn-outline-warning btn-warning">
+                                        Click here to resend Confirmation email
+                                    </button>
+                                </div>
+
+In the else block, we will display the div for Summary anchor.
+
+                            else
+                            {
+                                <div class="col-sm-12 col-lg-4 col-md-6 offset-lg-8 offset-md-6 ">
+                                    <a asp-area="Customer" , asp-controller="Cart" asp-action="Summary" class="btn btn-success form-control">Summary</a>
+                                </div>
+                            }
+
+Now if we refresh we dont see any difference.
+
+But from the users we would see the list of Users. 
+
+We have an email who is from an Authotized Company,  and would use that email(auth750@dkf) to try loggin in. 
+
+After login, Addin items in the cart. and check the cart. We see that the email is not confirmed message is being shown.
+
+In the next part we would be working in the code for resend confirmation and proceed.
+
+
+---------------------------------------------------------------
+--Pushed the codes to Github.
+
+--Index.cshtml
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
+
+<form method="post">
+    <br />
+    @if (Model.ListCart.Count() > 0)
+    {
+        <div class="backgroundWhiteBorder">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header bg-dark text-light ml-0 row container">
+                        <div class="col-6">
+                            <i class="fa fa-shopping-cart"></i> &nbsp;
+                            Shopping Cart
+                        </div>
+                        <div class="col-6 text-right">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-info btn-sm">Continue Shopping</a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        @foreach (var item in Model.ListCart)
+                        {
+                            <div class="row">
+                                <div class="d-none d-lg-block col-lg-1 text-center py-2">
+                                    <img src="@item.Product.ImageUrl" class="rounded" width="100%" />
+                                </div>
+                                <div class="col-12 text-sm-center col-lg-6 text-lg-left">
+                                    <h5><strong>@item.Product.Title</strong></h5>
+                                    <p><small>@item.Product.Description</small></p>
+                                </div>
+                                <div class="col-12 text-sm-center col-lg-5 text-lg-right row">
+                                    <div class="col-4 text-md-right" style="padding-top:5px;">
+                                        <h6><strong> $@item.Price<span class="text-muted">x</span> @item.Count </strong></h6>
+                                    </div>
+                                    <div class="col-6 col-sm-4 col-lg-6">
+                                        <div class="float-right mx-1">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <div class="float-right mx-1">
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-2 col-sm-4 col-lg-2 text-right">
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                        }
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 offset-md-6 col-lg-4 offset-lg-8 pr-4">
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between bg-light">
+                                        <span class="text-info"> Total (USD)</span>
+                                        <strong class="text-info">$ <span id="txtOrderTotal">@Model.OrderHeader.OrderTotal</span></strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-footer row">
+                            @if (!Model.OrderHeader.ApplicationUser.EmailConfirmed
+                         && Model.OrderHeader.ApplicationUser.CompanyId != null
+                         && Model.OrderHeader.ApplicationUser.Company.IsAuthorizedCompany)
+                            {
+                                <div class="col-8 text-danger">
+                                    Email Must be confirmed for authorized customers!
+                                </div>
+
+                                <div class="col-4">
+                                    <button type="submit" class="btn btn-outline-warning btn-warning">
+                                        Click here to resend Confirmation email
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-sm-12 col-lg-4 col-md-6 offset-lg-8 offset-md-6 ">
+                                    <a asp-area="Customer" , asp-controller="Cart" asp-action="Summary" class="btn btn-success form-control">Summary</a>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>There are No Items in the Shopping Cart</div>
+    }
+
+</form>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

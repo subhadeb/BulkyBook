@@ -1,4 +1,4 @@
-
+In this section, we will continue working on our shopping cart. And this time we will be having the summary page and we will be having the Addition/Subtraction and Add/Remove items from shopping cart.
 
 ---------------------------------------------------------------
 

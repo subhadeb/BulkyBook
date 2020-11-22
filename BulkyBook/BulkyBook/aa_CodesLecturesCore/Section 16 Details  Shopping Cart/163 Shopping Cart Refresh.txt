@@ -57,7 +57,7 @@ At the top we need the below using and inject
 Now inside <ul> for navbar-nav class, after the if conditions for User IsInRole, Added another check if we have any value in session or not. If value is not null the we would add a list where we will have an anchor tag which will have asp-area Customer, controller- Cart(Yet to be created), action-index, and we will display the count as the anchor text, and also use font awesome icon like:
 
                         <li style="color:white">
-                            <a asp-area="Customer" asp-controller="Carat" asp-action="Index" class="nav-link">
+                            <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-link">
                                 @{
                                     var count = HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart);
                                 }
@@ -448,7 +448,7 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                         @if (HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart) != null)
                         {
                             <li style="color:white">
-                                <a asp-area="Customer" asp-controller="Carat" asp-action="Index" class="nav-link">
+                                <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-link">
                                     @{
                                         var count = HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart);
                                     }

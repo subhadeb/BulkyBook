@@ -1,0 +1,197 @@
+Now we have our shopping cart and on click of the cart it opens this URL, and the controller/view is not yet created.
+
+https://localhost:44339/Customer/Cart
+
+We need to display all the items in our shopping cart, along with that we need the user object. The email of the user needs to be verified if the order is from an authorized company. So we need the application user.
+
+In OrderHeader.cs, we have ApplicationUser property and also the OrderTotal.
+
+So for Shopping Cart, we need to create a new view model(In ViewModels folder under Models project). Created ShoppingCartVM.cs
+
+Made the class Public and we need two properties. First is an IEnumberable of ShopppingCart to be named ListCart and a Property of ObjectHeader.
+
+    public class ShoppingCartVM
+    {
+        public IEnumerable<ShoppingCart> ListCart { get; set; }
+        public OrderHeader OrderHeader { get; set; }
+    }
+
+We can use this in our CartController.
+
+NO in Customer Area, under Controllers created CartController.cs(Template is empty)
+
+Here we would need three things for Dependency Injection. These are:
+
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
+        private readonly UserManager<IdentityUser> _userManager;
+
+The email sender is needed because if the email would not be confirmed we would not let them proceeed.(But in my case sendGrid is not sending mails so I might bypas this validation check- May be I can validate with regex email).
+
+Now added a constructor(ctor) and added all the three references.
+
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender,UserManager<IdentityUser> userManager)
+        {
+            _unitOfWork = unitOfWork;
+            _emailSender = emailSender;
+            _userManager = userManager;
+        }
+
+(Seeing for the first time) Added a propery for the ShoppingCartVM in the controller before the constructor.
+
+public ShoppingCartVM ShoppingCartVM { get; set; }
+
+Now, gone to Index action method.
+
+First we will get the claim from ClaimsIdentity in the way we did earlier like:
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+
+
+Initialized ShoppingCartVM along with OrderHeader and ListCart(from db with includeProperties: Product) initialization.
+
+            ShoppingCartVM = new ShoppingCartVM()
+            {
+                OrderHeader = new OrderHeader(),
+                ListCart = _unitOfWork.ShoppingCart.GetAll(x=>x.ApplicationUserId == claim.Value, includeProperties: "Product")
+            };
+
+
+
+
+Next we will set the OrderTotal as 0 like:
+ShoppingCartVM.OrderHeader.OrderTotal = 0;
+
+We will display the total at the end in the view.
+
+Now after OrderTotal, set the ApplicationUser with includeProperties Company based on claim.value like:
+
+ShoppingCartVM.OrderHeader.ApplicationUser = ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
+                                                    .GetFirstOrDefault(x=>x.Id == claim.Value, 
+                                                    includeProperties: "Company");
+
+
+
+Now we need to iterate over the ListCart and calculate the price based on the quantity.
+
+So added a foreach to iterat over listCart and inside that, as we would not be getting the Price from the db(it is havign [NotMapped] attribute). We would use the SD class GetPriceBasedOnQuantity method passing the params from the iterated object. 
+
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
+                item.Price = SD.GetPriceBasedOnQuantity(item.Count, item.Product.Price, item.Product.Price50, item.Product.Price100);
+
+
+            }
+
+Next(in the foreach) we will calculte the OrderTotal of the VM Order header and it would be added over the loop based on Price and Count(Multiplication).
+ShoppingCartVM.OrderHeader.OrderTotal += (item.Price * item.Count);
+
+
+Now(inside the foreach) we would like to get the Description and this should be in RawHtml and we can use the SD.ConvertToRawHtml like:
+item.Product.Description = SD.ConvertToRawHtml(item.Product.Description);
+
+Next, if the Description length would be length would be greater than 100 we would Substring it till 99 and then display ... like:
+
+                if (item.Product.Description.Length > 100)
+                {
+                    item.Product.Description = item.Product.Description.Substring(0, 99) + "...";
+                }
+
+Now in return, we can return shopping cart vm like:
+
+return View(ShoppingCartVM);
+
+This was a length method, where we are retrieving the shopping cart from db, we are getting the application user with company, and then iterating over the items to calculate the price based on the count because we have price logic based on count.
+
+We will add view in the next part.
+
+---------------------------------------------------------------
+
+--ShoppingCartVM.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Models.ViewModels
+{
+    public class ShoppingCartVM
+    {
+        public IEnumerable<ShoppingCart> ListCart { get; set; }
+        public OrderHeader OrderHeader { get; set; }
+    }
+}
+
+
+--CartController.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Customer.Controllers
+{
+    public class CartController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public ShoppingCartVM ShoppingCartVM { get; set; }
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender,UserManager<IdentityUser> userManager)
+        {
+            _unitOfWork = unitOfWork;
+            _emailSender = emailSender;
+            _userManager = userManager;
+        }
+
+        public IActionResult Index()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+
+            ShoppingCartVM = new ShoppingCartVM()
+            {
+                OrderHeader = new OrderHeader(),
+                ListCart = _unitOfWork.ShoppingCart.GetAll(x=>x.ApplicationUserId == claim.Value, includeProperties: "Product")
+            };
+            ShoppingCartVM.OrderHeader.OrderTotal = 0;
+            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
+                                                    .GetFirstOrDefault(x=>x.Id == claim.Value, 
+                                                    includeProperties: "Company");
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
+                item.Price = SD.GetPriceBasedOnQuantity(item.Count, item.Product.Price, item.Product.Price50, item.Product.Price100);
+                ShoppingCartVM.OrderHeader.OrderTotal += (item.Price * item.Count);
+                item.Product.Description = SD.ConvertToRawHtml(item.Product.Description);
+                if (item.Product.Description.Length > 100)
+                {
+                    item.Product.Description = item.Product.Description.Substring(0, 99) + "...";
+                }
+            }
+            return View(ShoppingCartVM);
+        }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,141 @@
+Now we would be adding the view for our CartController.
+
+First in the controller, at the top we should add [Area("Customer")] attribute.
+
+Now added the Index view(Index.cshtml) in Views folder in a new folder named Cart under the area Customer.
+
+He provided an attachment named 1+Shopping+Cart+View+UI.txt, there all the static html codes were present for the Shopping Cart. It did not had any dot net core code. Pasted it.
+
+The first thing is the model. As we are returning ShoppingCartVM, from index method so this would be the model like:
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
+
+
+Before making any code changes run the solution. Login as admin, Clicked on the Cart and we see static html contents. there is a closing brace(by mistake) }, so removed that.
+
+Now we would add a foreach condition for all of the count.
+
+Now collapse the div with class backgroundWhiteBorder, wrap it with an if condition for Model.ListCart.Count greater than 0.
+
+In the else block we will have a div with
+    else
+    {
+        <div>There are No Items in the Shopping Cart</div>
+    }
+
+In the top container div we have a card and inside that we have three divs with card-header, card-body and card-footer.
+
+Inside card-body div there are two div rows with a hr tag in between. 
+
+We would like to wrap the div with with the first div row with a foreach 
+
+                   @foreach (var item in Model.ListCart)
+                   { 
+			--the div with class row and hr tag                   
+                   }
+
+
+Now if we refresh we would see two items as we are having two items in the Cart.
+
+In the next part we will see all the details.
+
+---------------------------------------------------------------
+--Index.cshtml
+
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
+
+<form method="post">
+    <br />
+    @if (Model.ListCart.Count() > 0)
+    {
+        <div class="backgroundWhiteBorder">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header bg-dark text-light ml-0 row container">
+                        <div class="col-6">
+                            <i class="fa fa-shopping-cart"></i> &nbsp;
+                            Shopping Cart
+                        </div>
+                        <div class="col-6 text-right">
+                            <a class="btn btn-outline-info btn-sm">Continue Shopping</a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        @foreach (var item in Model.ListCart)
+                        {
+                            <div class="row">
+                                <div class="d-none d-lg-block col-lg-1 text-center py-2">
+                                    <img src="https://via.placeholder.com/150" class="rounded" width="100%" />
+                                </div>
+                                <div class="col-12 text-sm-center col-lg-6 text-lg-left">
+                                    <h5><strong>--TITLE--</strong></h5>
+                                    <p><small>--DESCRIPTION--</small></p>
+                                </div>
+                                <div class="col-12 text-sm-center col-lg-5 text-lg-right row">
+                                    <div class="col-4 text-md-right" style="padding-top:5px;">
+                                        <h6><strong>--Price --<span class="text-muted">x</span> --Count-- </strong></h6>
+                                    </div>
+                                    <div class="col-6 col-sm-4 col-lg-6">
+                                        <div class="float-right mx-1">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <div class="float-right mx-1">
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-2 col-sm-4 col-lg-2 text-right">
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                        }
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 offset-md-6 col-lg-4 offset-lg-8 pr-4">
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between bg-light">
+                                        <span class="text-info"> Total (USD)</span>
+                                        <strong class="text-info">$ <span id="txtOrderTotal">--TOTAL--</span></strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-footer row">
+
+                            <div class="col-sm-12 col-lg-4 col-md-6 offset-lg-8 offset-md-6 ">
+
+                                <a class="btn btn-success form-control">Summary</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>There are No Items in the Shopping Cart</div>
+    }
+
+</form>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
