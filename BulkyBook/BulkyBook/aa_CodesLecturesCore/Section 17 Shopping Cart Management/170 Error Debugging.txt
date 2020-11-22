@@ -1,4 +1,35 @@
-﻿using System;
+Now he will give an error to solve.
+
+Login as admin and go to User(Summary Grid).
+
+Now try to add a new user, Only give the email as the same email as the logged in admin user's email, password and confirm password(Nothing else) and click Register.
+
+On click of the Register button we see and error(He too got the same):
+InvalidOperationException: There is no ViewData item of type 'IEnumerable<SelectListItem>' that has the key 'Input.Role'
+
+He told us to find the root cause of the error by debuggin. I added a debbuger in Register.cshtml.cs in OnPostAsync method.
+
+I see in the line:
+var result = await _userManager.CreateAsync(user, Input.Password);
+
+The result was: {Failed : DuplicateUserName}, at the end it added a model state error saying email already in use, and as the model's SelectList items were not initialized it broke. The solution would be to initialize the Model's SelectLists
+
+I am totally correct :)
+
+It is failing in Initializing the dropdowns. It is trying to populate the RoleList and it's failing(It is mentioned in the error).
+
+  @Html.DropDownListFor(m => m.Input.Role, Model.Input.RoleList,
+
+To fix this, we copied the InputModel initialization code(populated CompanyList and RoleList inside) from OnGetAsync method and pasted above the below comment
+// If we got this far, something failed, redisplay form
+
+Now try reproducing the same scenario again(Login as admin and try to register his same email). Now we see the email is already taken error message.
+---------------------------------------------------------------
+
+Pushed the codes to Github
+
+--Register.cshtml.cs
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -221,3 +252,13 @@ namespace BulkyBook.Areas.Identity.Pages.Account
         }
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

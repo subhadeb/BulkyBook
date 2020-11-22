@@ -1,4 +1,50 @@
-﻿using System;
+Opened Register.cshtml.cs from Identity Area.
+
+We see in the method OnPostAsync, we have the code for GenerateEmailConfirmationTokenAsync. 
+
+We can copy the below codes startin from var code = await ... till await _emailSender... and paste
+
+
+Now in CartController, Added a method IndexPost() for Post and the reason we added it because the Index.cshtml is having form post and we have the button for submit. It is async method retruning Task<IActionResult> with attribute [HttpPost], and as the Name is different we can set the ActionName in the attribute [ActionName("Index")]. And  and pasted the copied codes.
+
+
+We need the email id of the logged in user, so copie the two lines of claimsIdentity code from the index get method and pasted at the top.
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+We get the user object from the database with the below code:
+var user = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == claim.Value);
+
+Now we will add an if condition, like if the user is null we will add an error in the ModelState with message verification email is empty
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Verification Email is Empty");
+            }
+
+Now there will be pasted code and now we will be resolving the build errors. Did control dot on WebEncoders, Encoding and HtmlEncoder and added the pacakge. 
+
+Removed the code: , returnUrl = returnUrl from values.
+
+Updated Input.Email to user.Email
+
+At the end we will add a model state error saying Verification email sent and then redirect to index action.
+
+            ModelState.AddModelError(string.Empty, "Verification Email Sent, Please check email");
+            return RedirectToAction("Index");
+
+Now Let's test our changes and I am quit sure email will not be send by SendGrid But still...
+
+Logged in as admin, Go to Users tab, create a new user with a valid gmail, added the Role as Company Customer and selected the CompanyId was Big Company(It's an authorized company)
+
+Clicked Register.
+
+Now logged in as the new user. Add item to the cart. Go to cart, and we see Email Must be confirmed for authorized customers! Clicked Resend orange button(And debugged also) but no email was sent for me due to sendgrid issue. I think I can update the DB column from the backend, and if required I will do from the backed with update query.
+
+---------------------------------------------------------------
+--CartController
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -89,3 +135,13 @@ namespace BulkyBook.Areas.Customer.Controllers
 
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
