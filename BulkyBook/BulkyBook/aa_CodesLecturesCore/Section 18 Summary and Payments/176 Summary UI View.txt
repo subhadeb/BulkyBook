@@ -1,0 +1,181 @@
+Now we have the Summary get action, it's time to create the view. Created Summary.cshtml and pasted the codes from the attachment.
+
+It's a plain html css code. At the top we need to define the Model it is :
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
+
+Now run the application and take a look at the View First. Logged in as admin, make sure we have more than one item in the cart(for viewing properly).
+
+In the summary page we see a nice html form for Order Summary with Back to Cart button, having PickUp Details: in the left and Order Summary: in the right.
+
+At the bottom we have the button Place Order and Estimate Arrival Date: 11/30/2020 - 12/7/2020.
+
+Back to Cart should take us bak to the Index of Cart.
+
+Now we will make changes in the running Application.
+
+First update the anchor tag(<a>) for Back to Cart, it will have the area as Customer, controller Cart and action Index like:
+
+<a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-outline-info btn-sm">Back to Cart</a>
+
+Now to the input field after label Name, we can bind to OrderHeader.Name with asp-for like:
+
+<input asp-for="OrderHeader.Name" type="text" class="form-control" />
+
+Done the same thing for PhoneNumber
+<input asp-for="OrderHeader.PhoneNumber" type="text" class="form-control" />
+
+Then similarly for OrderHeader.StreetAddress, OrderHeader.City, OrderHeader.State and OrderHeader.PostalCode
+
+Now refresh the Summary page. We see all the details are populated properly for Pickup Details.
+
+Now we would work on the Order Summary:
+
+Here inside list-group, in ul tag, we have two li one for individual Item and the second li for Grand Total.
+
+So we would wrap the first li inside a loop for all the available items. 
+
+[I had to spend a lot of times in fixing compilation errors in the view related to @/{}/() and ; we should do them carefully. As per my understanding as of now for calculations we should use {} and for displaying we should use () without ; inside]
+
+@foreach (var item in Model.ListCart)
+
+Now inside the foreach loop replace TITLE h6 code will be like:
+ <h6 class="my-0">@item.Product.Title</h6>
+
+For COUNT it would be like
+<small class="text-muted">Quantity: @item.Count</small>
+
+Next we would updte the span with --PRICE* COUNT-- to 
+<span class="text-muted">$ @( item.Price * item.Count)</span>
+
+Now, replace the strong tag with GRAND TOTAL to
+
+<strong class="text-info">$ @(Model.OrderHeader.OrderTotal)</strong>
+
+So no on refreshing we see the order summary products is looking good along with the totals updated.
+---------------------------------------------------------------
+Pushed the Codes to Github
+
+--Summary.cshtml
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
+
+<form method="post">
+    <br />
+    <div class="backgroundWhiteBorder">
+        <div class="container">
+            <div class="card">
+                <div class="card-header bg-dark text-light ml-0 row container">
+                    <div class="col-6">
+                        <i class="fa fa-shopping-cart"></i> &nbsp;
+                        Order Summary
+                    </div>
+                    <div class="col-6 text-right">
+                        <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-outline-info btn-sm">Back to Cart</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="container rounded p-2">
+                        <div class="row">
+                            <div class="col-12 col-lg-6 pb-4">
+                                <div class="row">
+                                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-info">PickUp Details:</span>
+                                    </h4>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Name</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.Name" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Phone</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.PhoneNumber" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Street Address</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.StreetAddress" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>City</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.City" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>State</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.State" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Postal Code</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.PostalCode" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-5 offset-lg-1">
+                                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-info">Order Summary:</span>
+                                </h4>
+                                <ul class="list-group mb-3">
+                                    @foreach (var item in Model.ListCart)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="my-0">@item.Product.Title</h6>
+                                                <small class="text-muted">Quantity: @item.Count</small>
+                                            </div>
+                                            <span class="text-muted">$ @( item.Price * item.Count)</span>
+                                        </li>
+                                    }
+                                    <li class="list-group-item d-flex justify-content-between bg-light">
+                                        <small class="text-info">Total (USD)</small>
+                                        <strong class="text-info">$ @(Model.OrderHeader.OrderTotal)</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-12 col-md-8 pt-2">
+                            <p style="color:maroon; font-size:14px;">Estimate Arrival Date: @DateTime.Now.AddDays(7).ToShortDateString() - @DateTime.Now.AddDays(14).ToShortDateString()</p>
+                        </div>
+                        <div class="col-12 col-md-4">
+
+                            <button type="submit" value="Place Order" class="btn btn-success form-control">Place Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

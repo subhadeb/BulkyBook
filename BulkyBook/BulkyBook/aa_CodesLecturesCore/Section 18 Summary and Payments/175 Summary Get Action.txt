@@ -1,4 +1,58 @@
-﻿using System;
+Now we would work on the Summary Page. And this would be opened when we click on Summary Button in Cart index page.
+
+In the Summary page we will have two sections in Left and Right. In the right we will display the product details, and in the left information we will capture the user details like address. 
+
+The user inforation can be populated from the order header. Other information will be asked to the user to manually input.
+
+Now opened CartController. At the end after Remove action added ActionMethod Summary.
+
+First, 
+we can get the ApplicationUser/claim with the below two pasted codes:
+
+var claimsIdentity = (ClaimsIdentity)User.Identity;
+var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+
+Now we will initialize the ShoppingCartVM, with Order Header, and ListCart(From DB) like:
+
+
+            ShoppingCartVM = new ShoppingCartVM()
+            {
+                OrderHeader = new OrderHeader(),
+                ListCart = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == claim.Value, includeProperties: "Product")
+            };
+
+
+
+Now we will populate the ShoppingCartVM.OrderHeader.ApplicationUser including Company like:
+
+            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.GetFirstOrDefault(x => x.Id == claim.Value,
+                                                            includeProperties: "Company");
+
+Now we would iterate over ShoppingCartVM.ListCart and set the Price and Description with the help of Static Details(SD.cs) in the same way we did for Index get. What we are are doing is we are getting the Price based on the quantity from the list cart and we are changing the total. Here we dont need the Descriptoin so removed the codes for this. It's like:
+
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
+                item.Price = SD.GetPriceBasedOnQuantity(item.Count, item.Product.Price, item.Product.Price50, item.Product.Price100);
+                ShoppingCartVM.OrderHeader.OrderTotal += (item.Price * item.Count);
+                item.Product.Description = SD.ConvertToRawHtml(item.Product.Description);
+            }
+
+Now we would populate the Order Header from our application user. So first we can populate the Name like:
+
+ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
+
+Made a copy of the above line and pasted five more times. After name, Updated the fields to PhoneNumber,City,State,StreetAddress and PostalCode.
+
+Now we can return the ShoppingCartVM:
+return View(ShoppingCartVM);
+
+Next we will create the Summary View.
+---------------------------------------------------------------
+
+--CartController.cs
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -150,7 +204,7 @@ namespace BulkyBook.Areas.Customer.Controllers
             ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
             ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
             ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State;
-            ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
+	    ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
             ShoppingCartVM.OrderHeader.PostalCode = ShoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
             return View(ShoppingCartVM);
         }
@@ -158,3 +212,13 @@ namespace BulkyBook.Areas.Customer.Controllers
 
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,4 +1,6 @@
+In this section we would be working on the Summary Page and Payments.
 
+In the sumary page we will be accepting payments from the end user and will be using stripe to collect card information.
 
 ---------------------------------------------------------------
 
