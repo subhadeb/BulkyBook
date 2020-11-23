@@ -1,4 +1,62 @@
-﻿using System;
+Let's implement Minus and Remove, In minus we have to take care that if it is the last item(It will remove the product from the cart and session as well).
+
+
+Remove will remove the item from the cart and remove from session
+
+In CartController, made a copy of the Plus action. Changed method name to Minus
+
+FIrst we would get the cart same as it is(var cart = ...)
+
+After that we will check if the Count of cart is equal to 1. In the if block 
+
+First we would get the count(in var cnt) using GetAll passing the cart.ApplicationUserId. 
+
+then we would remove the cart object from ShoppingCart. and call Save(). After that we have to update the session ssShoppingCart with values cnt - 1 like:
+
+            if (cart.Count == 1)
+            {
+                var cnt = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == cart.ApplicationUserId).ToList().Count();
+                _unitOfWork.ShoppingCart.Remove(cart);
+                _unitOfWork.Save();
+                HttpContext.Session.SetInt32(SD.ssShoppingCart, cnt - 1);
+            }
+
+
+In the else block, moved the plus codes three lines for updating Count and Price, here it would be cart.Count -= 1 and also the Save() is here.
+
+            else
+            {
+                cart.Count -= 1;
+                cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price,
+                                        cart.Product.Price50, cart.Product.Price100);
+                _unitOfWork.Save();
+            }
+
+At the end the redirection is same as earlier(To Index).
+
+Now copied the codes for Minus Action and pasted below. Changed method name to Remove. Here we will treat the count as 1 so removed the if condition(with braces) and the else block entirely. It's like:
+
+        public IActionResult Remove(int cartId)
+        {
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault
+                            (c => c.Id == cartId, includeProperties: "Product");
+            var cnt = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == cart.ApplicationUserId).ToList().Count();
+            _unitOfWork.ShoppingCart.Remove(cart);
+            _unitOfWork.Save();
+            HttpContext.Session.SetInt32(SD.ssShoppingCart, cnt - 1);
+            return RedirectToAction(nameof(Index));
+        }
+
+Now run the solution, logged in as admin. We see on Minus Count is decremented by 1. And on Price50 range the Price is also updated. And if the count was 1 on minus it is removed from the cart and session.
+
+The Remove/Delete is also working fine.
+So our cart is working fine.
+
+---------------------------------------------------------------
+--Pushed the codes to Github
+
+--CartController.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -131,3 +189,13 @@ namespace BulkyBook.Areas.Customer.Controllers
 
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

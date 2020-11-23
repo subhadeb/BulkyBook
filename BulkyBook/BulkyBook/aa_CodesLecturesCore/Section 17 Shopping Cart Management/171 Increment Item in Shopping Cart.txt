@@ -1,0 +1,290 @@
+Now we we would Like To work on the Cart +, - and Delete Icons.
+
+Before that make sure we have the Price and Price50/Price100 Update like this in order to test our solution further.
+
+Update the database such that we have four products and may be run update queries(Based on the id) like this:
+
+update Products set Price=109, Price50=89, Price100=69 where Id=2
+update Products set Price=209, Price50=189, Price100=169 where Id=3
+update Products set Price=309, Price50=289, Price100=269 where Id=4
+update Products set Price=409, Price50=389, Price100=369 where Id=5
+
+So we have updated the Price to be lowered on adding more items.
+
+
+We can have individual actions for each of the buttons passing the Id of the Product.
+
+Stopped the solution, closed every thing other than index.cshtml and CartController.
+
+Currently we have three buttons for +, - and trash. We need to change the buttons to action. So for plus changed button to anchor(<a>) with action plus and replace btn type with the action and route like:
+
+<a asp-action="plus" asp-route-cartId="@item.Id" class="btn btn-primary">
+
+Did the same thing for minus and trash(remove action) and these are
+
+ <a asp-action="minus" asp-route-cartId="@item.Id" class="btn btn-danger">
+
+and
+
+<a asp-action="remove" asp-route-cartId="@item.Id" class="btn btn-danger">
+
+Kept the font awesome icons under i tag unchanged.
+
+Now go to CartController, after IndexPost action,
+
+Added public IActionResult Plus(int cartId) method as we would be getting cartId in the Route.
+
+Based on the cartId we would get the cart from the database along with includeProperties Product like:
+
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault
+                            (c => c.Id == cartId, includeProperties: "Product");
+
+
+
+Now we will increment the count like:
+cart.Count += 1;
+
+Now we need to reload the price, because the price would be dynamic based on the cart count so called the method GetPriceBasedOnQuantity like:
+
+            cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price,
+                                    cart.Product.Price50, cart.Product.Price100);
+
+Now Saved _unitofWork and returned to Index action using nameof like:
+
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+
+Here we are using Save() directly(need not use Update), because EF tracks the updates. 
+
+Now run the solution and login as an admin.
+
+First add an item to test if the count updates.- It works.
+
+Now add a new product with count 49. In the Product details page we see the price of 1-49 is 109 and for 50-99 it's 89. So Added 48 Count Items.
+
+We see the price is like: $109x 48, clicked +, now it's $109x 49
+again clicked + and now it's $89x 50. So this is also working as expected.
+
+We will implement Minus and Remove in the next part.
+---------------------------------------------------------------
+
+--Index.cshtml
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
+
+<form method="post">
+    <br />
+    @if (Model.ListCart.Count() > 0)
+    {
+        <div class="backgroundWhiteBorder">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header bg-dark text-light ml-0 row container">
+                        <div class="col-6">
+                            <i class="fa fa-shopping-cart"></i> &nbsp;
+                            Shopping Cart
+                        </div>
+                        <div class="col-6 text-right">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-info btn-sm">Continue Shopping</a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        @foreach (var item in Model.ListCart)
+                        {
+                            <div class="row">
+                                <div class="d-none d-lg-block col-lg-1 text-center py-2">
+                                    <img src="@item.Product.ImageUrl" class="rounded" width="100%" />
+                                </div>
+                                <div class="col-12 text-sm-center col-lg-6 text-lg-left">
+                                    <h5><strong>@item.Product.Title</strong></h5>
+                                    <p><small>@item.Product.Description</small></p>
+                                </div>
+                                <div class="col-12 text-sm-center col-lg-5 text-lg-right row">
+                                    <div class="col-4 text-md-right" style="padding-top:5px;">
+                                        <h6><strong> $@item.Price<span class="text-muted">x</span> @item.Count </strong></h6>
+                                    </div>
+                                    <div class="col-6 col-sm-4 col-lg-6">
+                                        <div class="float-right mx-1">
+                                            <a asp-action="plus" asp-route-cartId="@item.Id" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i>
+                                            </a>
+                                        </div>
+                                        <div class="float-right mx-1">
+                                            <a asp-action="minus" asp-route-cartId="@item.Id" class="btn btn-danger">
+                                                <i class="fas fa-minus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-2 col-sm-4 col-lg-2 text-right">
+                                        <a asp-action="remove" asp-route-cartId="@item.Id" class="btn btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                        }
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 offset-md-6 col-lg-4 offset-lg-8 pr-4">
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between bg-light">
+                                        <span class="text-info"> Total (USD)</span>
+                                        <strong class="text-info">$ <span id="txtOrderTotal">@Model.OrderHeader.OrderTotal</span></strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-footer row">
+                            @if (!Model.OrderHeader.ApplicationUser.EmailConfirmed
+                         && Model.OrderHeader.ApplicationUser.CompanyId != null
+                         && Model.OrderHeader.ApplicationUser.Company.IsAuthorizedCompany)
+                            {
+                                <div class="col-8 text-danger">
+                                    Email Must be confirmed for authorized customers!
+                                </div>
+
+                                <div class="col-4">
+                                    <button type="submit" class="btn btn-outline-warning btn-warning">
+                                        Click here to resend Confirmation email
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-sm-12 col-lg-4 col-md-6 offset-lg-8 offset-md-6 ">
+                                    <a asp-area="Customer" , asp-controller="Cart" asp-action="Summary" class="btn btn-success form-control">Summary</a>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>There are No Items in the Shopping Cart</div>
+    }
+
+</form>
+
+
+--CartController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+
+namespace BulkyBook.Areas.Customer.Controllers
+{
+    [Area("Customer")]
+    public class CartController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public ShoppingCartVM ShoppingCartVM { get; set; }
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender,UserManager<IdentityUser> userManager)
+        {
+            _unitOfWork = unitOfWork;
+            _emailSender = emailSender;
+            _userManager = userManager;
+        }
+
+        public IActionResult Index()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+
+            ShoppingCartVM = new ShoppingCartVM()
+            {
+                OrderHeader = new OrderHeader(),
+                ListCart = _unitOfWork.ShoppingCart.GetAll(x=>x.ApplicationUserId == claim.Value, includeProperties: "Product")
+            };
+            ShoppingCartVM.OrderHeader.OrderTotal = 0;
+            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
+                                                    .GetFirstOrDefault(x=>x.Id == claim.Value, 
+                                                    includeProperties: "Company");
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
+                item.Price = SD.GetPriceBasedOnQuantity(item.Count, item.Product.Price, item.Product.Price50, item.Product.Price100);
+                ShoppingCartVM.OrderHeader.OrderTotal += (item.Price * item.Count);
+                item.Product.Description = SD.ConvertToRawHtml(item.Product.Description);
+                if (item.Product.Description.Length > 100)
+                {
+                    item.Product.Description = item.Product.Description.Substring(0, 99) + "...";
+                }
+            }
+            return View(ShoppingCartVM);
+        }
+        [HttpPost]
+        [ActionName("Index")]
+        public async Task<IActionResult> IndexPost()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            var user = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == claim.Value);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Verification Email is Empty");
+            }
+
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new { area = "Identity", userId = user.Id, code = code },
+                protocol: Request.Scheme);
+
+            await _emailSender.SendEmailAsync(user.Email, "Confirm your email",
+                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+            ModelState.AddModelError(string.Empty, "Verification Email Sent, Please check email");
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult Plus(int cartId)
+        {
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault
+                            (c => c.Id == cartId, includeProperties: "Product");
+            cart.Count += 1;
+            cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price,
+                                    cart.Product.Price50, cart.Product.Price100);
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
