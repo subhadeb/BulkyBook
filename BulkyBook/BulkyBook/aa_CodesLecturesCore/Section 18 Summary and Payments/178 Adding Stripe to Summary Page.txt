@@ -1,4 +1,66 @@
-﻿@model BulkyBook.Models.ViewModels.ShoppingCartVM
+Now we will be using Stripe in our summary Page.
+
+We have Summary.cshtml in Customer area Cart view folder.
+
+Here we would be injecting stripe. For that first at the top we will include 
+@using Microsoft.Extensions.Options
+
+Now we will @inject StripeSettings class like:
+@inject IOptions<BulkyBook.Utility.StripeSettings> Stripe
+
+This way we can access the Keys for Stripe.
+
+Now go to card-footer div.
+Before the sumbit button in the same div we will first set a variable for storing/calculationg the total price like:
+
+                            @{
+                                var OrderTotalFroStripe = Model.OrderHeader.OrderTotal * 100;
+                            }
+
+Next we would need script tag and he kind of hardcoded it like the below adding a class stripe-button. I also tried to open the js(with full path) in the browser and it worked. need to pass multiple configuration attributes to the script for Stript to work like data-key, data-amount, data-name ... So the script is like:
+
+
+                            <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                    data-key="@Stripe.Value.PublishableKey"
+                                    data-amount="@OrderTotalFroStripe"
+                                    data-name="Bulky Book"
+                                    data-label="Place Order"
+                                    data-description="Get Books For Less"
+                                    data-locale="auto"
+                                    data-allow-remember-me="false"
+                                    data-image="https://stripe.com/img/documentation/checkout/marketplace.png">
+                            </script>
+
+
+The above code would add a button above submit. 
+
+Now run the solution and login as an admin, to to Cart Summary.
+
+We see we hve the Place Order Button.
+
+The way stripe works is any button with type submit will trigger the stipe checkout page. 
+
+So on Click of Place order(for stripe) we see the Stripe Popup. And it looks good :)
+
+Also if we click on Place Order button that we have added it opens Stripe Popup.
+
+So we will hide one button(provided by stripe). Inpected html in browser and found the stripe Place Order button have the class like:class="stripe-button-el"
+
+Now in the cshtml, after the script section for stripe, added another script section to hide the Button provided by stripe using the classname
+
+                            <script>
+                                document.getElementsByClassName("stripe-button-el")[0].style.display = 'none'
+                            </script>
+
+
+
+Now on opening the popup with our Button and if we click Pay Button we see error on keeping fields blank. 
+
+It will work like it will set up the payment and will send the controller a token. And we will charge the credit card, and we will do these inside controller post in the next part.
+---------------------------------------------------------------
+--Summary.cshtml
+
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
 @using Microsoft.Extensions.Options
 
 @inject IOptions<BulkyBook.Utility.StripeSettings> Stripe
@@ -108,7 +170,7 @@
                             @{
                                 var OrderTotalFroStripe = Model.OrderHeader.OrderTotal * 100;
                             }
-                            @*<script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                            <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
                                     data-key="@Stripe.Value.PublishableKey"
                                     data-amount="@OrderTotalFroStripe"
                                     data-name="Bulky Book"
@@ -117,7 +179,7 @@
                                     data-locale="auto"
                                     data-allow-remember-me="false"
                                     data-image="https://stripe.com/img/documentation/checkout/marketplace.png">
-                            </script>*@
+                            </script>
                             <script>
                                 document.getElementsByClassName("stripe-button-el")[0].style.display = 'none'
                             </script>
@@ -129,3 +191,14 @@
         </div>
     </div>
 </form>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

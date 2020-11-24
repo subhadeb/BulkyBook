@@ -1,4 +1,118 @@
-﻿using System;
+Now we need to configure Summary post in which user enters card details, and press Pay button, it goes to Summary Post.
+
+But first we need to crete Order Header, Order Details and Push that to Database as Pending status and once payment is successful we will change the status.
+
+Stopped the soltion and opened CartController.cs
+After Summary get, added SummaryPost,as this would not be having any params with three attributes
+
+        [HttpPost]
+        [ActionName("Summary")]
+        [ValidateAntiForgeryToken]
+        public IActionResult SummaryPost()
+        { 
+        
+        }
+
+After this we will paste the codes of claim inside it(for ClaimsIdentity).
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+
+We could have stored the userid in a session, but he wanted to be consistent through out the application.
+
+Now we can get the ApplicationUser of OrderHeader from ApplicationUser along with includeProperties Company like:
+
+
+            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.GetFirstOrDefault(x => x.Id == claim.Value,
+                                                            includeProperties: "Company");
+
+Next we can populate ListCart like:
+
+ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == claim.Value, includeProperties: "Product");
+
+The reason that we are retrieving everything from the database is we are not sure what the user would post. 
+
+Now we will add constants in SD.cs for PaymentStatus. Opened SD.cs Added all the below constants(Copied from his github code)
+
+        public const string StatusPending = "Pending";
+        public const string StatusApproved = "Approved";
+        public const string StatusInProcess = "Processing";
+        public const string StatusShipped = "Shipped";
+        public const string StatusCancelled = "Cancelled";
+        public const string StatusRefunded = "Refunded";
+
+        public const string PaymentStatusPending = "Pending";
+        public const string PaymentStatusApproved = "Approved";
+        public const string PaymentStatusDelayedPayment = "ApprovedForDelayedPayment";
+        public const string PaymentStatusRejected = "Rejected";
+
+We have multiple status for Order and Payment status, although the names are same but we would like to keep them isolated.
+
+Initially it would be pending for both of them. 
+
+So back to Controller, after  ShoppingCartVM.ListCart = ....., we would add
+ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+
+Next we will set the Orderstatus as pending like
+ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
+
+After that we will set the APplicationUserid as 
+ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
+
+Next, OrderDate would be DateTime.Now
+ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
+
+Now let's update all these to the Database with:
+            _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
+            _unitOfWork.Save();
+
+Now after Save(), we will have the OrderHeaderId.
+
+Next we will have a list of OrderDetails, named orderDetailsList. We will iterate over ShoppingCartVM.ListCart.
+
+Inside the loop we will create an object of OrderDetail where the ProductId will be item's ProductId, we will have the OrderId in ShoppingCartVM.OrderHeader.Id, price would be item.Price and Count is item.count like
+
+            List<OrderDetails> orderDetailsList = new List<OrderDetails>();
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
+                OrderDetails orderDetails = new OrderDetails()
+                {
+                    ProductId = item.ProductId,
+                    OrderId = ShoppingCartVM.OrderHeader.Id,
+                    Price = item.Price,
+                    Count = item.Count
+                };
+            }
+
+Now(Inside the same loop), we will calucte the OrderTotal based on the Count of order multiplied by Price and this would go on adding in the loop.
+
+ShoppingCartVM.OrderHeader.OrderTotal += orderDetails.Count * orderDetails.Price;
+
+And in the loop only everytime we will save the orderdetails to the database.
+
+                _unitOfWork.OrderDetails.Add(orderDetails);
+                _unitOfWork.Save();
+
+So for every order header every oreder will be saved to the database.
+
+After that(outside of foreach loop) we can remove all the ListCart items from shopping cart like:
+
+_unitOfWork.ShoppingCart.RemoveRange(ShoppingCartVM.ListCart);
+
+And then we will update the session to for ssShoppingCarat to 0 like:
+
+HttpContext.Session.SetInt32(SD.ssShoppingCart,0);
+
+After that we can redirect to a new action named OrderConfirmation inside the same controller and we would pass the id from OrderHeader like:
+
+return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
+
+Next we would work Work on OrderConfirmation.
+---------------------------------------------------------------
+
+--CartController.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -24,7 +138,6 @@ namespace BulkyBook.Areas.Customer.Controllers
         private readonly IEmailSender _emailSender;
         private readonly UserManager<IdentityUser> _userManager;
 
-        [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
         public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, UserManager<IdentityUser> userManager)
         {
@@ -176,7 +289,6 @@ namespace BulkyBook.Areas.Customer.Controllers
             List<OrderDetails> orderDetailsList = new List<OrderDetails>();
             foreach (var item in ShoppingCartVM.ListCart)
             {
-                item.Price = SD.GetPriceBasedOnQuantity(item.Count,item.Product.Price, item.Product.Price50, item.Product.Price100);
                 OrderDetails orderDetails = new OrderDetails()
                 {
                     ProductId = item.ProductId,
@@ -189,15 +301,21 @@ namespace BulkyBook.Areas.Customer.Controllers
                 _unitOfWork.Save();
             }
             _unitOfWork.ShoppingCart.RemoveRange(ShoppingCartVM.ListCart);
-            _unitOfWork.Save();
             HttpContext.Session.SetInt32(SD.ssShoppingCart,0);
             return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
+            
         }
 
-        public IActionResult OrderConfirmation(int id)
-        {
-            return View(id);
-        }
 
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

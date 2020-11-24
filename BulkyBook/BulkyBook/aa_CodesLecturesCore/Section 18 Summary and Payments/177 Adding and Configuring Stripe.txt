@@ -1,3 +1,90 @@
+Now it's time for a new Challenging thing.
+
+When the User would Place Order, we should set up stripe and on valid payment we should let the user move ahead.
+
+First we need to install stripe in our project.
+
+Go to tools nuget package manager and search Stripe.net
+Install it in BulkyBook Project.
+
+It is installed now go to Stripe.com
+
+First we will create a stripe account.
+
+After registering with hotmail account, It opened dasboard, a loader was running for Activating your Stripe India beta invite!, after waiting for 5 mins clicked Get Started.
+
+Gone to mail inbox and Verified the account.
+
+Next in the portal clicked Activate your Stripe account Start Now button
+
+Next in the Portal clicked Developers from the Left.
+
+There under API Keys we have Publishable key and Secret key.
+
+Now opened appsettings.json, here we have two sendGridKeys, now we will add a separate element for stripe(we could have used like sendgrid as well but for separation we did this). Pasted the two keys like:
+
+   "Stripe": {
+    "SecretKey": "sk_test_...",
+    "PublishableKey": "pk_test_..."
+  }
+
+So now we will create a class named stripe settings and add these two properties.
+
+So in Utility project, created a class StripeSettings.cs made it public and the two properies are same as the one we declared in appsettings.json
+
+        public string SecretKey { get; set; }
+        public string PublishableKey { get; set; }
+
+Now open Starup.cs
+In ConfigureServices, After services.Configure<EmailOptions>(Configuration) we need to get the Key from Configuration and it's not present directly it's present in the section Strip so added:
+
+services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
+
+Now we will add stripe to Middlewares.
+So in Configure after UseRouting, added the below(dont know why he did not add app.)
+
+We will continue in the next part.
+
+
+---------------------------------------------------------------
+--appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=SUKLA\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "Win10DefaultConnection": "Server=USMUMSUBDEB3\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "SendGridKey": "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",
+  "SendGridUser": "BulkyBook",
+  "Stripe": {
+    "SecretKey": "sk_test_51HqVhWKjdIQzDW3r6bPMs28IQ1g8A5XXMNnyofqLkmVIxoaBavedcW8XVGuAtZ5oo8w3GqjyvXrfHoYyC1yHGtvh00oaP0wZ78",
+    "PublishableKey": "pk_test_51HqVhWKjdIQzDW3r1NF4u6DbS0eAvbn9HJnQAKemHcDkS1dbMY5viBotxCBAmxwGe6sCi2KtjQI9dqrqMwtXCCOB00OQzp57lS"
+  }
+}
+
+
+--StripeSettings.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Utility
+{
+    public class StripeSettings
+    {
+        public string SecretKey { get; set; }
+        public string PublishableKey { get; set; }
+    }
+}
+
+--Starup.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,3 +203,14 @@ namespace BulkyBook
         }
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

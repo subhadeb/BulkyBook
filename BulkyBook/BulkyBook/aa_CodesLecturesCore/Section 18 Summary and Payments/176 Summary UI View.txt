@@ -52,6 +52,8 @@ Now, replace the strong tag with GRAND TOTAL to
 <strong class="text-info">$ @(Model.OrderHeader.OrderTotal)</strong>
 
 So no on refreshing we see the order summary products is looking good along with the totals updated.
+
+Next thing what we need to do is when the User clicks Place Order, two things need to happen, first is Take payments for the Order. We will see this next.
 ---------------------------------------------------------------
 Pushed the Codes to Github
 

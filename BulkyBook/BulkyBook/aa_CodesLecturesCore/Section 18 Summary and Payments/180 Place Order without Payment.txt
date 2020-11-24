@@ -1,4 +1,56 @@
-﻿using System;
+Before we place order lets create the OrderConfirmation method.
+
+Created method OrderConfirmation at the end it has a parameter int id. We will pass the id to the view. We could have been fancy and display a complete order details(based on the id). but he kept it simple.
+
+Now added the view  OrderConfirmation.cshtml in the Cart folder.
+
+He had provided the html codes in the attachment(Order+Confirmation.txt) pasted that.
+
+
+Now he replace the image lawn_leaf.jpg from somewhere, I downloaded it from github(it was of 4mb) I reduced the size and pasted to the images folder under wwwroot.
+
+As the action is passing an integer so added @model int at the top. And Your Order number would look like:
+Your Order Number is : @Model
+
+
+NOw before he run first he Opened Summary.cshtml and commented the codes for script tag for stripe.
+
+Now we can order without Stripe. Run the solution, logged in as admin, gone to Cart, gone to Order Summary. 
+
+On placing order we got some error because the ShoppingCartVM object is not initialized. 
+
+There are two ways of Fixing it, first is we can initialize ShoppingCartVM by copying the Get codes, second is to ShoppingCartVM property declaration at the top we can use the attribute [BindProperty]. With the help of Bind Property we can retrive the data that was there in get in post.
+
+So with BindProperty binding is done automatically.
+
+Open SQL Server and run the two queries and track the result. For me there was no result(as we are yet to place any order)
+select * from OrderDetails
+select * from OrderHeaders
+
+
+
+Now run the solution again. Again go to Order Summary Add debugger in post code and click Place Order. Now we dont see null ref exception. And Order was Submitted Succesfully(The View came) with Order Number 1.
+
+
+In SQL server database, in OrderDetails we see two records for two products in cart - we have one issue here- The price is 0 now we will fix it, and in OrderHeaders we see 1 record. with order status and payment status as Pending.
+
+In order header the ShippingDate is empty right now because it has not yet been shipped, we have not filled PaymentDate and PaymentDueDate. 
+
+To fix the Price 0, Opened CartController.cs
+In SummaryPost, in the foreach loop on ShoppingCartVM.ListCart, we need to set the Price using our SD method like the below(this would be set before OrderDetails object creation):
+
+item.Price = SD.GetPriceBasedOnQuantity(item.Count,item.Product.Price, item.Product.Price50, item.Product.Price100);
+
+Now On running the Price issue would be solved but we have one more issue we still see two items in the cart(Which we already bought), and we need to fix this as well. To fix that, in SummaryPost we need to simply call _unitOfWork.Save() after ShoppingCart.RemoveRange.
+
+Now run the solution again. And placed the order we see now the records are created correctly. And the Cart is also refreshed with (0).
+
+In the next part we will see payments
+---------------------------------------------------------------
+Pushed the codes to Github.
+
+--CartController.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -201,3 +253,32 @@ namespace BulkyBook.Areas.Customer.Controllers
 
     }
 }
+
+--OrderConfirmation.cshtml
+@model int
+<div class="container row">
+    <div class="col-12 text-center">
+        <h1 class="text-primary text-center">Order Submitted Successfully</h1><br />
+        <img src="~/images/lawn_leaf.jpg" width="50%" />
+    </div>
+    <div class="col-12 text-center" style="color:maroon">
+        <br />
+        Thank you for your order! <br />
+        We have received your order and we will send a follow up email shortly!
+        <br />
+        Your Order Number is : @Model
+    </div>
+</div>
+
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
