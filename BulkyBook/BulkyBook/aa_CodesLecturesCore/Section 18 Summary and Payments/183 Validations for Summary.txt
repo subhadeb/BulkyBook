@@ -1,4 +1,90 @@
-﻿@model BulkyBook.Models.ViewModels.ShoppingCartVM
+Now we will work on the validations for Summary.
+
+Opened Summary.cshtml
+
+After the input of OrderHeader.Name, added
+<span asp-validation-for="OrderHeader.Name" class="text-danger"></span>
+
+Done the same for PhoneNumber
+<span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger"></span>
+
+Did the same for StreetAddress,City, State and PostalCode.
+
+At the end added reference to ValidationScripts like:
+
+
+If we press F12 in any of the properties we dont see required attribut in them. So we will add them. Added Required Attribute in the 6 fields starting from PhoneNumber till Name.
+
+Now we need to Add migration.
+
+Open PM Console, select project as DataAccess. And run
+> add-migration addValidationOnOrderHeader 
+
+Migration file was created with all the required things. Now we will update the database like:
+
+> update-database
+
+
+Now run the solution and see if validation comes for empty fields.
+
+So we can see the validaitons are working. And we have done the payments with stripe.
+
+And if it is an authorized company with verified email, they can order without payment. 
+---------------------------------------------------------------
+--Pushed the codes to github.
+
+--OrderHeader.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+    public class OrderHeader
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string ApplicationUserId { get; set; }
+        [ForeignKey("ApplicationUserId")]
+        public ApplicationUser ApplicationUser { get; set; }
+
+        [Required]
+        public DateTime OrderDate { get; set; }
+        [Required]
+        public DateTime ShippingDate { get; set; }
+        [Required]
+        public Double OrderTotal { get; set; }
+        public string TrackingNumber { get; set; }
+        public string Carrier { get; set; }
+        public string OrderStatus { get; set; }
+        public string PaymentStatus { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public DateTime PaymentDueDate { get; set; }
+        public string TransactionId { get; set; }
+
+        [Required]
+        public string PhoneNumber { get; set; }
+        [Required]
+        public string StreetAddress { get; set; }
+        [Required]
+        public string City { get; set; }
+        [Required]
+        public string State { get; set; }
+        [Required]
+        public string PostalCode { get; set; }
+        [Required]
+        public string Name { get; set; }
+
+
+    }
+}
+
+
+--Summary.cshtml
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
 @using Microsoft.Extensions.Options
 
 @inject IOptions<BulkyBook.Utility.StripeSettings> Stripe
@@ -147,3 +233,13 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial">
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

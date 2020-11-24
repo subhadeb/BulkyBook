@@ -1,4 +1,197 @@
-﻿using System;
+Now we have some logic based on authorized company user. If a logged in user is an authorized user, when they go to complete payment, If theire email is confirmed we want to give them an option that they can place the order without the payment.
+
+We can give them an option of paying within 30 days after the order is delivered.
+
+So for this condition, we can give them a different button for the option to pay without stripe. 
+
+[For me as SendGrid is not working, to make that email confirmed I can updte the user with valid email(not confirmed due to sendgrid issue) and authorized company to EmailConfirmed flag as 1]
+
+[Not writing email due to privacy]
+--So ran the update query based on the Id, the select query to find that user was
+select * from AspNetUsers where name='Registered Company Another Valid Email user'
+--The update query is:
+update AspNetUsers set EmailConfirmed=1 where name='Registered Company Another Valid Email user'
+
+So onow the email is confirmed(From the backend).
+
+Opened Summary.cshtml
+
+Before the <script> tag of stripe, we can have a check, if there is no company for the user or the Company is not authorized then only show/execute the stripe button 
+
+So wrapped the script for stripe(till <button type=submit>) within the below if check.
+
+@if (Model.OrderHeader.ApplicationUser.Company == null ||                           !(Model.OrderHeader.ApplicationUser.Company.IsAuthorizedCompany))
+
+In the else block we will have the same button but this will not be place order for stripe. In the button made the class as btn-primary to make the Button Blue. Tested by refreshing the browser. So Green means make stripe payment and Blue means Place Order without payment.
+
+Now we need to make code changes for this in CartController SummaryPost method.
+
+We have already written the code for if (stripeToken == null) with empty if block. Stripe token will only be null, if they would place order with blue button. This means the user is authorizes. First in the if block added the below comment like him.
+
+After that updated the DueDate to 30days from now like:
+ShoppingCartVM.OrderHeader.PaymentDueDate = DateTime.Now.AddDays(30);
+
+Set the PaymentStatus as Delayed Payment and Order Status as approved.
+
+                ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
+                ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
+
+Also moved _unitOfWork.Save(); after if and else block.
+
+Now run the solution and try to place an order for the authorized user.
+
+On click of Place Oreder(In Blue), while debuggin we see stripeToken is null. and everything worked as expected.
+
+We see OrderStatus as Approved, payment status as ApprovedForDelayedPayment, Payment due as One month to a month later. Payment date is empty as expected.
+
+In the next part we will add validations in Order Summary page.
+---------------------------------------------------------------
+
+
+--Summary.cshtml
+@model BulkyBook.Models.ViewModels.ShoppingCartVM
+@using Microsoft.Extensions.Options
+
+@inject IOptions<BulkyBook.Utility.StripeSettings> Stripe
+
+<form method="post">
+    <br />
+    <div class="backgroundWhiteBorder">
+        <div class="container">
+            <div class="card">
+                <div class="card-header bg-dark text-light ml-0 row container">
+                    <div class="col-6">
+                        <i class="fa fa-shopping-cart"></i> &nbsp;
+                        Order Summary
+                    </div>
+                    <div class="col-6 text-right">
+                        <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-outline-info btn-sm">Back to Cart</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="container rounded p-2">
+                        <div class="row">
+                            <div class="col-12 col-lg-6 pb-4">
+                                <div class="row">
+                                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-info">PickUp Details:</span>
+                                    </h4>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Name</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.Name" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Phone</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.PhoneNumber" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Street Address</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.StreetAddress" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>City</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.City" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>State</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.State" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <label>Postal Code</label>
+                                    </div>
+                                    <div class="col-9">
+                                        <input asp-for="OrderHeader.PostalCode" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-5 offset-lg-1">
+                                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-info">Order Summary:</span>
+                                </h4>
+                                <ul class="list-group mb-3">
+                                    @foreach (var item in Model.ListCart)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="my-0">@item.Product.Title</h6>
+                                                <small class="text-muted">Quantity: @item.Count</small>
+                                            </div>
+                                            <span class="text-muted">$ @( item.Price * item.Count)</span>
+                                        </li>
+                                    }
+                                    <li class="list-group-item d-flex justify-content-between bg-light">
+                                        <small class="text-info">Total (USD)</small>
+                                        <strong class="text-info">$ @(Model.OrderHeader.OrderTotal)</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-12 col-md-8 pt-2">
+                            <p style="color:maroon; font-size:14px;">Estimate Arrival Date: @DateTime.Now.AddDays(7).ToShortDateString() - @DateTime.Now.AddDays(14).ToShortDateString()</p>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            @{
+                                var OrderTotalFroStripe = Model.OrderHeader.OrderTotal * 100;
+                            }
+                            @if (Model.OrderHeader.ApplicationUser.Company == null ||
+                         !(Model.OrderHeader.ApplicationUser.Company.IsAuthorizedCompany))
+                            {
+                                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                        data-key="@Stripe.Value.PublishableKey"
+                                        data-amount="@OrderTotalFroStripe"
+                                        data-name="Bulky Book"
+                                        data-label="Place Order"
+                                        data-description="Get Books For Less"
+                                        data-locale="auto"
+                                        data-allow-remember-me="false"
+                                        data-image="https://stripe.com/img/documentation/checkout/marketplace.png">
+                                </script>
+                                <script>
+                                    document.getElementsByClassName("stripe-button-el")[0].style.display = 'none'
+                                </script>
+                                <button type="submit" value="Place Order" class="btn btn-success form-control">Place Order</button>
+                            }
+                            else 
+                            {
+                        <button type="submit" value="Place Order" class="btn btn-primary form-control">Place Order</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+--CartController.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -236,3 +429,14 @@ namespace BulkyBook.Areas.Customer.Controllers
 
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
