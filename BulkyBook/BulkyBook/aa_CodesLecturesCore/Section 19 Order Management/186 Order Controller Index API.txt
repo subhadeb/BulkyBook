@@ -1,0 +1,96 @@
+As of now we are done will all the functionalities till placing an order.
+
+Now admin would be able to see the placed orders. Admin would ship/cancel an order. 
+
+First that the first task would be to show the list of orders. We will display a list of all the order headers.
+
+In Admin area, created a new empty controller named it OrderController.cs
+
+First set up the repository pattern with UnitOfWork with:
+
+	 private readonly IUnitOfWork _unitOfWork;
+
+        public OrderController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+To the Controller added the Attribute Area for Admin like:
+[Area("Admin")]
+
+Also, For now we will add Autorize attrribute only(not any specific role)
+
+Now we will have an Api call, for that added region API Calls. Inside that we will have method GetOrderList() with Attribute [HttpGet] returning IActionResult.
+
+        #region API Calls
+        [HttpGet]
+        public IActionResult GetOrderList()
+        {
+            return Json(new { });
+        }
+        #endregion
+
+In the method we will declare a variable orderHeaderList of type IEnumberable.
+IEnumerable<OrderHeader> orderHeaderList;
+
+Then we will populate it from unitofwork, OrderHeader GetAll with includeProperties ApplicationUser.
+
+orderHeaderList = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser");
+
+Now at the end, we will return Json object in the element data like:
+return Json(new { data = orderHeaderList});
+
+We will call this method using datatables.
+---------------------------------------------------------------
+--OrderController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    [Authorize]
+    public class OrderController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public OrderController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+
+        #region API Calls
+        
+        [HttpGet]
+        public IActionResult GetOrderList()
+        {
+            IEnumerable<OrderHeader> orderHeaderList;
+            orderHeaderList = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser");
+            return Json(new { data = orderHeaderList});
+        }
+        #endregion
+
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

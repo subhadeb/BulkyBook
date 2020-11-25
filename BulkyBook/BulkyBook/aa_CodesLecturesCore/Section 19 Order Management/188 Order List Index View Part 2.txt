@@ -1,0 +1,164 @@
+Now in the running solution, if we click on any of the statuses, the url changes, like if we click on Pending the url becomes:
+
+https://localhost:44339/Admin/Order?status=pending
+
+This is because in each link
+
+                   asp-action="Index" asp-route-status="pending">
+                    <li class="list-group-item"> Pending </li>
+
+We are passing the route-status. So based on the url we would like to assign the statuses different classes.
+
+In the top @{} block(where we defined layout) we will add the codes.
+
+First we can get the status from the querystring using context like:
+var status = Context.Request.Query["status"];
+
+Next we will set variables(based on status) and assign them classes like:
+
+    var pending = "text-primary";
+    var all = "text-primary";
+    var inprocess = "text-primary";
+    var completed = "text-primary";
+    var rejected = "text-primary";
+
+These names should be similar to our route that we have given.
+
+Now we will add a switch case based on the status, for pending case, the the value of pending would be active text-white like:
+
+    switch (status)
+    {
+        case "pending":
+            pending = "active text-white";
+            break;
+    }
+
+Similarly made copies of approved, to set the other variables, all would have the same value like below, all case would be treated as default case:
+
+    switch (status)
+    {
+        case "pending":
+            pending = "active text-white";
+            break;
+        case "inprocess":
+            inprocess = "active text-white";
+            break;
+        case "completed":
+            completed = "active text-white";
+            break;
+        case "rejected":
+            rejected = "active text-white";
+            break;
+        default:
+            all = "active text-white";
+            break;
+    }
+
+Now we would use these variables inside our css classes for our links. 
+
+So to the list class for inprocess, added like:
+<li class="list-group-item @inprocess"> In Process </li>
+
+Done the same for the other four, like for all it's:
+<li class="list-group-item @all"> All </li>
+
+Now, if we run/refresh the browser we see what ever is clicked we see the active class added. This looks better.
+
+In the next part we would load the orders.
+---------------------------------------------------------------
+--Index.cshtml
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var status = Context.Request.Query["status"];
+    var approved = "text-primary";
+    var pending = "text-primary";
+    var all = "text-primary";
+    var inprocess = "text-primary";
+    var completed = "text-primary";
+    var rejected = "text-primary";
+
+    switch (status)
+    {
+        case "pending":
+            pending = "active text-white";
+            break;
+        case "inprocess":
+            inprocess = "active text-white";
+            break;
+        case "completed":
+            completed = "active text-white";
+            break;
+        case "rejected":
+            rejected = "active text-white";
+            break;
+        default:
+            all = "active text-white";
+            break;
+    }
+
+    }
+<br />
+<div class="border p-3">
+    <div class="d-flex justify-content-between mb-3">
+        <div class="p2">
+            <h2 class="text-primary">Category List </h2>
+        </div>
+        <div class="p2">
+            <ul class="list-group list-group-horizontal-sm">
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="inprocess">
+                    <li class="list-group-item @inprocess"> In Process </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="pending">
+                    <li class="list-group-item @pending"> Pending </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="completed">
+                    <li class="list-group-item @completed"> Completed </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="rejected">
+                    <li class="list-group-item @rejected"> Rejected </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="all">
+                    <li class="list-group-item @all"> All </li>
+                </a>
+
+            </ul>
+        </div>
+    </div>
+    <br /><br />
+    <table id="tblData" class="table table-striped table-bordered" style="width:100%">
+        <thead class="thead-dark">
+            <tr class="table-info">
+                <th>Id</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+                <th>Order Status</th>
+                <th>Amount</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+@section Scripts{
+    <script src="~/js/order.js"></script>
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

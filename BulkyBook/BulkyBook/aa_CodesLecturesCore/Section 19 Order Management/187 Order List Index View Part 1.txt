@@ -1,4 +1,138 @@
-﻿@using BulkyBook.Utility
+Now we would Add the Index view, In Views, we will create a new folder called Order in Views under Admin
+
+Now created View Index.cshtml in the new Order folder.
+
+Now opened Category's Index.cshtml and pasted it to newly created Index for Order
+
+We will maked some design changes here after the top br tag, added the below divs and moved the h2(pasted Category List header) inside that. and renamed to Orders list.
+
+Next we will have a div with class p2, and there will store all the status, in an Unordered list(<ul>), Inside the ul there will be an anchor tag and inside that we will have a list item for the status. As of now, it is like:
+
+
+<div class="border p-3">
+    <div class="d-flex justify-content-between mb-3">
+        <div class="p2">
+            <h2 class="text-primary">Category List </h2>
+        </div>
+        <div class="p2">
+            <ul class="list-group list-group-horizontal-sm">
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="inprocess">
+                    <li class="list-group-item"> In Process </li>
+                </a>
+        </ul>
+	</div>
+    </div>
+</div>
+
+NOw made a copy of the anchor tag and pasted it five more times(for the different statuses)
+
+After In Process, made the second one as asp-route-status="pending" and li text Pending.
+
+Next asp-route-status="completed", text Completed
+
+Next asp-route-status="rejected" and text Rejected.
+
+Next asp-route-status="all" and text All
+
+Now before the last div ends(for class border-p3 after div with class p2),  we will add the table. First added two <br/> tags there.
+
+after br tags moved the code for <table> there and cleaned up(removed) everything remaining there. Between the div ending for p3 and scripts section.
+
+
+Renamed the script name from category.js to order.js at the bottom.
+
+Here in this table we will display all the properties:
+            <tr class="table-info">
+                <th>Id</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+                <th>Order Status</th>
+                <th>Amount</th>
+                <th></th>
+            </tr>
+
+Now opened _Layout.cshtml under shared.
+
+From the navbar ul class copied the first li item:
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+
+
+And Pated it before the Shopping Cart after User Company(See code backup from below for placement)
+
+In this set the area as Admin, controller is Order and Action is Index and made the link text as Orders.
+
+<a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">Orders</a>
+
+Now run the solution, Login as admin We see all the order status. And the summary table
+
+
+---------------------------------------------------------------
+--Index.chstml under Order
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<br />
+<div class="border p-3">
+    <div class="d-flex justify-content-between mb-3">
+        <div class="p2">
+            <h2 class="text-primary">Category List </h2>
+        </div>
+        <div class="p2">
+            <ul class="list-group list-group-horizontal-sm">
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="inprocess">
+                    <li class="list-group-item"> In Process </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="pending">
+                    <li class="list-group-item"> Pending </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="completed">
+                    <li class="list-group-item"> Completed </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="rejected">
+                    <li class="list-group-item"> Rejected </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="all">
+                    <li class="list-group-item"> All </li>
+                </a>
+
+            </ul>
+        </div>
+    </div>
+    <br /><br />
+    <table id="tblData" class="table table-striped table-bordered" style="width:100%">
+        <thead class="thead-dark">
+            <tr class="table-info">
+                <th>Id</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+                <th>Order Status</th>
+                <th>Amount</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+@section Scripts{
+    <script src="~/js/order.js"></script>
+}
+
+---_Layout.cshtml
+@using BulkyBook.Utility
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -106,3 +240,15 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

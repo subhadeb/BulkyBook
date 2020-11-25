@@ -1,0 +1,228 @@
+Now we need to Trigger the GetOrderListMethod in controller based on the url.
+
+In wwwroot, under js made a copy of category.js and renamed to order.js
+
+In document.ready , first we would need the url, we can get that with
+
+var url = window.location.search;
+
+Then we will check the url with includes(similar to contains). As per w3school-
+The includes() method determines whether a string contains the characters of a specified string.
+
+We will check if the url includes inprocess, we will call loadDataTable passing our actionname and the paramer like:
+
+    if (url.includes('inprocess')) {
+        loadDataTable('GetOrderList?status=inprocess');
+    };
+
+[I am implementing the IF else in a differnt way he did multiple nested if else checks, i will do all if else if together], 
+
+In else if added the check for pending and updated the url to pending. similarly id for completed and rejected and the last else block was for all.
+
+    else if (url.includes('pending')) {
+        loadDataTable('GetOrderList?status=pending');
+    }
+    else if (url.includes('completed')) {
+        loadDataTable('GetOrderList?status=completed');
+    }
+    else if (url.includes('rejected')) {
+        loadDataTable('GetOrderList?status=rejected');
+    }
+    else {
+        loadDataTable('GetOrderList?status=all');
+    }   
+
+Now added the param url to the function loadDataTable.
+function loadDataTable(url) {
+
+
+Updated the ajax call for url to use the param url like:
+'url': '/Admin/Order/' + url
+
+Now in columns the first column is id and changed the width to 10%.
+
+{ "data": "id", "width": '15%' },
+
+for the remaining set the width to 15% and made copies based on the columns of our cshtml table like below:
+
+[email is inside applicationUser.email]
+
+            { "data": "name", "width": "15%" },
+            { "data": "phoneNumber", "width": "15%" },
+            { "data": "applicationUser.email", "width": "15%" },
+            { "data": "orderStatus", "width": "15%" },
+            { "data": "orderTotal", "width": "15%" },
+
+The render type was based on the id and we will keep it same, we only want to show the details of the order. We will later add an action called Details.
+
+And there will be only one button, so removed the second anchor tag.
+
+For the first one changed the href to 
+href="/Admin/Order/Details/${data}" 
+
+Maded the width of this column(with render) to 5%(instead of 40%)
+
+At the bottom we can remove the Delete function.
+
+Now run the solution. Logged in as admin.
+
+On click of Orders we see all the orders whose payment is pending(It's status is Approved)
+
+Completed and rejected are empty, Everything else is in process.
+
+To make it more readable, we will make the anchor link Pending to Payment Pending in index.cshtml.
+<li class="list-group-item @pending"> Payment Pending </li>
+
+Next we will work on Order Details Action.
+---------------------------------------------------------------
+Pushed the codes to Github
+
+--order.js
+var dataTable;
+
+$(document).ready(function () {
+
+    var url = window.location.search;
+    if (url.includes('inprocess')) {
+        loadDataTable('GetOrderList?status=inprocess');
+    }
+    else if (url.includes('pending')) {
+        loadDataTable('GetOrderList?status=pending');
+    }
+    else if (url.includes('completed')) {
+        loadDataTable('GetOrderList?status=completed');
+    }
+    else if (url.includes('rejected')) {
+        loadDataTable('GetOrderList?status=rejected');
+    }
+    else {
+        loadDataTable('GetOrderList?status=all');
+    }   
+});
+
+function loadDataTable(url) {
+    dataTable = $('#tblData').DataTable({
+        "ajax": {
+            'url': '/Admin/Order/' + url
+        },
+        "columns": [
+            { "data": "id", "width": '15%' },
+            { "data": "name", "width": "15%" },
+            { "data": "phoneNumber", "width": "15%" },
+            { "data": "applicationUser.email", "width": "15%" },
+            { "data": "orderStatus", "width": "15%" },
+            { "data": "orderTotal", "width": "15%" },
+
+            {
+                'data': 'id',
+                'render': function (data) {
+                    return `
+                        <div class="text-center">
+                            <a href="/Admin/Order/Details/${data}" class="btn btn-success text-white" style="cursor:pointer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+`
+
+                }, 'width': '40%'
+            }
+        ]
+    })
+}
+
+--Index.cshtml
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var status = Context.Request.Query["status"];
+    var approved = "text-primary";
+    var pending = "text-primary";
+    var all = "text-primary";
+    var inprocess = "text-primary";
+    var completed = "text-primary";
+    var rejected = "text-primary";
+
+    switch (status)
+    {
+        case "pending":
+            pending = "active text-white";
+            break;
+        case "inprocess":
+            inprocess = "active text-white";
+            break;
+        case "completed":
+            completed = "active text-white";
+            break;
+        case "rejected":
+            rejected = "active text-white";
+            break;
+        default:
+            all = "active text-white";
+            break;
+    }
+
+    }
+<br />
+<div class="border p-3">
+    <div class="d-flex justify-content-between mb-3">
+        <div class="p2">
+            <h2 class="text-primary">Category List </h2>
+        </div>
+        <div class="p2">
+            <ul class="list-group list-group-horizontal-sm">
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="inprocess">
+                    <li class="list-group-item @inprocess"> In Process </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="pending">
+                    <li class="list-group-item @pending"> Payment Pending </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="completed">
+                    <li class="list-group-item @completed"> Completed </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="rejected">
+                    <li class="list-group-item @rejected"> Rejected </li>
+                </a>
+                <a style="text-decoration:none;" asp-controller="Order"
+                   asp-action="Index" asp-route-status="all">
+                    <li class="list-group-item @all"> All </li>
+                </a>
+
+            </ul>
+        </div>
+    </div>
+    <br /><br />
+    <table id="tblData" class="table table-striped table-bordered" style="width:100%">
+        <thead class="thead-dark">
+            <tr class="table-info">
+                <th>Id</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+                <th>Order Status</th>
+                <th>Amount</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+@section Scripts{
+    <script src="~/js/order.js"></script>
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

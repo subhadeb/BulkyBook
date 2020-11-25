@@ -1,0 +1,158 @@
+Now our controller should have logic to fetch data based on the order status.
+
+We can add one more requirement with it.
+
+If the role of the user is Admin/Employee we will show all the orders, else we will show only orders belonging to their account.
+
+So we will make changes in Orders Controller API call.
+
+Opened OrderController.cs method GetOrderList,
+
+first we will get the user deatails using claims identity like:
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+Now we will add a parameter called status, and we would fetch data based on this
+
+Now after the declaration of orderHeaderList, we will check what is the role of the user using user.IsInRole. 
+
+First we will check if the user is Admin, Employee, we will retrieve all the orders(moved the existing code to here for orderHeaderList). in the else block we will have a condition on ApplicationuserId for getting only the orders of him like:
+
+                orderHeaderList = _unitOfWork.OrderHeader.GetAll(
+                    x=>x.ApplicationUserId == claim.Value ,includeProperties: "ApplicationUser");
+
+            if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+            {
+                orderHeaderList = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser");
+            }
+            else
+            {
+                orderHeaderList = _unitOfWork.OrderHeader.GetAll(
+                    x=>x.ApplicationUserId == claim.Value ,includeProperties: "ApplicationUser");
+            }
+
+Now after the if else ends, WE will update the list to filter based on status. 
+
+Now we will have a switch case condition for the different status to filter. 
+
+In switch we will have five cases(similar to the one we have written in index.cshtml codes). for default case we will not have any filter. 
+
+For case pending the orderHeaderList will be filtered using Where, and we are using the SD file constants like:
+
+            switch (status)
+            {
+                case "pending":
+                    orderHeaderList = orderHeaderList.Where(o => o.PaymentStatus == SD.PaymentStatusDelayedPayment);
+                    break;
+
+
+
+For case inprocess, We will check the Order status(not payment status), the orders status shold be Approved/InProcess/Pending. If any of the three are true we will display them as in process.
+                case "inprocess":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusApproved ||
+                                                            o.OrderStatus == SD.StatusInProcess ||
+                                                            o.OrderStatus == SD.StatusPending);
+                    break;
+
+Next, is completed, the Status should be shipped.
+                case "completed":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusShipped);
+
+For rejected, the status would be Cancelled or Refunded or PaymentStatusRejected. 
+
+Default will return all the order headers.
+                default:
+                    break;
+
+Next we need the JS file to call this API. we will do that next.
+---------------------------------------------------------------
+--OrderController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    [Authorize]
+    public class OrderController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public OrderController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+
+        #region API Calls
+        
+        [HttpGet]
+        public IActionResult GetOrderList(string status)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            IEnumerable<OrderHeader> orderHeaderList;
+
+            if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+            {
+                orderHeaderList = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser");
+            }
+            else
+            {
+                orderHeaderList = _unitOfWork.OrderHeader.GetAll(
+                    x=>x.ApplicationUserId == claim.Value ,includeProperties: "ApplicationUser");
+            }
+            switch (status)
+            {
+                case "pending":
+                    orderHeaderList = orderHeaderList.Where(o => o.PaymentStatus == SD.PaymentStatusDelayedPayment);
+                    break;
+                case "inprocess":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusApproved ||
+                                                            o.OrderStatus == SD.StatusInProcess ||
+                                                            o.OrderStatus == SD.StatusPending);
+                    break;
+                case "completed":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusShipped);
+                    break;
+                case "rejected":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusCancelled ||
+                                                            o.OrderStatus == SD.StatusRefunded ||
+                                                            o.OrderStatus == SD.PaymentStatusRejected);
+                    break;
+                default:
+                    break;
+            }
+
+
+            return Json(new { data = orderHeaderList});
+        }
+        #endregion
+
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

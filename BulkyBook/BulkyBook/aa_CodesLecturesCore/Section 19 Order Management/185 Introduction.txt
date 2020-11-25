@@ -1,4 +1,8 @@
+In this section we will be working on Order Management.
 
+Once an user places an order, admin needs to view all the orders and take actions accordingly.
+
+We will be managing all of this in this section.
 
 ---------------------------------------------------------------
 
