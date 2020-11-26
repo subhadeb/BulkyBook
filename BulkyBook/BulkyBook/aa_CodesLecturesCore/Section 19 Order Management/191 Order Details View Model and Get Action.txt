@@ -1,4 +1,62 @@
-﻿using System;
+In this part we will work on the Details.
+
+First run the solution and login as the authorized confirmed user for which we have placed an order.
+
+In the Ordrs page we only see the orders placed by this user not all the orders.This is because it is not an admin user.
+
+[Got a bug to fix, I Earlier I forgot to change the header of Page. It should be Orders List]
+
+If he would click the Details/Edit icon he should see the details of the order, we should be able to see the order header as well as the order details.
+
+Before working on Order, he have show a cleanup code in CartController.cs
+
+There, in SummaryPost, we have declared the below line but never used, so deleted it.
+
+            List<OrderDetails> orderDetailsList = new List<OrderDetails>();
+
+
+On building the project, there is no compilation error.
+
+Now, go to Models folder, 
+In ViewModels folder, created class OrderDetailsVM.cs
+
+Made it public, and here we have two properties.
+
+        public OrderHeader OrderHeader { get; set; }
+        public IEnumerable<OrderDetails> OrderDetails { get; set; }
+
+One order header will have multiple OrderDetails so made it ienumerable.
+
+Now in OrderController, we will add Details Action method.
+
+After Index get method, added the Details method with a parameter id like below the id will be returned from the js:
+
+        public IActionResult Details(int id)
+        {
+            return View();
+        }
+
+Here we would use the newly created OrderDetailsVM so we will create a property named OrderVM and use BindProperty attribute like:
+
+        [BindProperty]
+        public OrderDetailsVM OrderVM { get; set; }
+
+Now back in the Action Method we can populate the OrderVM using unitOfWork based on id and OrderDetails based on id with GetAll like below.
+
+            OrderVM = new OrderDetailsVM()
+            {
+                OrderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id,
+                                                includeProperties: "ApplicationUser"),
+                OrderDetails = _unitOfWork.OrderDetails.GetAll(o => o.OrderId == id, includeProperties: "Product")
+
+            };
+
+Now in return we will send OrderVM
+
+
+---------------------------------------------------------------
+--OrderController.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -91,3 +149,29 @@ namespace BulkyBook.Areas.Admin.Controllers
 
     }
 }
+
+
+--OrderDetailsVM.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Models.ViewModels
+{
+    public class OrderDetailsVM
+    {
+        public OrderHeader OrderHeader { get; set; }
+        public IEnumerable<OrderDetails> OrderDetails { get; set; }
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
