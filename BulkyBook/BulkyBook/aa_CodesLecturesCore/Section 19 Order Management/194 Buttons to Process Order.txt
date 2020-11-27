@@ -1,4 +1,49 @@
-﻿@model BulkyBook.Models.ViewModels.OrderDetailsVM
+Now with Admin role we see most of the fields in the Pickup Details are enabled, now if we logout and login as a registerd email user of company,
+
+We see all the Fields are disabled and we dont see the transaction id and other details as expected.
+
+Now, log out and login as Admin. For an Order with Payment Stautus Approved, we want to start processing. 
+
+So a new button needs to be added which would be visible for Admin and Employee and if the current status is approved. If the Current Status is in process, we should have a button to ship the order. 
+
+After the end of ul class="list-group(before the closing div), we will have a check for if the User is Admin or Employee.
+
+@if(User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+
+In the if block, we will add a line break first, 
+
+Then we will check if order status is StatusApproved, inside this if block, we will show an anchor button for start processing, it will take us to a new Action called StartProcessing, we will pass the route-id as orderheader id.
+
+                                @if (Model.OrderHeader.OrderStatus == SD.StatusApproved)
+                                {
+                                    <a asp-action="StartProcessing" asp-route-id="@Model.OrderHeader.Id"
+                                       class="btn btn-primary form-control">Start Processing</a>
+                                }
+
+We will add another If condition for status InProcess, in the if block we will have a input button for type submit with value Ship Order. To it's on click we would like to execute a custom funciton named validateInput. Here we will specify formaction passing an url for ShipOrder and formmethod would be post.
+
+                               @if (Model.OrderHeader.OrderStatus == SD.StatusInProcess)
+                               { 
+                               <input type="submit" value="Ship Order" onclick="validateInput"
+                                      class="btn btn-primary form-control"
+                                      formaction="/Admin/Order/ShipOrder" formmethod="post"
+                                      />
+                               }
+
+In the else block of UserInRole(for roles other than admin and employee), we will display a label saying about their current order status.
+
+                            else
+                            {
+                                <label class="btn btn-primary form-control">@Model.OrderHeader.OrderStatus</label>
+                            }
+
+Now on running we see the Start Processing button for the Payment Status Approved order.
+
+For a pending order we dont see the button.
+
+---------------------------------------------------------------
+--Details.cshtml
+@model BulkyBook.Models.ViewModels.OrderDetailsVM
 @using BulkyBook.Utility
 <form method="post">
     <input hidden asp-for="OrderHeader.Id">
@@ -126,7 +171,7 @@
                                 <div class="col-9">
                                     @if (User.IsInRole(SD.Role_Employee) || User.IsInRole(SD.Role_Admin))
                                     {
-                                        <input asp-for="OrderHeader.Carrier" id="carrier" type="text" class="form-control" />
+                                        <input asp-for="OrderHeader.Carrier" type="text" class="form-control" />
                                     }
                                     else
                                     {
@@ -139,7 +184,7 @@
                                 <div class="col-9">
                                     @if (User.IsInRole(SD.Role_Employee) || User.IsInRole(SD.Role_Admin))
                                     {
-                                        <input asp-for="OrderHeader.TrackingNumber" id="trackingNumber" type="text" class="form-control" />
+                                        <input asp-for="OrderHeader.TrackingNumber" type="text" class="form-control" />
                                     }
                                     else
                                     {
@@ -230,7 +275,7 @@
                                 }
                                 @if (Model.OrderHeader.OrderStatus == SD.StatusInProcess)
                                 {
-                                    <input type="submit" value="Ship Order" onclick="return validateInput()"
+                                    <input type="submit" value="Ship Order" onclick="validateInput"
                                            class="btn btn-primary form-control"
                                            formaction="/Admin/Order/ShipOrder" formmethod="post" />
                                 }
@@ -239,18 +284,6 @@
                             {
                                 <label class="btn btn-primary form-control">@Model.OrderHeader.OrderStatus</label>
                             }
-
-                            @if (Model.OrderHeader.OrderStatus != SD.StatusRefunded &&
-                          Model.OrderHeader.OrderStatus != SD.StatusCancelled &&
-                          (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee)))
-                            {
-                                <div class="pt-2">
-                                    <a asp-action="CancelOrder" asp-route-id="@Model.OrderHeader.Id"
-                                       class="btn btn-danger form-control">Cancel Order</a>
-                                </div>
-                            }
-
-
                         </div>
                     </div>
                 </div>
@@ -259,38 +292,12 @@
     </div>
 </form>
 
-@section Scripts {
-    <script>
-        function validateInput() {
-            var tracking = document.getElementById('trackingNumber').value;
-            var carrier = document.getElementById('carrier').value;
-
-            if (tracking.toString() == '') {
-                swal('Error', 'Please enter tracking number', 'error');
-                return false
-            }
-            else {
-                if (carrier.toString() == '') {
-                    swal('Error', 'Please enter carrier', 'error');
-                    return false
-                }
-                else {
-                    return true;
-                }
-            }
-
-        }
-        $(document).ready(function () {
-            var shippingDate = document.getElementById("shippingDate");
-            if (shippingDate.value == '1/1/0001') {
-                shippingDate.value = "";
-            }
-            var paymentDate = document.getElementById("paymentDate");
-            if (paymentDate.value == '1/1/0001') {
-                paymentDate.value = "";
-            }
-        });
+---------------------------------------------------------------
 
 
-    </script>
-}
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

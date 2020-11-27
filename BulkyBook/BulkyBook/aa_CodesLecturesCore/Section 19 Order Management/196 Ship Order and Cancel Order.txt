@@ -1,4 +1,129 @@
-﻿@model BulkyBook.Models.ViewModels.OrderDetailsVM
+Run the solution as an admin. Open an approved order.
+
+Now let's have the button to cancel an order.
+
+Open Details.cshtml
+
+After the last else block having a label, 
+
+We will check if the OrderStatus is not refunded and other order is not cancelled, and also the User's Role is Admin or Employee, then we will have a button for Cancel Order, calling action CancelOrder inside a div with class pt-2(Padding top 2)
+
+
+                            @if (Model.OrderHeader.OrderStatus != SD.StatusRefunded &&
+                           Model.OrderHeader.OrderStatus != SD.StatusCancelled &&
+                           (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee)))
+                            {
+                                <div class="pt-2">
+                                    <a asp-action="CancelOrder" asp-route-id="@Model.OrderHeader.Id"
+                                       class="btn btn-danger form-control">Cancel Order</a>
+                                </div>
+                            }
+
+
+On running we see the Cancel order button in Red. If we go back to list we see the order status is currently Approved, now if we go to details and click , Start Processing, we see the order status changed to Processing in the summary grid.
+
+Now if we again go to Details and click Ship Order we see an error.
+
+NullReferenceException: Object reference not set to an instance of an object
+
+In the line:
+orderHeader.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
+
+
+So we need to add a validation for TrackingNumber. In Details.cshtml tin the input tag without readonly, added an id attribute as trackingNumber
+<input asp-for="OrderHeader.TrackingNumber" id="trackingNumber" type="text" class="form-control" />
+
+Also for the Carrier input without readonly added id as carrier.
+<input asp-for="OrderHeader.Carrier" id="carrier" type="text" class="form-control" />
+
+For Shipping date we already have the id shippingDate, For Payment Date also we have the id paymentDate.
+
+Now to the Ship Order button, we are having onclick as validateInput. So modified that to  onclick="return validateInput()
+
+Now at the end after the last form end tag, we will add a section for scripts. 
+inside it we would add the tag <script> and inside that add the funciton validateInput like:
+
+
+@section Scripts {
+    <script>
+        function validateInput() {
+
+        }
+    </script>
+}
+
+Inside the function, first we would get the trackingNumber value in a variable tracking like:
+
+var tracking = document.getElementById('trackingNumber').value;
+
+similary got the value for carrier in the variable carrier.
+
+After that we will check if tracking toString is empty, then a sweetalert would be displayed withe message Please enter tracking information and then return false like:
+
+            if (tracking.toString() == '') {
+                swal('Error', 'Please enter tracking number', 'error');
+                return false
+            }
+
+in the else block we will have another if check, Copied the above if check and replace tracking with  carrier in two places. in the else(of carrier check) we wil return true.
+
+            else {
+                if (carrier.toString() == '') {
+                    swal('Error', 'Please enter carrier', 'error');
+                    return false
+                }
+                else {
+                    return true;
+                }
+            }
+
+Now if we refresh and click Ship order, we see error popup:
+Please enter tracking number
+
+Next he copy pasted some codes for putting the shipppingDate and paymentDate as '' if these are 1/1/0001
+
+So after that validateInput method, added document.ready(in the same <script> section). After that added the below codes to sto set shipping date to '' if it is 1/1/0001. like:
+
+        $(document).ready(function () {
+            var shippingDate = document.getElementById("shippingDate");
+            if (shippingDate.value == '1/1/0001') {
+                shippingDate.value = "";
+            }
+            var paymentDate = document.getElementById("paymentDate");
+            if (paymentDate.value == '1/1/0001') {
+                paymentDate.value = "";
+            }
+        });
+
+On refresheing we see the value of ShippingDate is blank instead of the default min value. This is much cleaner.
+
+Now in Running mode let's make the Carrier as UPS and Tracking as some value may be 34878338, on click of ship order we see the error again. The reason for this is 
+in ShipOrder, we are not passing any Id(debug to see that) below(to analyze):
+
+
+                                    <input type="submit" value="Ship Order" onclick="return validateInput()"
+                                           class="btn btn-primary form-control"
+                                           formaction="/Admin/Order/ShipOrder" formmethod="post" />
+
+
+So from ShipOrder we can remove the parameter int id. And to initialize orderHeader variable, we can use the binded property
+
+OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id);
+
+[Fixed a bug later]Also make sure that at the TrackingNumber and Carrier and mapped correct, For Carrier it should be:
+orderHeader.Carrier = OrderVM.OrderHeader.Carrier
+
+Now the orderHeader would be loaded properly.
+
+Now run the application again.
+
+Now agin make the Carrier as UPS and Tracking as some value may be 34878338. and click Ship Order. Now in the summary grid we see the status as Shipped. 
+
+---------------------------------------------------------------
+Pushed the codes to Github.
+
+--Details.cshtml
+@model BulkyBook.Models.ViewModels.OrderDetailsVM
 @using BulkyBook.Utility
 <form method="post">
     <input hidden asp-for="OrderHeader.Id">
@@ -294,3 +419,155 @@
 
     </script>
 }
+
+--OrderController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Stripe;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    [Authorize]
+    public class OrderController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        [BindProperty]
+        public OrderDetailsVM OrderVM { get; set; }
+
+        public OrderController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+        public IActionResult Index()
+        {
+            return View();
+        }
+        public IActionResult Details(int id)
+        {
+            OrderVM = new OrderDetailsVM()
+            {
+                OrderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id,
+                                                includeProperties: "ApplicationUser"),
+                OrderDetails = _unitOfWork.OrderDetails.GetAll(o => o.OrderId == id, includeProperties: "Product")
+
+            };
+            return View(OrderVM);
+        }
+
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult StartProcessing(int id)
+        {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(x => x.Id == id);
+            orderHeader.OrderStatus = SD.StatusInProcess;
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult ShipOrder()
+        {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id);
+            orderHeader.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
+            orderHeader.Carrier = OrderVM.OrderHeader.Carrier;
+            orderHeader.OrderStatus = SD.StatusShipped;
+            orderHeader.ShippingDate = DateTime.Now;
+
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult CancelOrder(int id)
+        {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(x => x.Id == id);
+            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved)
+            {
+                var options = new RefundCreateOptions
+                {
+                    Amount = Convert.ToInt32(orderHeader.OrderTotal * 100),
+                    Reason = RefundReasons.RequestedByCustomer,
+                    Charge = orderHeader.TransactionId
+                };
+                var service = new RefundService();
+                Refund refund = service.Create(options);
+                orderHeader.OrderStatus = SD.StatusRefunded;
+                orderHeader.PaymentStatus = SD.StatusRefunded;
+            }
+            else
+            {
+                orderHeader.OrderStatus = SD.StatusCancelled;
+                orderHeader.PaymentStatus = SD.StatusCancelled;
+            }
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+        #region API Calls
+
+        [HttpGet]
+        public IActionResult GetOrderList(string status)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            IEnumerable<OrderHeader> orderHeaderList;
+
+            if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+            {
+                orderHeaderList = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser");
+            }
+            else
+            {
+                orderHeaderList = _unitOfWork.OrderHeader.GetAll(
+                    x => x.ApplicationUserId == claim.Value, includeProperties: "ApplicationUser");
+            }
+            switch (status)
+            {
+                case "pending":
+                    orderHeaderList = orderHeaderList.Where(o => o.PaymentStatus == SD.PaymentStatusDelayedPayment);
+                    break;
+                case "inprocess":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusApproved ||
+                                                            o.OrderStatus == SD.StatusInProcess ||
+                                                            o.OrderStatus == SD.StatusPending);
+                    break;
+                case "completed":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusShipped);
+                    break;
+                case "rejected":
+                    orderHeaderList = orderHeaderList.Where(o => o.OrderStatus == SD.StatusCancelled ||
+                                                            o.OrderStatus == SD.StatusRefunded ||
+                                                            o.OrderStatus == SD.PaymentStatusRejected);
+                    break;
+                default:
+                    break;
+            }
+
+
+            return Json(new { data = orderHeaderList });
+        }
+        #endregion
+
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
