@@ -1,4 +1,43 @@
-﻿@model BulkyBook.Models.ViewModels.OrderDetailsVM
+If we login as admin user, we see we have an order for authorized user that is shipped. 
+
+Here the payment is yet pending, so we need to have a link in the right for Payment. And we already have a Payment Due Date. 
+
+So we will add a button for this. We will copy the codes for string ui that we have already written in Summary.cshtml, opened that.
+
+Copied the stripe codes along with the if conditon for Orderheader Company. Pasted it in Details.cshml at the bottom before the if Check for Cancel Order button.
+
+Now we will modify this, this would be displayed only if the Payment Status is ApprovedForDelayedPayment and the OrderStatus is Shipped. like below:
+
+                            @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment &&
+                          Model.OrderHeader.OrderStatus == SD.StatusShipped)
+
+Changed the button text from Place Order to Pay Now. 
+
+Now we would need OrderTotalFroStripe, for that above the if check, we will have a Razor code for setting this like:
+
+                            @{
+                                var OrderTotalFroStripe = Model.OrderHeader.OrderTotal * 100;
+                            }
+
+
+Now from Summary.cshtml copied the below two lines:
+@using Microsoft.Extensions.Options
+
+@inject IOptions<BulkyBook.Utility.StripeSettings> Stripe
+
+And pasted them in the top third line of Details.cshtml
+
+Now on refreshing we see the Pay Now button in green.
+
+Now logout and login as the user(Verified) who have placed the order.
+
+We see the Button as Shipped and in green, we see the Pay Now button. Shipped is just the status it is not a button.
+
+If we click Pay now popup is opened for Stripe. We are yet to write the post codes for Stripe payments and change the order status. We will do that in the next part.
+---------------------------------------------------------------
+--Details.cshtml
+
+@model BulkyBook.Models.ViewModels.OrderDetailsVM
 @using BulkyBook.Utility
 
 @using Microsoft.Extensions.Options
@@ -320,3 +359,12 @@
 
     </script>
 }
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,4 +1,82 @@
-﻿using System;
+Now we will work on the Strip Pay Now will process the charge once the Stripe payment is done from the popup.
+
+
+
+We will copy pasted codes for that, go to CartController, SummaryPost method and copy the else block(for stripe payments)
+
+After Details get, we will create a method Details with  with attributes [HttpPost] and [ValidateAntiForgeryToken]. Inside it we will have a condition for null check of stripeToken.
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Details(string stripeToken)
+        {
+            if (stripeToken != null)
+            { 
+            
+            }
+        }
+
+
+Now pasted the copied codes for charge inside the if check.
+
+Before the stripeToken if check we will get the orderHeader details(based on OrderVM.OrderHeader.Id) similar to the codes of ShipOrder, here we will include Properties ApplicationUser.
+
+
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == OrderVM.OrderHeader.Id,
+                includeProperties: "ApplicationUser");
+
+
+Now inside the codes for ChargeCreateOptions, replace ShoppingCartVM.OrderHeader with orderHeader like:
+Amount = Convert.ToInt32(orderHeader.OrderTotal * 100),
+
+Similary for Descripiton orderid replace ShoppingCartVM.OrderHeader with orderHeader.
+
+Description = "Order ID: " + orderHeader.Id,
+
+Next weill have the null check for charge.Id, and if null we will set orderHeader.PaymentStatus as Rejected like:
+
+                if (charge.Id == null)
+                {
+                   orderHeader.PaymentStatus = SD.PaymentStatusRejected;
+                }
+
+In the else block, we will have the TransactionId of orderHeader as charge.id
+
+                else
+                {
+                    orderHeader.TransactionId = charge.Id;
+                }
+
+Next, if the charge.status would be succeeded, we will only update the PaymentStatus(to Approved) and PaymentDate(to Today's date) like:
+
+                if (charge.Status.ToLower() == "succeeded")
+                {
+                    orderHeader.PaymentStatus = SD.PaymentStatusApproved;
+                    orderHeader.PaymentDate = DateTime.Now;
+                }
+
+
+After that we will do _unitOfWork.Save(); and then after the if blcok of stripeToken null check, we would redirect to the same Details action pasing the id like:
+
+
+
+Now Run the solution, login as authorized user, for the Shipped order, Before clicking Pay Now, check the database status first:
+
+--It has OrderStatus: Shipped and PaymentStatus as ApprovedForDelayedPayment
+select * from OrderHeaders where Id=6
+
+Now Hit Paynow and enter card number as 4242 4242 4242 4242, expiry date as any future date, any cvc. And hit Pay.
+
+The Pay Now button is now gone after payment. And in Database, now the Payment status is Approved and the PaymentDate is also today's date.
+
+So the functionality for Payment and delayed payment is working as expected.
+
+---------------------------------------------------------------
+--Pushed the codes to Github
+
+--OrderController.cs
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -174,3 +252,13 @@ namespace BulkyBook.Areas.Admin.Controllers
 
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
