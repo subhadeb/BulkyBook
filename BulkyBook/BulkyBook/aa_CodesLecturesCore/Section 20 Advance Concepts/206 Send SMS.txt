@@ -1,4 +1,68 @@
-﻿using System;
+Now we need to make sure the appsettings keys would be accessible with Dependency Injection. Opened Startup.cs
+
+In ConfigureServices, method we will copy what we did with StripeSettings, pasted to the next line and changed StripeSettings to TwilioSettings and Stripe in quotes to Twilio in quotes.
+services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
+
+In order the access the above using Dependency Injection we have to use IOptions.
+
+The customer places order from cart controller so Opened CartController.cs from Customer area.
+
+After _emailSender declaration, added:
+
+        private TwilioSettings _twilioOptions { get; set; }
+
+In the construcotr parameter we need to use IOptions of TwilioSettings like:
+IOptions<TwilioSettings> twilionOptions
+
+Inside the Constructor, we can initialize _twilioSettings like:
+
+            _twilioOptions = twilionOptions.Value;
+
+In the method OrderConfirmation, at the very bottom we are only passing the id, we will modify it now.
+
+Inside it, first we will access orderHeader based on the id parameter like:
+OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u=>u.Id==id); 
+
+
+Now we will create TwilioClient and call Init method, there we need to pass two params one is the Did and another is the Auth Token
+
+TwilioClient.Init(_twilioOptions.AccountSid, _twilioOptions.AuthToken);
+
+Next we would use try catch block for the message. This is because there might be exception for phone number. Next we will create a new message, passing body as a message, from as the phone number from configuration, and to as orderHeader.PhoneNumber.
+
+
+            try
+            {
+                var message = MessageResource.Create(
+                    body: "Order Placed on Bulky Book. Your Order ID:" + id,
+                    from: new Twilio.Types.PhoneNumber(_twilioOptions.PhoneNumber),
+                    to: new Twilio.Types.PhoneNumber(orderHeader.PhoneNumber)
+                    );
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+Now we run this application and give this a try.
+
+Logged in as admin added few items to the cart, Make sure the phone number is correct. Then hit place order and give the stripe account details in the popup. We would receive an sms in our cell phone. 
+
+I did not receive it due to some issue of unverified numbers. Resolved that my giving the phone number as +91[RegisteredTwilioNumber] in the pickup details. Earlier they were saying they does not sent message to Unverified/Unregistered number.
+
+Go the message in my phone like:
+Sent from your Twilo trial account.
+-Order Placed on Bulky Book. Your Order ID: 9
+
+So we have seen how easy it was to integrate twilio in our project.
+
+Now we can have customized orders in every steps. We now know how to implement. We can also send an sms when an order is shipped. but he will not do this and it is on us.
+---------------------------------------------------------------
+Pushed the codes to github
+
+CartController.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -256,3 +320,14 @@ namespace BulkyBook.Areas.Customer.Controllers
 
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

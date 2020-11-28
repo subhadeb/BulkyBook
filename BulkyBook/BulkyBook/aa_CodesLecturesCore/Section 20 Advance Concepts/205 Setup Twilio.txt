@@ -1,0 +1,69 @@
+Now we would like to send SMS Notification, for that we will use twilio.
+
+https://www.twilio.com/
+
+Signed up for an account, Verified the email.
+Next it asked for Phone Number, provided my Phone number and Verified.
+
+Next do you write code - Selected No.
+
+Selected Build Twilio for my self.
+
+I opened console with a dashboard.
+
+It gives a free Trial Balance of $15.50
+
+Selected Get a Trial Number. Selected Choose this number from the popup.
+
+A message came:
+Your new Phone Number is +14088377801
+
+Clicked Done, next we see Account SID and Auth token. 
+
+In our Utility project, we have EmailOptions. Currently we have two properties for SendGridKey and SendGriduser. 
+
+In the same Utility Project, created the class TwilioSettings.cs, made it public and added the below three properties:
+
+        public string PhoneNumber { get; set; }
+        public string AuthToken { get; set; }
+        public string AccountSid { get; set; }
+
+We need to set all the three properties from appsettings.json.
+
+Made a new section like Stripe(copy pasted it after comma), made it Twilio, replaced SecretKey with PhoneNumber, PublishableKey with AuthToken and added a third element named AccountSid.
+
+Copied the three things from the portal and pasted them in this appsettings.json. Phone number is the trial number. We are almost done. Go to Nuget Package manager and install Twilio to BulkyBook project.
+
+Next we would like to send a message to the user saying you order have been placed
+
+We will do that in th next part.
+
+
+---------------------------------------------------------------
+
+--TwilioSettings.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Utility
+{
+    public class TwilioSettings
+    {
+        public string PhoneNumber { get; set; }
+        public string AuthToken { get; set; }
+        public string AccountSid { get; set; }
+    }
+}
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
