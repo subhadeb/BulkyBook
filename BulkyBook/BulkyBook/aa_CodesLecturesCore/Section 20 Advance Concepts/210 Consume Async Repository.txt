@@ -1,4 +1,173 @@
-﻿using System;
+Now lets use the Async Repository in CategoryRepository and ICategoryRepository.
+
+Opened CategoryRepository and ICategoryRepository.
+
+In CategoryRepository.cs, 
+Now it would implement RepositoryAsync.
+
+Also in ICategoryRepository.cs,
+It would implement IRepositoryAsync
+
+
+Now if we build the solution many thing will break mainly the CategoryController.
+
+Got Six errors in the error list.
+
+If we Open CategoryController(from the errors may be), we see errors in All the methods, that it does not contain a defination of the written method.
+
+
+So if we would the async methods the return type of the ActionResults should also change. Like Upsert Method declaration is currently:
+public IActionResult Upsert(int? id)
+
+It would change to the below that is it should return async Task<IActionResult> instead of IActionResult.
+public async Task<IActionResult> Upsert(int? id)
+
+Copied async Task<IActionResult> and pasted in all the method declarations return IActionResult.
+
+Now we will start using the Async Methods that we have implemented in Async repository. 
+First in GetAll, currently we are getting allObj like:
+var allObj = _unitOfWork.Category.GetAll();
+
+It would now change to use GetAllAsync with await like:
+var allObj = await _unitOfWork.Category.GetAllAsync();
+
+Done the same thing inside Delete method(Use the method with Async and add await in the beginning). The removeAsync method is called like:
+await _unitOfWork.Category.RemoveAsync(objFromDb);
+
+Did the same in Upsert post 
+  await _unitOfWork.Category.AddAsync(category);
+
+And in Upsert get like:
+
+category = await _unitOfWork.Category.GetAsync(id.GetValueOrDefault());
+
+Now there are no errors in CategoryController.
+
+We have build errors now in ProductController as we are using Category there.
+
+Opened ProductController
+
+Upsert get method is breaking, so first updated the method declaration to 
+public async Task<IActionResult> Upsert(int? id)
+
+
+Now for GetAll as we are using Select along with it, we will first get CategoryList in a variable in the start of the ActionMethod with the below GetAllAsync method call.
+
+IEnumerable<Category> CatList = await _unitOfWork.Category.GetAllAsync();
+
+And wow use the CatList to Populate CatgoryList of productVm like
+
+CategoryList = CatList.Select(i => new SelectListItem
+
+In Upsert Post also we are getting the same error and will fix in the same way, so before the line with GetAll in the else block, we will copy paste the code for CatList to use GetAllAsync()
+
+And in the next line use like:
+productVM.CategoryList = CatList.Select(i => new SelectListItem
+
+Also change the action method declaration to 
+public async Task<IActionResult> Upsert(ProductVM productVM)
+
+
+Now all the build errors are gone, and run the solution.  Go to Content Management Category. 
+
+Add a new Category, edit it update it and then delete it to verify everything works fine. I have tested and all looks fine.
+---------------------------------------------------------------
+Pushed the codes to Github
+
+--CategoryController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
+    public class CategoryController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> Upsert(int? id)
+        {
+            Category category = new Category();
+            if (id == null)
+            {
+                return View(category); ;
+            }
+            category = await _unitOfWork.Category.GetAsync(id.GetValueOrDefault());
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upsert(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                if (category.Id == 0)
+                {
+                   await _unitOfWork.Category.AddAsync(category);
+                }
+                else
+                {
+                    _unitOfWork.Category.Update(category);
+                }
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
+
+            }
+            return View(category);
+        }
+
+        #region API Calls
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var allObj = await _unitOfWork.Category.GetAllAsync();
+            return Json(new { data = allObj });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var objFromDb = await _unitOfWork.Category.GetAsync(id);
+            if (objFromDb == null)
+            {
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+            await _unitOfWork.Category.RemoveAsync(objFromDb);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+        #endregion
+    }
+}
+
+
+
+--ProductController.cs
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -163,3 +332,13 @@ namespace BulkyBook.Areas.Admin.Controllers
         #endregion
     }
 }
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

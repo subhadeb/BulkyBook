@@ -1,0 +1,237 @@
+Now he will show us Async and await.
+
+We have our Repository pattern in place. In DataAccess project, we have a a list of IRepositories and Repositories.
+
+Now made a copy of IRepository.cs and pasted in teh same folder done the same for Repository.cs
+
+Now renamed the newly copied files to IRepositoryAsync.cs and RepositoryAsync.cs.
+
+Opened the file IRepositoryAsync.cs 
+
+Inside it changed the interface name to IRepositoryAsync
+
+Now, whenever we are returning anything it would be Task<>
+
+
+So first T Get(int id); would be modified to
+Task<T> Get(int id);
+
+And The method GetAll which as a IEnumberable<T> return type will now be modified to :
+
+Task<IEnumerable<T>> GetAll(
+
+Simliarlty T GetFirstOrDefault would be updated to:
+Task<T> GetFirstOrDefault(
+
+When we have void, we would just return a Task like void Add(T entity) would be modieified to 
+Task Add(T entity);
+
+Did the same for the other three methods in the interface.
+
+Now all the methods are appended by the word Async like Get is renamed to GetAsync, Add to AddAsync and did the same for all the 7 methods.
+
+So our IRepositoryAsync is complete.
+
+Now open RepositoryAsync.cs
+
+First change the Class and the implemeting interface to use Async like:
+
+public class RepositoryAsync<T> : IRepositoryAsync<T> where T : class
+
+Also canged the Constructor name. Now add the Asyn keyword at the end of all the method names.
+
+Like RemoveRange is renamed to RemoveRangeAsync. Done the same for all the methods.
+
+First we will update the below method to use async
+
+        public void AddAsync(T entity)
+        {
+            dbSet.Add(entity);
+        }
+
+for a method returning void we should change to return async Task and most of the methods have Async implementation as well like dbSet will have AddAsync along with Add, so used dbSet.AddAsync and added await before it's call. Modified method is like:
+
+        public async Task AddAsync(T entity)
+        {
+            await dbSet.AddAsync(entity);
+        }
+
+now we would update the below method:
+
+        public T GetAsync(int id)
+        {
+            return dbSet.Find(id);
+        }
+
+Here in the above, first the return type will be modified to use async Task<T> and the return will have await dbSet.FindAsync like:
+
+       public async Task<T> GetAsync(int id)
+        {
+            return await dbSet.FindAsync(id);
+        }
+
+Similarly update GetAllAsync to return  async Task<IEnumerable<T>>, inist the method at the last we will update ToList to ToListAsync adding an await after return. did the same for the last line(changed to return await query.ToListAsync();)
+
+
+Did the same thing for method GetFirstOrDefaultAsync inside it only updated the return to return await query.FirstOrDefaultAsync();
+
+Did the same for RemoveAsync, it would return and isside it will call await FindAsync() and also use await with RemoveAsync like;
+        public async Task RemoveAsync(int id)
+        {
+            T entity = await dbSet.FindAsync(id);
+            await RemoveAsync(entity);
+        }
+
+Now Remove and RemoveAll methods does not have async implementation so we will keep them as it is only changed the return type for both like:
+
+        public async Task RemoveAsync(T entity)
+        {
+           dbSet.Remove(entity);
+        }
+
+        public async Task RemoveRangeAsync(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
+        }
+
+In the next part we will Use the Async Repositories in our CategoryRepository and make changes in the controller.
+---------------------------------------------------------------
+--IRepositoryAsync.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BulkyBook.DataAccess.Repository.IRepository
+{
+    public interface IRepositoryAsync<T> where T : class
+    {
+        Task<T> GetAsync(int id);
+
+        Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            string includeProperties = null
+            );
+
+        Task<T> GetFirstOrDefaultAsync(
+          Expression<Func<T, bool>> filter = null,
+          string includeProperties = null
+          );
+
+        Task AddAsync(T entity);
+
+        Task RemoveAsync(int id);
+        Task RemoveAsync(T entity);
+
+        Task RemoveRangeAsync(IEnumerable<T> entity);
+
+    }
+}
+
+
+--RepositoryAsync.cs
+
+using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BulkyBook.DataAccess.Repository
+{
+    public class RepositoryAsync<T> : IRepositoryAsync<T> where T : class
+    {
+        private readonly ApplicationDbContext _db;
+        internal DbSet<T> dbSet;
+
+        public RepositoryAsync(ApplicationDbContext db)
+        {
+            _db = db;
+            this.dbSet = _db.Set<T>();
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await dbSet.AddAsync(entity);
+        }
+
+        public async Task<T> GetAsync(int id)
+        {
+            return await dbSet.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query= query.Include(includeProp);
+                }
+            }
+            if (orderBy != null)
+            {
+                return await orderBy(query).ToListAsync();
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeProperties != null)
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query =   query.Include(includeProp);
+                }
+            }
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task RemoveAsync(int id)
+        {
+            T entity = await dbSet.FindAsync(id);
+            await RemoveAsync(entity);
+        }
+
+        public async Task RemoveAsync(T entity)
+        {
+           dbSet.Remove(entity);
+        }
+
+        public async Task RemoveRangeAsync(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
+        }
+    }
+}
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
