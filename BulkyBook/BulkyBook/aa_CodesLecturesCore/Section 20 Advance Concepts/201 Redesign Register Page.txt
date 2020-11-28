@@ -1,0 +1,344 @@
+We want to change the Look and feel of our Register page.
+
+In site.css under wwwroot, we already have the button for facebook and google, so we will integrate it.
+
+Open Identity Area, Register.cshtml view.
+
+We will redesign this page.
+
+Removed the below:
+<h1>@ViewData["Title"]</h1>
+
+
+
+At the top before div row, added a new div with class py-4 my-4
+
+First moved the div with asp-validation-summary from bottom(not page bottom) to here.
+
+Now added few nested divs. First after the div with validation summary, added the below self explanatory nested divs with multiple classes.
+
+<div class="py-4 my-4">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="row form-group">
+        <div class="col-8 offset-2">
+            <div class="card">
+                <div class="card-body px-lg-5 pt-4">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+Now inside the most inner div(with card-body) moved the code for form tag from bottom to here. As of now only moved the starting tag not the contents inside it. To the form attribute, set autocomplete to off.
+
+Now inside the form tag we will add a header with multiple css classes. like:
+
+                        <h3 class="col-12 text-success text-center py-4">
+                            
+                        </h3>
+
+Now inside the h3 tag, we will show the header based on the Role. If the User is Admin or Employee we will show Register an User Account in strong tag else we will display Sign Up.
+
+                            @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                            {
+                                <strong>Register an User Account</strong>
+                            }
+                            else
+                            {
+                                <strong>Sign Up</strong>
+                            }
+
+
+Next we will work on all of the Input types. 
+
+After thes able if else block for h3, added a <hr/>, after this we will add a new div with class py-2. Inside that moved the input tag and span for validation for Input.Name and then added a placeholder Name. Like:
+
+                        <div class="py-2">
+                            <input asp-for="Input.Name" placeholder="Name" class="form-control" />
+                            <span asp-validation-for="Input.Name" class="text-danger"></span>
+                        </div>
+
+Now made the copy of the div py-2, and pasted four times below it.
+
+In the first copy, changed Name to Email in three places, also added type="email" to input tag.
+
+In the next copy, along with py-2 added the class input-group. Inside that we will have a div with class input-group-prepend and there we will simply display +1 inside a span with class input-group-text this is for prepending Americal phone numbers. Then to the input changed Name to PhoneNumber and placeholder as Phone Number, and added type="text" to the input tag. It's like:
+
+                        <div class="py-2 input-group">
+                            <div class="input-group-prepend">
+                                 <span class="input-group-text">+1</span> 
+                            </div>
+                            <input asp-for="Input.PhoneNumber" type="text" placeholder="Phone Number" class="form-control" />
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                        </div>
+
+
+To the next copy, we will changed Name to PhoneNumber, placeholder as Street Address.
+
+                        <div class="py-2">
+                            <input asp-for="Input.StreetAddress" placeholder="Street Address" class="form-control" />
+                            <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+                        </div>
+
+
+Next, changed Name to StreetAddress.
+                        <div class="py-2">
+                            <input asp-for="Input.City" placeholder="City" class="form-control" />
+                            <span asp-validation-for="Input.City" class="text-danger"></span>
+                        </div>
+
+
+
+After this, Now again made a copy of the Name div, to class py-2 added the class form-row(before that), inside it added a div with class col and inside this moved the two lines for input and span for Name and then changed Name to State in three places. After this maded a copy of this div col and inside it changed Name to PostalCode/Postal Code.
+
+                        <div class="form-row py-2">
+                            <div class="col">
+                                <input asp-for="Input.State" placeholder="State" class="form-control" />
+                                <span asp-validation-for="Input.State" class="text-danger"></span>
+                            </div>
+                            <div class="col">
+                                <input asp-for="Input.PostalCode" placeholder="Postal Code" class="form-control" />
+                                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+
+After this made a copy of the same div with class form-row py-2 for Password and Confirm Password. Inside the first copied col div, replaced the input and span tags by copying the codes for Password from bottom and added type="password" to the input for password, and also added placeholder as Password. Made a copy of the two lines(input and span) and replaced inside the next div col and changed Password to ConfirmPassword/Confirm Password.
+
+                        <div class="form-row py-2">
+                            <div class="col">
+                                <input asp-for="Input.Password" type="password" placeholder="Password" class="form-control" />
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+                            <div class="col">
+                                <input asp-for="Input.ConfirmPassword" type="password" placeholder="Confirm Password" class="form-control" />
+                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+
+Now after the form-row py-2 div ends, we can cut the codes from bottom with if condition for User.IsInRole from the bottom for Role and Company and paste it here and we will leave it as it is.
+
+Now after this before the form ending tag, we will add a div with class py2 for the submit button by moving it fromt he bottom to here. Changed the btn class to success also added the class form-control to it.
+
+It's 
+                    <div class="py-2">
+                        <button type="submit" class="btn btn-success form-control">Register</button>
+                    </div>
+
+
+Now at the bottom we can see there is another form wit id external-account(in the else block for Model.ExternalLogins check) and we dont need the if check any more because it will never be true as we have already configured external login by FB and google.
+
+In the top after form end tag, we can add an if check for User is not an Admin or emaployee. Inside it (cut)paste the entire form with id external-account. Before the div he added a p tag and and hr, which he have copied from somewhere for Acceptance. and then to the div, inside the form gave a class row. Now inside the foreach, it would iterat based on providers that we have configured. So as of now, it's like:
+
+
+                    @if (!User.IsInRole(SD.Role_Admin) && !User.IsInRole(SD.Role_Employee))
+                    {
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                            <div class="row">
+                                <p>
+                                    By clicking <em>Register</em> you agree to our <a href="" target="_blank"> terms of service </a>
+                                </p>
+                                <hr />
+                                <p>
+                                    @foreach (var provider in Model.ExternalLogins)
+                                    {
+                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                    }
+                                </p>
+                            </div>
+                        </form>
+                    }
+
+
+Now inside the foreach loop, before the buttons, we will add a div with class col-6. After that we will check if the provider name in lowercase contains facebook, then the then copied(not moved) the button from below and this button will have the class facebook-btn, we will use btn-block(not btn-primary). And used the font awesome class for fab fa-facebook-square inside i tag. It's like:
+
+                                    <div class="col-6">
+                                        @if (provider.Name.ToLower().Contains("facebook"))
+                                        {
+                                            <button type="submit" class="btn btn-block facebook-btn form-control"
+                                                    name="provider" value="@provider.Name"
+                                                    title="Log in using your @provider.DisplayName account">
+                                                <i class="fab fa-facebook-square"></i> @provider.DisplayName
+                                            </button>
+                                        }
+                                    </div>
+
+Made a copy of this @if and pasted below it with else if(instead of if).
+Changed contains to google, inside it changed the bootstrap class to google-btn, and the font awesome class is fab fa-google. 
+
+At the end added an else block and inside it kept the button code as it is(if the provider is not facebook or google)
+
+  else
+                                        {
+                                            <button type="submit" class="btn btn-primary" name="provider"
+                                                    value="@provider.Name"
+                                                    title="Log in using your @provider.DisplayName account">
+                                                @provider.DisplayName
+                                            </button>
+                                        }
+
+
+After that removed all the old codes from the bottom(till before Scripts section).
+
+
+
+On running we see the Codes center aligned, and the buttons for Facebook and Google is having f and G icons. 
+
+
+Functionality Wise everything is Same, we have only redesigned this page.
+---------------------------------------------------------------
+--Register.cshtml
+@page
+@model RegisterModel
+@using BulkyBook.Utility
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="py-4 my-4">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="row form-group">
+        <div class="col-8 offset-2">
+            <div class="card">
+                <div class="card-body px-lg-5 pt-4">
+                    <form autocomplete="off" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <h3 class="col-12 text-success text-center py-4">
+                            @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                            {
+                                <strong>Register an User Account</strong>
+                            }
+                            else
+                            {
+                                <strong>Sign Up</strong>
+                            }
+                        </h3>
+                        <hr />
+                        <div class="py-2">
+                            <input asp-for="Input.Name" placeholder="Name" class="form-control" />
+                            <span asp-validation-for="Input.Name" class="text-danger"></span>
+                        </div>
+                        <div class="py-2">
+                            <input asp-for="Input.Email" type="email" placeholder="Email" class="form-control" />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        <div class="py-2 input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">+1</span> 
+                            </div>
+                            <input asp-for="Input.PhoneNumber" type="text" placeholder="Phone Number" class="form-control" />
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="py-2">
+                            <input asp-for="Input.StreetAddress" placeholder="Street Address" class="form-control" />
+                            <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+                        </div>
+                        <div class="py-2">
+                            <input asp-for="Input.City" placeholder="City" class="form-control" />
+                            <span asp-validation-for="Input.City" class="text-danger"></span>
+                        </div>
+                        <div class="form-row py-2">
+                            <div class="col">
+                                <input asp-for="Input.State" placeholder="State" class="form-control" />
+                                <span asp-validation-for="Input.State" class="text-danger"></span>
+                            </div>
+                            <div class="col">
+                                <input asp-for="Input.PostalCode" placeholder="Postal Code" class="form-control" />
+                                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row py-2">
+                            <div class="col">
+                                <input asp-for="Input.Password" type="password" placeholder="Password" class="form-control" />
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+                            <div class="col">
+                                <input asp-for="Input.ConfirmPassword" type="password" placeholder="Confirm Password" class="form-control" />
+                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                        @if (User.IsInRole(SD.Role_Admin))
+                        {
+                            <div class="form-group">
+                                <label asp-for="Input.Role"></label>
+                                @Html.DropDownListFor(m => m.Input.Role, Model.Input.RoleList,
+                               "-Please select Role-", new { @class = "form-control" })
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Input.CompanyId"></label>
+                                @Html.DropDownListFor(m => m.Input.CompanyId, Model.Input.CompanyList,
+                               "-Please select Company-", new { @class = "form-control" })
+                            </div>
+                        }
+
+                        <div class="py-2">
+                            <button type="submit" class="btn btn-success form-control">Register</button>
+                        </div>
+                    </form>
+
+                    @if (!User.IsInRole(SD.Role_Admin) && !User.IsInRole(SD.Role_Employee))
+                    {
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                            <div class="row">
+                                <p>
+                                    By clicking <em>Register</em> you agree to our <a href="" target="_blank"> terms of service </a>
+                                </p>
+                                <hr />
+                                <p>
+                                    @foreach (var provider in Model.ExternalLogins)
+                                    {
+                                    <div class="col-6">
+                                        @if (provider.Name.ToLower().Contains("facebook"))
+                                        {
+                                            <button type="submit" class="btn btn-block facebook-btn form-control"
+                                                    name="provider" value="@provider.Name"
+                                                    title="Log in using your @provider.DisplayName account">
+                                                <i class="fab fa-facebook-square"></i> @provider.DisplayName
+                                            </button>
+                                        }
+                                        else if (provider.Name.ToLower().Contains("google"))
+                                        {
+                                            <button type="submit" class="btn btn-block google-btn form-control"
+                                                    name="provider" value="@provider.Name"
+                                                    title="Log in using your @provider.DisplayName account">
+                                                <i class="fab fa-google"></i> @provider.DisplayName
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="btn btn-primary" name="provider"
+                                                    value="@provider.Name"
+                                                    title="Log in using your @provider.DisplayName account">
+                                                @provider.DisplayName
+                                            </button>
+                                        }
+                                    </div>
+                                    }
+                                </p>
+                            </div>
+                        </form>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,151 @@
+Let's now work on the Login Page.
+
+Similar to Register, Open Login.cshtml
+
+After Setting tehe ViewData[Title] in the razor blcok, added a div with id(not class) logreg-forms.
+
+<div id="logreg-form">
+
+</div>
+
+IN the bottom of the file, there is a section for external login. We can remove the code and conditoin for if block, because we have Model.ExternalLogins which would be greater than 0 always.So we will have the form tag remaining(with 7-8 Lines). Now move the form codes to the new div that we have created above(logreg).
+
+Now, after pasting, before the div starts added an h1 tag with a lot of classes(below) with style for Sign In text.
+ <h1 class="h3 mb-3 font-weight-normal text-primary" style="text-align:center;">Sign In</h1>
+
+After that we will add a div with class social-login pb-0 mb-0. And inside this cut paste the foreach loop for external logins. We will remove the unused divs below that. 
+
+Now inside the foreach loop we have added styles and based on provider, we can copy the same codes from inside foreach loop in Register.cshtml and paste here.
+
+Now after the end tag of this form we will add another form, cut the form tag from below
+
+    <form id="account" method="post">
+    
+    
+    </form>
+
+Inside it, first we will have an if check to check if ExternalLogins count is greater than 0, then we would display OR in a p tag.
+
+        @if (Model.ExternalLogins?.Count > 0)
+        {
+            <p style="text-align:center"> OR </p>
+        }
+
+After that(after if ends), the form would start and cut the input tag for Email from below and paste, and to this add placeholder="Email...", type="email" and added the class mb-1
+
+<input asp-for="Input.Email" placeholder="Email..." type="email" class="mb-1 form-control" />
+
+
+Now cut the input tag for Password, add placeholder as Pasword... and type as password
+<input asp-for="Input.Password" placeholder="Password" type="password" class="form-control" />
+
+
+After that past the button code of submit(Log In button), paste it and give the class btn-block, change to btn-success and then added a font awesome icon for fa-sign-in-alt, and changed the text from Log In to Sign in
+
+        <button type="submit" class="btn btn-success btn-block">
+            <i class="fas fa-sign-in-alt"></i>
+            Sign in
+        </button>
+
+Then cut the two links for Forgot password inside paragraph and pasted after Sign in button. After pasting removed all the p starting and closing tags. These are standalong anchor tags, also he had third link for SendVerficationEmail, but I did not find it in my code, to ForgotPassword added the class pb-2 text-info.
+        
+<a id="forgot-password" asp-page="./ForgotPassword" class="pb-2 text-info"  >Forgot your password?</a>
+        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+
+
+In between the two(he had a third one for SendVerficationEmail as well) anchor tags from above, added a div for validation summary like:
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+And to the Register as a new user button/link, added bootstrp class="btn btn-primary text-white" and also a font awesome icon(fas fa-user-plus) like:
+
+        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-primary text-white">
+            <i class="fas fa-user-plus"></i>
+            Register as a new user
+        </a>
+
+Now remove the old content from the bottom, starting from ViewData[Title] till the scripts section.
+
+On running we see the form(the text boxes are bigger than his dont know why) the code is the same though.
+
+So we changed the Layout for Login and Registration.
+---------------------------------------------------------------
+--Login.cshtml
+
+@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div id="logreg-form">
+    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+        <h1 class="h3 mb-3 font-weight-normal text-primary" style="text-align:center;">Sign In</h1>
+        <div class="social-login pb-0 mb-0">
+            @foreach (var provider in Model.ExternalLogins)
+            {
+                @if (provider.Name.ToLower().Contains("facebook"))
+                {
+                    <button type="submit" class="btn btn-block facebook-btn form-control"
+                            name="provider" value="@provider.Name"
+                            title="Log in using your @provider.DisplayName account">
+                        <i class="fab fa-facebook-square"></i> @provider.DisplayName
+                    </button>
+                }
+                else if (provider.Name.ToLower().Contains("google"))
+                {
+                    <button type="submit" class="btn btn-block google-btn form-control"
+                            name="provider" value="@provider.Name"
+                            title="Log in using your @provider.DisplayName account">
+                        <i class="fab fa-google"></i> @provider.DisplayName
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary" name="provider"
+                            value="@provider.Name"
+                            title="Log in using your @provider.DisplayName account">
+                        @provider.DisplayName
+                    </button>
+                }
+                @*<button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>*@
+            }
+        </div>
+    </form>
+    <form id="account" method="post">
+        @if (Model.ExternalLogins?.Count > 0)
+        {
+            <p style="text-align:center"> OR </p>
+        }
+        <input asp-for="Input.Email" placeholder="Email..." type="email" class="mb-1 form-control" />
+        <input asp-for="Input.Password" placeholder="Password" type="password" class="form-control" />
+        <button type="submit" class="btn btn-success btn-block">
+            <i class="fas fa-sign-in-alt"></i>
+            Sign in
+        </button>
+        <a id="forgot-password" asp-page="./ForgotPassword" class="pb-2 text-info">Forgot your password?</a>
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-primary text-white">
+            <i class="fas fa-user-plus"></i>
+            Register as a new user
+        </a>
+
+    </form>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,30 @@
+In this Section we will be learning a lot of new technologies.
+
+This is a kind of bonus for us.
+
+First we will start with Redesigning our Login and Register page. Then two factor authentication, after that we will see how we can send sms. we will be using Twilio for that. 
+
+After that we will looking at View Componenet and its need. 
+
+Then we will convert our repository to async repository. 
+
+As of now we did not use Async Repository because till now we did not have any heavy database calls. But for a website is having DB calls Async repository pattern is needed.
+
+After that we will be looking at building a custome tag helper for paginations. After that we will have a look at temp data and how to use them for alerts. 
+
+Then we will look for a competitor for stripe which we have used for payment. We will be using BrainTree.
+
+This is a jam packed section with a lots of new technologies and new features.
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

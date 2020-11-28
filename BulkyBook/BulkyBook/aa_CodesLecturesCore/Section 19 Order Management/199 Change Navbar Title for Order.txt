@@ -1,4 +1,35 @@
-﻿@using BulkyBook.Utility
+Now We would like to Display Orders as Orders History if no one has logged in.
+If admin or employee logs in we can change Orders to Manage Orders.
+
+Opened _Layout.cshtml, we have Orders button. Before that we can have have an if check to check if the User is Employee or Admin.
+
+Moved the li class and anchor class(a starting only not the link text) above the if check. Inside the if check added a span with text Manage Order. In the else block the span will be for Order History.
+
+The code is like:
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                @if (User.IsInRole(SD.Role_Employee) || User.IsInRole(SD.Role_Admin))
+                                {
+                                    <span>Manage Order</span>
+                                }
+                                else
+                                {
+                                    <span>Order History</span>
+                                }
+                            </a>
+                        </li>
+
+
+Now if we log out, we see the link as Order History, and if we log in we see the link as Manage Order.
+
+Next we would like to change the UI of Register and Login.
+
+
+
+---------------------------------------------------------------
+_Layout.chstml
+@using BulkyBook.Utility
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -115,3 +146,14 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

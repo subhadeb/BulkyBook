@@ -1,4 +1,24 @@
-﻿using System;
+Now we will fix some issues,
+
+I donot have the Resend confirmation button(May be bcz I did not configure it as sendgrig was not sending emails), but he have shown that if he hit the Resend Email Confirmation link, he got some error on Object reference
+
+The issue is in the method OnPostAsync, we are returning Page, and we were not initializing the ExternalLogins that we did in get. So before return Page copy pasted the below code from Get.
+
+ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+Now on running, his error was gone.
+
+After this by running we have shown Forgot your password thing, by entering an email, and then clicked Submit, mail was sent to his registered email(sendgrid is not working for me) after that from the mail he opend the reset link of our portal then entered the email and password, confirm password again. and the password was reset.
+
+Now another issue which was reproduced by me, if we provide an incorrect password and try to login, whe code breaks in cstml in foreach loop line for Model.ExternalLogins. And the issue is the same. We can fix it by copying the same ExteranlLogin line and paste it before the check of result.RequiresTwoFactor.
+
+Now on running we see the error is gone.
+
+
+---------------------------------------------------------------
+Pushed the Codes to github.
+--Login.cshtml.cs
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -117,3 +137,14 @@ namespace BulkyBook.Areas.Identity.Pages.Account
         }
     }
 }
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
