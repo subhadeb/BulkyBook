@@ -1,0 +1,108 @@
+NOw, after we login, we see our email address in the top right prepended by Hello. What if we want to show the name of the user.
+
+It is under _Layout.cshtml which in turn calls _LoginPartial.cshtml.
+
+In _LoginPartial.cshtml, we can see it displays like:
+
+Hello @User.Identity.Name!
+
+In this place we want to display the Name and we do not have a model here. Also _Layout does not have anything for Name to pass it to _LoginPartial.
+
+For this we will use a view component. View Component renders a chunk rather than a whole response. It includes the same Separation of concern, Testability Benefits between controller and a view and it can have parameters and a business logic. It is typically invoked from a layout page because we do not have that flexibility in our layout like _LoginPartial
+
+There are certain rules for rendering view components. 
+
+Stop the solution if it is running.
+
+Added a new folder in BulkyBook main project named it ViewComponents. To this folder added a new class and right now ASP dot net core does not have a default way for creating View Component. 
+
+Created class UserNameViewComponent.cs
+
+ViewComponents should end with the name ViewComponent and it should extend ViewComponents.
+
+    public class UserNameViewComponent : ViewComponent
+    {
+
+    }
+
+
+Inside the method we would like to retrieve the details of the user who has signed in. For this we would need UnitOfwork so added the below two with dependency injection for our unit of work.
+
+        private readonly IUnitOfWork _unitOfWork;
+
+        public UserNameViewComponent(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+Now, we need an actual action method and that would be called InvokeAsyn. declared it like:
+
+        public async Task<IViewComponentResult> InvokeAsync()
+        { 
+        
+        }
+
+Iniside it we will get the id of the logged in user with the help of claimsidentity that we did before like:
+
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claims = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+And then got the userFromDb like:
+
+ var userFromDb = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == claims.Value);
+
+And then we will return userFromDb back to the view.
+
+So this is how we are retrieving the user component from db.
+
+We need to invoke this from Login Partial and display the Name. 
+
+This will be in the next part.
+But we should remember the rules for ViewComponent
+
+> It should end with ViewComponent
+> It should Inherit ViewComponent
+> It will have an InvokeAsync in which we can do whatever we want and then return to the view.
+---------------------------------------------------------------
+--UserNameViewComponent.cs
+
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
+namespace BulkyBook.ViewComponents
+{
+    public class UserNameViewComponent : ViewComponent
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public UserNameViewComponent(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<IViewComponentResult> InvokeAsync()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claims = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            var userFromDb = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == claims.Value);
+            return View(userFromDb);
+        }
+
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,72 @@
+Now we will add the view for consuming our view component. And there are certain rules for that. 
+
+In Views/Shared we need to create a new folder that will be named Components. Inside it there should be another folder which will have the same name in starting as our ViewComponent in this case it is UserName. So created the folder UserName.
+
+Inside the Folder, added a new View.(It should be a partial view but I did not see the option for creating the Partial View unlike hime). Named the View Default.cshtml
+
+
+Here we first need to pass the Model, Here it would be:
+
+@model BulkyBook.Models.ApplicationUser
+
+After that we will display Hi and then the Name from model followed by font awesome icon for fa-user like:
+
+Hi! @Model.Name <i class="far fa-user"></i>
+
+Now we will consume this View from _LoginPartial. Open this file.
+
+Here we would replace Hello @User.Identity.Name! with await Component.InvokeAsync() passing the name of the view component it is UserName in our case.
+
+<a  class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">@await Component.InvokeAsync("UserName")</a>
+
+Now Run and login to our account again. Now we see Hi and then the UserName. It now looks clean as well. So we have learned how we can implement a view component.
+
+This is an important feature that we can use while working with _Layout or partial views because they do not have a model of their own.
+
+---------------------------------------------------------------
+Pushed the codes to github.
+
+--Default.cshtml
+@model BulkyBook.Models.ApplicationUser
+
+Hi! @Model.Name <i class="far fa-user"></i>
+
+
+--_LoginPartial.cshtml
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item">
+        <a  class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">@await Component.InvokeAsync("UserName")</a>
+    </li>
+    <li class="nav-item">
+        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link " asp-area="Identity" asp-page="/Account/Login">Login</a>
+    </li>
+}
+</ul>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
