@@ -1,0 +1,476 @@
+We have learnt many things through out the project. Now we would see TempData.
+
+When we want to move data among controller/views/Actions we have options like TempData/ViewData/ViewBag.
+
+He is against VeiwData and ViewBag. For passing some data we should always consider ViewModel rather than using the two. 
+
+ViewModel is tightly bound to a view and that should be the solid approach that we should take.
+
+Asp Dot net team has created TempData that will hold data for Just one request.
+
+And this scenario would be useful when we are deleting a category. Now here when we will delete a category we want to see the notification that category was deleted succesfully.
+
+So while Deleting a Category we can set the TempData and when we load the page we can check the TempData and load success or failure message.
+
+We need to configure TempData in Startup.cs because it is not included by default.
+
+Stopped vs if it is running and close all tabs, open Startup.cs
+
+In ConfigureServices method, after EmailSender, added AddSingleton in which ITempDataProvider will use CookieTempDataProvider both the classes available in dot net core.
+
+Now go to Categorycontroller and go to Delete API Call.
+
+Earlier we were sending the Success or error message with Json Data, but right now we are not using that any more, so in the objFromDb is null if block(where we are sending success as false) we will add the TempData Error like: 
+
+TempData["Error"] = "Error deleteing Category";
+
+Now later before we are returning Json with success true we would send TempData like:
+TempData["Success"] = "Category Successfully Deleted";
+
+Now we would use the TempData in our Index view.
+
+So opened Index.cshtml for category.
+
+In the top after setting the Layout added an if block to Check if TempData["Success"] is not null.
+
+
+Now opened Bootstrap portal to find Dismissable Alerts.
+
+Opened https://getbootstrap.com/docs/4.0/components/alerts/
+
+search with alert-dismissible and then Copied and pasted the entire div in the if block, after pasting replaced the entire strong tag(removing the strong tag) with @TempData["Success"], changed the div class alert-warning  to alert-success
+
+It was Like:
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+       @TempData["Success"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+
+Made a copy of the if block and pasted in else if here it is TempData["Error"] in two places and the div class is alert-danger(instead of alert-success).
+
+else @if (TempData["Error"] != null)
+{
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    @TempData["Error"]
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+}
+
+Now run the solution. Create a dummy category may be something starting with aa and then hit the delete button. 
+
+We see the message Category Successfully Deleted.
+
+What if we want to have such alerts in all the places. For that we can create partial view.
+
+Stopped the solution, Under Main project Views/Shared, created view _Notifications.cshtml 
+
+Now in this view CUT pasted the two if and else if blocks for TempData Success and Error. We can render this view in all the pages, we can also have a common place for rendering this.
+
+Opened _Layout.cshtml
+
+Before @RenderBody(), 
+
+we can refer this partial view like:
+<partial name="_Notification"/>
+
+Now make sure we dont have the TempData codes in Index.cshtml of categoy and run the solution.
+
+In category page, we see the same delete success message. In this way we can implement the same in all the other pages if we want(For one time error message rendering)
+
+---------------------------------------------------------------
+--Startup.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BulkyBook.DataAccess.Data;
+using BookListRazor.Constants;
+using BulkyBook.DataAccess.Repository;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using BulkyBook.Utility;
+using Stripe;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            if (Environment.MachineName == Constants.Win10MachineName)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("Win10DefaultConnection")));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+
+            services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
+            services.Configure<EmailOptions>(Configuration);
+            
+            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
+            services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages();
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+            services.AddAuthentication().AddFacebook(options =>
+            {
+                options.AppId = "2859494254281667";
+                options.AppSecret = "7a6cba804bd8cd880ad3539337b74469";
+            });
+            services.AddAuthentication().AddGoogle(options =>
+            {
+                options.ClientId = "246232864900-ifabvjm0ck8dpn0dnnf7v8f85htjifrs.apps.googleusercontent.com";
+                options.ClientSecret = "lKFA1HjDcorcq3KJZdj4-75v";
+            });
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+            StripeConfiguration.ApiKey = Configuration.GetSection("Stripe")["SecretKey"];
+            app.UseSession();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+
+----CategoryController.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BulkyBook.Areas.Admin.Controllers
+{
+    [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
+    public class CategoryController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<IActionResult> Index(int productPage = 1)
+        {
+            CategoryVM categoryVM = new CategoryVM()
+            {
+                Categories = await _unitOfWork.Category.GetAllAsync()
+            };
+            var count = categoryVM.Categories.Count();
+            categoryVM.Categories = categoryVM.Categories.OrderBy(x => x.Name)
+                .Skip((productPage - 1) * 2).Take(2).ToList();
+
+            categoryVM.PagingInfo = new PagingInfo()
+            {
+                CurrentPage = productPage,
+                ItemsPerPage = 2,
+                TotalItem = count,
+                urlParam = "/Admin/Category/Index?productPage=:"
+            };
+
+            return View(categoryVM);
+        }
+
+        public async Task<IActionResult> Upsert(int? id)
+        {
+            Category category = new Category();
+            if (id == null)
+            {
+                return View(category); ;
+            }
+            category = await _unitOfWork.Category.GetAsync(id.GetValueOrDefault());
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upsert(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                if (category.Id == 0)
+                {
+                   await _unitOfWork.Category.AddAsync(category);
+                }
+                else
+                {
+                    _unitOfWork.Category.Update(category);
+                }
+                _unitOfWork.Save();
+                return RedirectToAction(nameof(Index));
+
+            }
+            return View(category);
+        }
+
+        #region API Calls
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var allObj = await _unitOfWork.Category.GetAllAsync();
+            return Json(new { data = allObj });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var objFromDb = await _unitOfWork.Category.GetAsync(id);
+            if (objFromDb == null)
+            {
+                TempData["Error"] = "Error deleteing Category";
+                return Json(new { success= false, message = "Error While Deleting" }); 
+            }
+            await _unitOfWork.Category.RemoveAsync(objFromDb);
+            _unitOfWork.Save();
+            TempData["Success"] = "Category Successfully Deleted";
+            return Json(new { success = true, message = "Delete Succesful" });
+        }
+
+        #endregion
+    }
+}
+
+--Index.cshtml done coding and later moved to _Notifications.cshtml partial view
+
+
+
+---_Notifications.cshtml
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+else @if (TempData["Error"] != null)
+{
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    @TempData["Error"]
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+}
+
+--_Layout.cshtml
+@using BulkyBook.Utility
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BulkyBook</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BulkyBook</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <partial name="_LoginPartial" />
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        @if (User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Content Management
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="CoverType" asp-action="Index">Cover Type</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
+
+                                </div>
+                            </li>
+                        }
+
+                        @if (User.IsInRole(SD.Role_Employee) || User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    User/Company
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">User</a>
+                                </div>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                @if (User.IsInRole(SD.Role_Employee) || User.IsInRole(SD.Role_Admin))
+                                {
+                                    <span>Manage Order</span>
+                                }
+                                else
+                                {
+                                    <span>Order History</span>
+                                }
+                            </a>
+                        </li>
+                        @if (HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart) != null)
+                        {
+                            <li style="color:white">
+                                <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-link">
+                                    @{
+                                        var count = HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart);
+                                    }
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (@count)
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li style="color:white">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (0)
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            <partial name="_Notifications"/>
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-white-50 bg-primary">
+        <div class="container">
+            &copy; 2020 - BulkyBook
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://kit.fontawesome.com/e19c476714.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
