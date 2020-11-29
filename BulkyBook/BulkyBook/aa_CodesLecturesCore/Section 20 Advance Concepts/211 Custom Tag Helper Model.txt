@@ -1,0 +1,69 @@
+We have learnt a lot in this project. Before we wrap up this project We will see one advanced topic on how to build our own tag helpers.
+
+So far we have used the predefined tag helpers like asp-action, asp-page, asp-for etc.
+
+[Opened Category List Summary grid in the browser]
+
+What if we want to have our own tag helper for let's say pagination.
+
+Let's say we are not using datatables, we are using our own table and we want pagination. For that first we would need a model for this pagination tag helper.
+
+The properties in the model will be
+> Total items in the model
+> How many items we want to display
+> Count in the first page
+> Url to navigate from one page to another.
+
+
+In VS Close all the opened tabs.
+
+Let's build the Model. Go to Models Project and Create the class PagingInfo.cs
+
+Open, made the class Public. Added the below four properties that we discussed above (he copy pasted from somewhere)
+
+        public int TotalItem { get; set; }
+        public int ItemsPerPage { get; set; }
+        public int CurrentPage { get; set; }
+        public string urlParam { get; set; }
+
+
+Now we can calculate based on the total items and we can divide by items per page. It will give us the total number of pages or total number of tags or the count that we want to have for our tag helper. 
+
+Now he copy pasted the below property for calculationg TotalPage
+
+ public int TotalPage => (int)Math.Ceiling((decimal)TotalItem / ItemsPerPage);
+
+The above divides the total item by the items per page.
+
+We will not be adding this model to the database, it's only for working with pagination.
+
+We will work more on pagination next.
+
+---------------------------------------------------------------
+
+--PagingInfo.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.Models
+{
+    public class PagingInfo
+    {
+        public int TotalItem { get; set; }
+        public int ItemsPerPage { get; set; }
+        public int CurrentPage { get; set; }
+        public string urlParam { get; set; }
+        public int TotalPage => (int)Math.Ceiling((decimal)TotalItem / ItemsPerPage);
+    }
+}
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

@@ -1,0 +1,159 @@
+In this Part we will add our Custom Tag Helper.
+
+In BulkyBook main project, added a folder named TagHelpers.
+
+Inside the folder added a class named PageLinkTagHelper
+
+With tag helpers the first thing we need to write is the html target element meaning which target element will have the tag helper.
+
+For example if we open the view Admin/Views/CoverType/Index, we see asp-action is applicable for anchor(<a>) tag and button tag
+
+For Our case we would we would like to use an html of target div.
+
+So to the class added the attribute HtmlTargetElement, to this passed two arguments first is div and the second is Attributes = "page-model"
+
+[HtmlTargetElement("div",Attributes = "page-model")]
+
+
+Now the class PageLinkTagHelper will extend TagHelper class.
+
+public class PageLinkTagHelper : TagHelper
+
+Now inside it, we need the view context object.
+
+ViewContext object provides access to things like HttpContext, HttpResponse etc.
+
+So added the below property of type ViewContext
+public ViewContext ViewContext { get; set; }
+
+Now to the property we also need to set the attribute [ViewContext] and the [HtmlAttributeNotBound] - Which means that we do not want this element as the tag helper.
+
+In tag helper need more attributes that would be used for pagination like css selector. 
+
+Now created a property of the PaginInfo class that we have created named it PageModel. This would be the root model of our tag helper.
+public PagingInfo PageModel { get; set; }
+
+
+Along with the two he copied some properties(both bool and string) from somewhere that would tell the PageAction/Css class etc. These are:
+
+        public string PageAction { get; set; }
+        public bool PageClassesEnabled { get; set; }
+        public string PageClass { get; set; }
+        public string PageClassNormal { get; set; }
+        public string PageClassSelected { get; set; }
+
+PageClassesEnabled finds if PageClasses are enabled or not.
+
+Now we need to define what we would be actually doing in this custom tag helper.
+
+For that we have to overrirde void Process. Type public override void P and hit tab on selecting the suggestion for Process it will create the method with two parameters.
+
+In this tag helper we will not be using using context but we will be using output. We will modify this output to add html and append our pagination.
+
+Now removed the base.Process line code.
+
+Now first we will create an object of TagBuilder to it's constructor we need to pass the element in string in which we want the Tag Helper.
+TagBuilder result = new TagBuilder("div");
+
+Now discussed: If we have 15 items and if we display 5 items in each page we will have 3 pages, the first page will have 1-5, second 6 -10 and the third remaining
+
+so for this we will have a for loop with i less than PageModel.TotalPage 
+
+            for (int i = 1; i < PageModel.TotalPage; i++)
+            { 
+            
+            }
+
+Now inside this for loop, first we whill again have a TagBuilder named tag, and we will pass "a" to it's constructor, meaning it's an anchor tag
+TagBuilder tag = new TagBuilder("a");
+
+After that we need a string url to denote what url it should hit we will use a colon to display the page number. So created url like:
+string url = PageModel.urlParam.Replace(":", i.ToString());
+
+Next we will have tag.Attrribute["href"] referencing this url like:
+tag.Attributes["href"] = url;
+
+Then we will have an if check for PageClassesEnabled. In the if block, first we will add the PageClass css class and also add another class based on the CurrentPage. If it is currentpage then the class will be PageClassSelected else it would be PageClassNormal like:
+
+                if (PageClassesEnabled)
+                {
+                    tag.AddCssClass(PageClass);
+                    tag.AddCssClass(i == PageModel.CurrentPage ? PageClassSelected : PageClassNormal);
+                }
+
+Now after the if block, to the tag InnerHtml, we will apped i.ToString
+tag.InnerHtml.Append(i.ToString());
+
+Next will will set result.InnerHtml to append the tag html like:
+result.InnerHtml.AppendHtml(tag);
+
+Now at the end after/outside the for loop, we will append result.InnerHtml to the output.
+output.Content.AppendHtml(result.InnerHtml);
+
+
+This was a entirely new set of codes for building Custom tag helpers with a lot of new syntax as it is an advanced topic.
+
+In the next part we will consume this tag helper.
+---------------------------------------------------------------
+--PageLinkTagHelper.cs
+
+using BulkyBook.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace BulkyBook.TagHelpers
+{
+    [HtmlTargetElement("div",Attributes = "page-model")]
+    public class PageLinkTagHelper : TagHelper
+    {
+        [ViewContext]
+        [HtmlAttributeNotBound]
+        public ViewContext ViewContext { get; set; }
+
+        public PagingInfo PageModel { get; set; }
+
+        public string PageAction { get; set; }
+        public bool PageClassesEnabled { get; set; }
+        public string PageClass { get; set; }
+        public string PageClassNormal { get; set; }
+        public string PageClassSelected { get; set; }
+
+        public override void Process(TagHelperContext context, TagHelperOutput output)
+        {
+            TagBuilder result = new TagBuilder("div");
+
+            for (int i = 1; i < PageModel.TotalPage; i++)
+            {
+                TagBuilder tag = new TagBuilder("a");
+                string url = PageModel.urlParam.Replace(":", i.ToString());
+                tag.Attributes["href"] = url;
+                if (PageClassesEnabled)
+                {
+                    tag.AddCssClass(PageClass);
+                    tag.AddCssClass(i == PageModel.CurrentPage ? PageClassSelected : PageClassNormal);
+                }
+                tag.InnerHtml.Append(i.ToString());
+                result.InnerHtml.AppendHtml(tag);
+            }
+            output.Content.AppendHtml(result.InnerHtml);
+            
+        }
+
+    }
+}
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
