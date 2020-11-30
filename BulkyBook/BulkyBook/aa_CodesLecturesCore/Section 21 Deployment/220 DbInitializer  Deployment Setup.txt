@@ -1,0 +1,589 @@
+Now we want to deploy our application and see everything live in the azure portal.
+
+Before we deploy we need to make some configuration changes. First is we need to make sure Admin user is created to the Database and all the roles are created. 
+
+Previously we have added all the roles and Admin to the portal using code changes. But now we would be doing these using DBInitializer.
+
+For that In our Data Access project created a new folder named Initializer.
+
+Iniside it added an Interface called IDbInitializer.cs
+
+Opened, made it public and added the void method Initialize();
+
+
+In the same foler added the Class DbInitializer.cs
+
+Opened, maded it public,  and it will implement IDbInitializer
+
+There was not implemented error in the Interface, resolved that by Clicking Implement interface with Ctrl + Dot.
+
+The Initialize() method is created. Now we need few things from depenedency injection.  Now he copied the codes from somewhere for initializing the DbContext and UserManager and RoleManager. He was saying he copied from Register.cshtml.cs of Identity area but I did not find ApplicationDbContext among the three:
+
+        private readonly ApplicationDbContext _db;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+        public DbInitializer(ApplicationDbContext db, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            _db = db;
+            _roleManager = roleManager;
+            _userManager = userManager;
+        }
+
+So we are getting the avobe three using Dependency Injection.
+
+Now we will configure the Initialize method. First added a try catch block. In catch we are only catching the exception nothing else, and in try block, We will check the PendingMingrations. If this is greater than 0 this means there are some pending migrations. And we will migrate them with _db.Database.Migrate(). This way it will push all the pending migrations to the DB automatically. As of the the codes are like:
+
+
+        public void Initialize()
+        {
+            try
+            {
+                if (_db.Database.GetPendingMigrations().Count() > 0)
+                {
+                    _db.Database.Migrate();
+                }
+            }
+            catch (Exception ex)
+            { 
+            
+            }
+        }
+
+Now after the try catch block, after we push all the pending migrations, now we will use our role manager. We will use CreateAsync to to crete role. And we will add GetAwaiter().GetResult() to make sure the next statement will only be executed after this one completes. 
+
+_roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
+
+Pasted the same three more times for all the roles. So Changed the roles to Role_Employee, Role_User_Comp and Role_User_Indi.
+
+Once the roles are created, 
+
+We will now use _userManager.CreateAsync and here we would pass all the details of the Admin User that we want to create. The second parameter of CreateAsync is the password and here we would set Admin123* as the password We will also use the GetAwaiter().GetResult() to make make sure the next line is execute only after the execution of this line. Like:
+
+            _userManager.CreateAsync(new ApplicationUser
+            {
+                UserName = "admin@gmail.com",
+                Email = "admin@gmail.com",
+                EmailConfirmed = true,
+                Name = "Admin John"
+            }, "Admin123*").GetAwaiter().GetResult() ;
+
+
+Now we would want to add Admin role to the user. for that first we will retrieve the new user from the DB like:
+
+ ApplicationUser user = _db.ApplicationUsers.Where(x => x.Email == "admin@gmail.com").FirstOrDefault();
+
+Next we will assign admin role to this user and will also use the GetAwaiter().GetResults() here like:
+
+_userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
+
+Now in Register.cshtml earlier we have added all the roles using codes like:
+!await _roleManager.RoleExistsAsync(SD.Role_Admin) . We dont need them anymore
+
+Removed all the codes(Four if statements and if blocks). Did not delete the if check for if (user.Role == null).
+
+Now go to Startup.cs, we need to add Dependency Injection to call the Initialize method for DbInitializer. Opened the method ConfigureServices.
+
+After the line for AddScoped IUnitOfWork, Added the below 
+services.AddScoped<IDbInitializer, DbInitializer>();
+
+And in DbInitializer we have the method Initialize(), we need to call it from the method Configure in Starup.cs
+
+So first to the Configure method, added the parameter IDbInitializer dbInitializer like:
+
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDbInitializer dbInitializer)
+
+Inside the method, after app.UseAuthorization();, called dbInitializer.Initialize();
+
+So this will call our method and add the migrations that we need to.
+
+
+Now again go to DbInitalizer.cs class, Initialize() method.
+
+We want something like when the Application starts it shuold not create all the roles every time. To do that, So added a check like if there will be any role in the DB with Admin it should not execute further/return.
+
+if (_db.Roles.Any(r => r.Name == SD.Role_Admin)) return;
+
+Open SQL server and see there is now database with the name BulkyBook_New
+
+Now open appsettings.json
+
+Now we need to test that everything is working. For this if we change the Database name in our Connection, It should create a new database. We do not need to do anything in SQL server database. because everything is there in DbInitializer.
+
+In the connection string changed database to:
+Database=BulkyBook_New
+
+Now run the solution. We see there are no products. If we try to login with our old Admin account it says invalid login attempt.
+
+And if we login with: admin@gmail.com and password Admin123* . we are able to sign in and in the Users List we see only this user.
+
+In sql server DB we see BulkyBook_New database created.
+
+We see the user as :
+select * from AspNetUsers
+
+We see all the roles in:
+select * from AspNetRoles
+
+
+---------------------------------------------------------------
+Pushed the codes to Github
+
+--IDbInitializer.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Initializer
+{
+    public interface IDbInitializer
+    {
+        void Initialize();
+    }
+}
+
+--DbInitializer.cs
+using BulkyBook.DataAccess.Data;
+using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BulkyBook.DataAccess.Initializer
+{
+    public class DbInitializer : IDbInitializer
+    {
+        private readonly ApplicationDbContext _db;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+        public DbInitializer(ApplicationDbContext db, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            _db = db;
+            _roleManager = roleManager;
+            _userManager = userManager;
+        }
+        public void Initialize()
+        {
+            try
+            {
+                if (_db.Database.GetPendingMigrations().Count() > 0)
+                {
+                    _db.Database.Migrate();
+                }
+            }
+            catch (Exception ex)
+            { 
+            
+            }
+
+            if (_db.Roles.Any(r => r.Name == SD.Role_Admin)) return;
+
+            _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
+            _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee)).GetAwaiter().GetResult();
+            _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Comp)).GetAwaiter().GetResult();
+            _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Indi)).GetAwaiter().GetResult();
+
+            _userManager.CreateAsync(new ApplicationUser
+            {
+                UserName = "admin@gmail.com",
+                Email = "admin@gmail.com",
+                EmailConfirmed = true,
+                Name = "Admin John"
+            }, "Admin123*").GetAwaiter().GetResult() ;
+
+            ApplicationUser user = _db.ApplicationUsers.Where(x => x.Email == "admin@gmail.com").FirstOrDefault();
+            _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
+        }
+    }
+}
+
+
+--Register.cshtml.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+
+namespace BulkyBook.Areas.Identity.Pages.Account
+{
+    [AllowAnonymous]
+    public class RegisterModel : PageModel
+    {
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<RegisterModel> _logger;
+        private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public RegisterModel(
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            ILogger<RegisterModel> logger,
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager,
+            IUnitOfWork unitOfWork)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+            _emailSender = emailSender;
+            _roleManager = roleManager;
+            _unitOfWork = unitOfWork;
+        }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public string ReturnUrl { get; set; }
+
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
+
+            [Required]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Password)]
+            [Display(Name = "Password")]
+            public string Password { get; set; }
+
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+            [Required]
+            public string Name { get; set; }
+
+            public string StreetAddress { get; set; }
+
+            public string City { get; set; }
+
+            public string State { get; set; }
+
+            public string PostalCode { get; set; }
+
+            public string PhoneNumber { get; set; }
+
+            public string Role { get; set; }
+
+            public int? CompanyId { get; set; }
+            public IEnumerable<SelectListItem> CompanyList { get; set; }
+            public IEnumerable<SelectListItem> RoleList { get; set; }
+
+        }
+
+        public async Task OnGetAsync(string returnUrl = null)
+        {
+            ReturnUrl = returnUrl;
+            Input = new InputModel()
+            {
+                CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                }),
+                RoleList = _roleManager.Roles.Where(x => x.Name != SD.Role_User_Indi).Select(x => x.Name).Select(i => new SelectListItem
+                {
+                    Text = i,
+                    Value = i
+                })
+            };
+            if (User.IsInRole(SD.Role_Employee))
+            {
+                Input.RoleList = _roleManager.Roles.Where(x => x.Name == SD.Role_Employee).Select(x => x.Name).Select(i => new SelectListItem
+                {
+                    Text = i,
+                    Value = i
+                });
+            };
+
+
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        }
+
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = Input.Email,
+                    Email = Input.Email,
+                    CompanyId = Input.CompanyId,
+                    StreetAddress = Input.StreetAddress,
+                    City = Input.City,
+                    State = Input.State,
+                    PostalCode = Input.PostalCode,
+                    Name = Input.Name,
+                    PhoneNumber = Input.PhoneNumber,
+                    Role = Input.Role
+                };
+                var result = await _userManager.CreateAsync(user, Input.Password);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User created a new account with password.");
+                    if (user.Role == null)
+                    {
+                        await _userManager.AddToRoleAsync(user, SD.Role_User_Indi);
+                    }
+                    else
+                    {
+                        if (user.CompanyId > 0)
+                        {
+                            await _userManager.AddToRoleAsync(user, SD.Role_User_Comp);
+                        }
+                        await _userManager.AddToRoleAsync(user, user.Role);
+                    }
+
+
+
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
+                        protocol: Request.Scheme);
+
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    {
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        if (user.Role == null)
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            return LocalRedirect(returnUrl);
+                        }
+                        else
+                        {
+                            //admin is registering a new user.
+                            return RedirectToAction("Index", "User", new { Area = "Admin" });
+                        }
+                    }
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            Input = new InputModel()
+            {
+                CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                }),
+                RoleList = _roleManager.Roles.Where(x => x.Name != SD.Role_User_Indi).Select(x => x.Name).Select(i => new SelectListItem
+                {
+                    Text = i,
+                    Value = i
+                })
+            };
+
+
+            // If we got this far, something failed, redisplay form
+            return Page();
+        }
+    }
+}
+
+
+--Startup.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BulkyBook.DataAccess.Data;
+using BookListRazor.Constants;
+using BulkyBook.DataAccess.Repository;
+using BulkyBook.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using BulkyBook.Utility;
+using Stripe;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using BulkyBook.DataAccess.Initializer;
+
+namespace BulkyBook
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            if (Environment.MachineName == Constants.Win10MachineName)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("Win10DefaultConnection")));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+
+            services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
+            services.Configure<EmailOptions>(Configuration);
+            
+            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
+            services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IDbInitializer, DbInitializer>();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages();
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+            services.AddAuthentication().AddFacebook(options =>
+            {
+                options.AppId = "2859494254281667";
+                options.AppSecret = "7a6cba804bd8cd880ad3539337b74469";
+            });
+            services.AddAuthentication().AddGoogle(options =>
+            {
+                options.ClientId = "246232864900-ifabvjm0ck8dpn0dnnf7v8f85htjifrs.apps.googleusercontent.com";
+                options.ClientSecret = "lKFA1HjDcorcq3KJZdj4-75v";
+            });
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDbInitializer dbInitializer)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                //app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+            StripeConfiguration.ApiKey = Configuration.GetSection("Stripe")["SecretKey"];
+            app.UseSession();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+            dbInitializer.Initialize();
+
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
+        }
+    }
+}
+
+
+--appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=SUKLA\\SQLEXPRESS;Database=BulkyBook;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "Win10DefaultConnection": "Server=USMUMSUBDEB3\\SQLEXPRESS;Database=BulkyBook_New;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "SendGridKey": "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",
+  "SendGridUser": "BulkyBook",
+  "Stripe": {
+    "SecretKey": "sk_test_51HqVhWKjdIQzDW3r6bPMs28IQ1g8A5XXMNnyofqLkmVIxoaBavedcW8XVGuAtZ5oo8w3GqjyvXrfHoYyC1yHGtvh00oaP0wZ78",
+    "PublishableKey": "pk_test_51HqVhWKjdIQzDW3r1NF4u6DbS0eAvbn9HJnQAKemHcDkS1dbMY5viBotxCBAmxwGe6sCi2KtjQI9dqrqMwtXCCOB00OQzp57lS"
+  },
+  "Twilio": {
+    "PhoneNumber": "+14088377801",
+    "AuthToken": "3c46087b04b0b89e70704f2bf79a16fc",
+    "AccountSid": "AC8c9d286a57b90461cd8a1f1b3d9bdb51"
+  }
+}
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+

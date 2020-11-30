@@ -1,4 +1,8 @@
+Once we build a website the ultimate goal is to deploy the website and see it live.
 
+We will deploy our project on Azure cloud.
+
+He will show all these from the next part.
 
 ---------------------------------------------------------------
 
