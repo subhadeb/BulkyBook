@@ -1,0 +1,89 @@
+Now we are on the final step of our project and we will deploy our project on Azure.
+
+I am not sure if I will be able to deploy the Portal because I have already used my 30Days free trial 2 Years back.
+
+Signed in with my office account.
+
+Clicked Start For Free button twice.
+
+It opened portal.azure.
+
+Next QuickStart Center - Ignored it.
+
+Now opened Visual Studio. We will publish from VS.
+
+Right click on the BulkyBook Project and clicked Publish.
+
+A new Popup came, With the first option Azure selected.
+
+Clicked Next, Now selected Azure App Services(Windows).
+
+It asked to re enter credentials.
+
+
+Now From the bottom selected Create a new Azure App Service.
+
+Selected the Name as BulkyBookSD, 
+Selected the Subscription as Free Trial
+Kept the other two as default.
+
+Clicked Create.
+
+Clicked Finish
+
+Now from Service Dependencies, selected Configure sql server database. Then Selected Azure SQL Database, Next By default it selected BulkyBook_db. changed to BulkyBookDB
+
+Selected the Database Server name as bulkybookdbserversd
+
+Selected admin username as 
+adminuser
+
+Set password as Admin123*
+
+Clicked create. Thre were some errors in created gave a try again. This time selected Database connection string name as Win10DefaultConnection.
+
+Selected admin username as 
+adminuser
+
+Set password as Admin123*
+
+It created the connection string as 
+Data Source=tcp:bulkybookdbserversd.database.windows.net,1433;Initial Catalog=BulkyBook_db;User Id=adminuser@bulkybookdbserversd;Password=Admin123*
+
+We can see three things will be created:
+1. Azure SQL SErver
+2. SQL Server
+3. App Service 
+
+After all the configuration, we can see the site url.
+
+Next he opened some settings, in which we selected the below:
+
+Configuration: Release
+Target Framework: netcoreapp3.1
+Deployment Mode: Frameworkd-Dependent
+Target Runtime: Portalble.
+
+Then clicked save. and clicked Publish button. I got some error.
+
+Now he opened BulkyBook project with the azure website Url, logged in as admin user. He can see all the tabs as well.
+
+To test the application he created a category and it was saved. So with this our deployment to azure is done.
+
+I was not able to run the solution in the server.
+
+
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+
+
